@@ -1,0 +1,14 @@
+{
+  "name": "fiap-hackathon-senior-ease",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "latest"
+  }
+}

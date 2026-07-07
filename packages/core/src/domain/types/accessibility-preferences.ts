@@ -1,0 +1,27 @@
+export type FontSizePreference = 'normal' | 'large' | 'extra';
+
+export type ContrastPreference = 'default' | 'high' | 'soft';
+
+export type SpacingPreference = 'comfortable' | 'wide' | 'extraWide';
+
+export type InterfaceMode = 'basic' | 'advanced';
+
+export type AccessibilityPreferences = {
+  fontSize: FontSizePreference;
+  contrast: ContrastPreference;
+  spacing: SpacingPreference;
+  interfaceMode: InterfaceMode;
+  enhancedFeedback: boolean;
+  confirmCriticalActions: boolean;
+  reduceMotion: boolean;
+};
+
+export const defaultAccessibilityPreferences: AccessibilityPreferences = {
+  fontSize: 'normal',
+  contrast: 'default',
+  spacing: 'comfortable',
+  interfaceMode: 'basic',
+  enhancedFeedback: true,
+  confirmCriticalActions: true,
+  reduceMotion: false,
+};
