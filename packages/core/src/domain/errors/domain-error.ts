@@ -1,0 +1,26 @@
+export type DomainErrorCode =
+  | "ACTIVITY_ID_REQUIRED"
+  | "ACTIVITY_USER_ID_REQUIRED"
+  | "ACTIVITY_TITLE_REQUIRED"
+  | "ACTIVITY_DATE_REQUIRED"
+  | "ACTIVITY_CREATED_AT_REQUIRED"
+  | "ACTIVITY_UPDATED_AT_REQUIRED"
+  | "ACTIVITY_COMPLETED_AT_REQUIRED"
+  | "ACTIVITY_STEPS_REQUIRED"
+  | "ACTIVITY_STEP_ID_REQUIRED"
+  | "ACTIVITY_STEP_COMPLETED_AT_REQUIRED"
+  | "ACTIVITY_STEP_DESCRIPTION_REQUIRED"
+  | "ACTIVITY_STEP_ORDER_INVALID"
+  | "ACTIVITY_STEP_IDS_DUPLICATED"
+  | "ACTIVITY_STEP_ORDERS_DUPLICATED"
+  | "ACTIVITY_STEP_NOT_FOUND";
+
+export class DomainError extends Error {
+  constructor(
+    public readonly code: DomainErrorCode,
+    message = code,
+  ) {
+    super(message);
+    this.name = "DomainError";
+  }
+}
