@@ -18,7 +18,7 @@ export type AccessibilityPreferences = {
 export const defaultAccessibilityPreferences: AccessibilityPreferences = {
   fontSize: "normal",
   contrast: "default",
-  spacing: "normal",
+  spacing: "comfortable",
   interfaceMode: "basic",
   enhancedFeedback: false,
   confirmCriticalActions: true,
