@@ -3,7 +3,7 @@ import {
   type AccessibilityPreferences,
   type EntityId,
 } from "../../domain";
-import { validateAccessibilityPreferences } from "../../domain/validation/accessibility";
+import { validateAccessibilityPreferences } from "../../domain/";
 import type { AccessibilityPreferencesRepository } from "../repositories";
 
 export type UpdateAccessibilityPreferencesUseCaseInput = {

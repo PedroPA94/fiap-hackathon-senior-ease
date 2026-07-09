@@ -5,7 +5,7 @@ import {
   DomainError,
   type AccessibilityPreferences,
 } from "../../../src/domain";
-import { validateAccessibilityPreferences } from "../../../src/domain/validation/accessibility";
+import { validateAccessibilityPreferences } from "../../../src/domain/";
 
 function expectDomainError(fn: () => unknown, code: string): void {
   expect(fn).toThrow(DomainError);
@@ -99,7 +99,8 @@ describe("AccessibilityPreferences value object", () => {
   });
 
   it("keeps defaultAccessibilityPreferences as a valid value object shape", () => {
-    const preferences: AccessibilityPreferences = defaultAccessibilityPreferences;
+    const preferences: AccessibilityPreferences =
+      defaultAccessibilityPreferences;
 
     expect(preferences).toEqual({
       fontSize: "normal",
