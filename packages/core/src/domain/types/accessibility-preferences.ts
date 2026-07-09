@@ -2,7 +2,7 @@ export type FontSizePreference = "normal" | "large" | "extra";
 
 export type ContrastPreference = "default" | "high";
 
-export type SpacingPreference = "normal" | "large" | "extra";
+export type SpacingPreference = "comfortable" | "wide" | "extraWide";
 
 export type InterfaceMode = "basic" | "advanced";
 
