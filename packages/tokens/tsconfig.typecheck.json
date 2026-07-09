@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "../..",
+    "paths": {
+      "@senior-ease/core": ["../core/src/index.ts"]
+    }
+  },
+  "include": ["src", "tests", "../core/src"]
+}

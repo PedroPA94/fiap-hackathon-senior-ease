@@ -20,6 +20,6 @@ export const defaultAccessibilityPreferences: AccessibilityPreferences = {
   contrast: "default",
   spacing: "comfortable",
   interfaceMode: "basic",
-  enhancedFeedback: false,
+  enhancedFeedback: true,
   confirmCriticalActions: true,
 };
