@@ -5,6 +5,7 @@ export const applicationErrorMessagesPtBr: Record<
   string
 > = {
   ACTIVITY_NOT_FOUND: "Não encontramos esta atividade.",
+  USER_PROFILE_NOT_FOUND: "Não encontramos este perfil de usuário.",
 };
 
 export function getApplicationErrorMessagePtBr(

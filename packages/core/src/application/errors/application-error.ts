@@ -1,4 +1,6 @@
-export type ApplicationErrorCode = "ACTIVITY_NOT_FOUND";
+export type ApplicationErrorCode =
+  | "ACTIVITY_NOT_FOUND"
+  | "USER_PROFILE_NOT_FOUND";
 
 export class ApplicationError extends Error {
   constructor(
