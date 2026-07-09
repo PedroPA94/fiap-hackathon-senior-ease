@@ -1,10 +1,10 @@
-export type FontSizePreference = 'normal' | 'large' | 'extra';
+export type FontSizePreference = "normal" | "large" | "extra";
 
-export type ContrastPreference = 'default' | 'high' | 'soft';
+export type ContrastPreference = "default" | "high";
 
-export type SpacingPreference = 'comfortable' | 'wide' | 'extraWide';
+export type SpacingPreference = "normal" | "large" | "extra";
 
-export type InterfaceMode = 'basic' | 'advanced';
+export type InterfaceMode = "basic" | "advanced";
 
 export type AccessibilityPreferences = {
   fontSize: FontSizePreference;
@@ -13,15 +13,13 @@ export type AccessibilityPreferences = {
   interfaceMode: InterfaceMode;
   enhancedFeedback: boolean;
   confirmCriticalActions: boolean;
-  reduceMotion: boolean;
 };
 
 export const defaultAccessibilityPreferences: AccessibilityPreferences = {
-  fontSize: 'normal',
-  contrast: 'default',
-  spacing: 'comfortable',
-  interfaceMode: 'basic',
-  enhancedFeedback: true,
+  fontSize: "normal",
+  contrast: "default",
+  spacing: "normal",
+  interfaceMode: "basic",
+  enhancedFeedback: false,
   confirmCriticalActions: true,
-  reduceMotion: false,
 };
