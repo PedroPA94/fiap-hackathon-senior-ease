@@ -5,6 +5,8 @@ export const domainErrorMessagesPtBr: Record<DomainErrorCode, string> = {
   ACTIVITY_USER_ID_REQUIRED: "Não foi possível identificar o usuário.",
   ACTIVITY_TITLE_REQUIRED: "Digite um nome para esta atividade.",
   ACTIVITY_DATE_REQUIRED: "Escolha uma data para a atividade.",
+  ACTIVITY_DATE_INVALID: "Informe uma data válida para a atividade.",
+  ACTIVITY_TIME_INVALID: "Informe um horário válido para a atividade.",
   ACTIVITY_CREATED_AT_REQUIRED:
     "Não foi possível identificar quando a atividade foi criada.",
   ACTIVITY_UPDATED_AT_REQUIRED:

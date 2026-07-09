@@ -4,13 +4,15 @@ import {
   assertNonEmpty,
   assertPositiveInteger,
   assertUniqueValues,
+  normalizeDateOnly,
   normalizeOptionalText,
+  normalizeOptionalTime,
   normalizeRequiredText,
 } from "../validation";
 
 import type {
   EntityId,
-  ISODateString,
+  DateOnlyString,
   ISODateTimeString,
   TimeString,
 } from "../types";
@@ -31,7 +33,7 @@ export type Activity = {
   userId: EntityId;
   title: string;
   description?: string;
-  date: ISODateString;
+  date: DateOnlyString;
   time?: TimeString;
   steps: ActivityStep[];
   createdAt: ISODateTimeString;
@@ -58,7 +60,7 @@ export type CreateActivityInput = {
   userId: EntityId;
   title: string;
   description?: string;
-  date: ISODateString;
+  date: DateOnlyString;
   time?: TimeString;
   steps: CreateActivityStepInput[];
   createdAt: ISODateTimeString;
@@ -72,8 +74,6 @@ export function createActivity(input: CreateActivityInput): Activity {
   assertNonEmpty(input.createdAt, "ACTIVITY_CREATED_AT_REQUIRED");
   assertNonEmpty(input.updatedAt, "ACTIVITY_UPDATED_AT_REQUIRED");
 
-  const title = normalizeRequiredText(input.title, "ACTIVITY_TITLE_REQUIRED");
-
   if (input.steps.length === 0) {
     throw new DomainError("ACTIVITY_STEPS_REQUIRED");
   }
@@ -83,10 +83,10 @@ export function createActivity(input: CreateActivityInput): Activity {
   return {
     id: input.id,
     userId: input.userId,
-    title,
+    title: normalizeRequiredText(input.title, "ACTIVITY_TITLE_REQUIRED"),
     description: normalizeOptionalText(input.description),
-    date: input.date,
-    time: normalizeOptionalText(input.time),
+    date: normalizeDateOnly(input.date, "ACTIVITY_DATE_INVALID"),
+    time: normalizeOptionalTime(input.time, "ACTIVITY_TIME_INVALID"),
     steps,
     createdAt: input.createdAt,
     updatedAt: input.updatedAt,
