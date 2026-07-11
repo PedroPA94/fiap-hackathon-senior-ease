@@ -7,10 +7,12 @@ import {
   type EntityId,
 } from '@senior-ease/core';
 
+import { storageKeys } from '../../core/constants/storage-keys';
+
 @Injectable()
 export class LocalStorageAccessibilityPreferencesRepository implements AccessibilityPreferencesRepository {
   async findByUserId(userId: EntityId): Promise<AccessibilityPreferences | null> {
-    const storageKey = this.getStorageKey(userId);
+    const storageKey = storageKeys.accessibilityPreferences(userId);
     const rawValue = localStorage.getItem(storageKey);
 
     if (!rawValue) {
@@ -36,12 +38,8 @@ export class LocalStorageAccessibilityPreferencesRepository implements Accessibi
   ): Promise<AccessibilityPreferences> {
     validateAccessibilityPreferences(preferences);
 
-    localStorage.setItem(this.getStorageKey(userId), JSON.stringify(preferences));
+    localStorage.setItem(storageKeys.accessibilityPreferences(userId), JSON.stringify(preferences));
 
     return preferences;
-  }
-
-  private getStorageKey(userId: EntityId): string {
-    return `senior-ease:users:${userId}:accessibility-preferences`;
   }
 }

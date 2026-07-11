@@ -7,10 +7,12 @@ import {
   type UserProfileRepository,
 } from '@senior-ease/core';
 
+import { storageKeys } from '../../core/constants/storage-keys';
+
 @Injectable()
 export class LocalStorageUserProfileRepository implements UserProfileRepository {
   async findById(id: EntityId): Promise<UserProfile | null> {
-    const rawValue = localStorage.getItem(this.getStorageKey(id));
+    const rawValue = localStorage.getItem(storageKeys.userProfile(id));
 
     if (!rawValue) {
       return null;
@@ -21,7 +23,7 @@ export class LocalStorageUserProfileRepository implements UserProfileRepository 
 
       return createUserProfile(parsedValue);
     } catch {
-      localStorage.removeItem(this.getStorageKey(id));
+      localStorage.removeItem(storageKeys.userProfile(id));
 
       return null;
     }
@@ -31,14 +33,10 @@ export class LocalStorageUserProfileRepository implements UserProfileRepository 
     const normalizedProfile = createUserProfile(profile);
 
     localStorage.setItem(
-      this.getStorageKey(normalizedProfile.id),
+      storageKeys.userProfile(normalizedProfile.id),
       JSON.stringify(normalizedProfile),
     );
 
     return normalizedProfile;
-  }
-
-  private getStorageKey(userId: EntityId): string {
-    return `senior-ease:users:${userId}:profile`;
   }
 }
