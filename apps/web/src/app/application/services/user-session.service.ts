@@ -13,8 +13,8 @@ import {
 
 import { USER_PROFILE_REPOSITORY } from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
+import { LocalStorageUserSessionStore } from '../../infrastructure/stores/local-storage-user-session.store';
 import type { LocalUser } from '../models/local-user';
-import { storageKeys } from '../../core/constants/storage-keys';
 
 @Injectable({ providedIn: 'root' })
 export class UserSessionService {
@@ -27,10 +27,12 @@ export class UserSessionService {
 
     @Inject(ID_GENERATOR)
     private readonly idGenerator: IdGenerator,
+
+    private readonly userSessionStore: LocalStorageUserSessionStore,
   ) {}
 
   getCurrentUserId(): EntityId | null {
-    return localStorage.getItem(storageKeys.currentUserId);
+    return this.userSessionStore.getCurrentUserId();
   }
 
   async getCurrentUserProfile(): Promise<UserProfile | null> {
@@ -56,27 +58,7 @@ export class UserSessionService {
   }
 
   listLocalUsers(): LocalUser[] {
-    const rawValue = localStorage.getItem(storageKeys.userIndex);
-
-    if (!rawValue) {
-      return [];
-    }
-
-    try {
-      const parsedValue = JSON.parse(rawValue);
-
-      if (!Array.isArray(parsedValue)) {
-        localStorage.removeItem(storageKeys.userIndex);
-
-        return [];
-      }
-
-      return parsedValue.filter(this.isLocalUserSummary);
-    } catch {
-      localStorage.removeItem(storageKeys.userIndex);
-
-      return [];
-    }
+    return this.userSessionStore.listLocalUsers();
   }
 
   async createLocalUser(name: string): Promise<UserProfile> {
@@ -90,8 +72,9 @@ export class UserSessionService {
       name,
     });
 
-    this.setCurrentUser(profile.id);
-    this.saveLocalUser({
+    this.userSessionStore.setCurrentUserId(profile.id);
+
+    this.userSessionStore.saveLocalUser({
       id: profile.id,
       name: profile.name,
       lastAccessedAt: now,
@@ -102,10 +85,12 @@ export class UserSessionService {
 
   async selectLocalUser(userId: EntityId): Promise<UserProfile> {
     const useCase = new GetUserProfileUseCase(this.userProfileRepository);
+
     const profile = await useCase.execute({ id: userId });
 
-    this.setCurrentUser(profile.id);
-    this.saveLocalUser({
+    this.userSessionStore.setCurrentUserId(profile.id);
+
+    this.userSessionStore.saveLocalUser({
       id: profile.id,
       name: profile.name,
       lastAccessedAt: this.clock.now(),
@@ -115,38 +100,6 @@ export class UserSessionService {
   }
 
   clearCurrentUser(): void {
-    localStorage.removeItem(storageKeys.currentUserId);
-  }
-
-  private setCurrentUser(userId: EntityId): void {
-    localStorage.setItem(storageKeys.currentUserId, userId);
-  }
-
-  private saveLocalUser(user: LocalUser): void {
-    const users = this.listLocalUsers();
-    const usersWithoutCurrent = users.filter((item) => item.id !== user.id);
-
-    const updatedUsers = [user, ...usersWithoutCurrent].sort((a, b) =>
-      b.lastAccessedAt.localeCompare(a.lastAccessedAt),
-    );
-
-    localStorage.setItem(storageKeys.userIndex, JSON.stringify(updatedUsers));
-  }
-
-  private isLocalUserSummary(value: unknown): value is LocalUser {
-    if (!value || typeof value !== 'object') {
-      return false;
-    }
-
-    const candidate = value as Partial<LocalUser>;
-
-    return (
-      typeof candidate.id === 'string' &&
-      candidate.id.trim().length > 0 &&
-      typeof candidate.name === 'string' &&
-      candidate.name.trim().length > 0 &&
-      typeof candidate.lastAccessedAt === 'string' &&
-      candidate.lastAccessedAt.trim().length > 0
-    );
+    this.userSessionStore.clearCurrentUserId();
   }
 }
