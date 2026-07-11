@@ -5,7 +5,8 @@
   "scripts": {
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "start:web": "pnpm --filter @senior-ease/web start"
   },
   "devDependencies": {
     "typescript": "^5.9.3",
