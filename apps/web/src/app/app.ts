@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { defaultAccessibilityPreferences } from '@senior-ease/core';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
+import { ThemeService } from './application/services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -10,7 +11,9 @@ import { createAccessibilityTheme } from '@senior-ease/tokens';
   styleUrl: './app.scss',
 })
 export class App {
-  protected readonly title = signal('web');
+  private readonly themeService = inject(ThemeService);
 
-  protected readonly themePreview = createAccessibilityTheme(defaultAccessibilityPreferences);
+  ngOnInit(): void {
+    this.themeService.initializeTheme();
+  }
 }
