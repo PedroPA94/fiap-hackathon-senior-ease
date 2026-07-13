@@ -1,11 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 
+import { createAccessibilityTheme } from '@senior-ease/tokens';
+
 import { App } from './app';
 import { ThemeService } from './application/services/theme.service';
 
 describe('App', () => {
   const themeServiceMock = {
-    initializeTheme: vi.fn<ThemeService['initializeTheme']>().mockResolvedValue(undefined as never),
+    initializeTheme: vi.fn<ThemeService['initializeTheme']>().mockResolvedValue(
+      createAccessibilityTheme(),
+    ),
   };
 
   beforeEach(async () => {
