@@ -1,0 +1,19 @@
+<form class="create-user-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <header class="create-user-form__header">
+    <h1 id="welcome-title">Vamos começar?</h1>
+
+    <p>Digite seu nome para personalizarmos a sua experiência.</p>
+  </header>
+
+  <se-text-input
+    inputId="user-name"
+    label="Seu nome"
+    placeholder="Ex.: Maria Helena"
+    formControlName="name"
+    [required]="true"
+    [invalid]="form.controls.name.invalid && form.controls.name.touched"
+    errorMessage="Digite seu nome para continuar."
+  />
+
+  <se-button type="submit" [loading]="submitting()"> Continuar </se-button>
+</form>

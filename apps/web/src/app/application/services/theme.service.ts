@@ -120,19 +120,39 @@ export class ThemeService {
     rootElement.style.setProperty('--se-font-family', theme.typography.body.fontFamily);
 
     rootElement.style.setProperty('--se-font-size-body', `${theme.typography.body.fontSize}px`);
-
     rootElement.style.setProperty('--se-line-height-body', `${theme.typography.body.lineHeight}px`);
 
     rootElement.style.setProperty(
       '--se-font-size-body-large',
       `${theme.typography.bodyLarge.fontSize}px`,
     );
+    rootElement.style.setProperty(
+      '--se-line-height-body-large',
+      `${theme.typography.bodyLarge.lineHeight}px`,
+    );
 
     rootElement.style.setProperty('--se-font-size-title', `${theme.typography.title.fontSize}px`);
+    rootElement.style.setProperty(
+      '--se-line-height-title',
+      `${theme.typography.title.lineHeight}px`,
+    );
 
     rootElement.style.setProperty(
       '--se-font-size-heading',
       `${theme.typography.heading.fontSize}px`,
+    );
+    rootElement.style.setProperty(
+      '--se-line-height-heading',
+      `${theme.typography.heading.lineHeight}px`,
+    );
+
+    rootElement.style.setProperty(
+      '--se-font-size-display',
+      `${theme.typography.display.fontSize}px`,
+    );
+    rootElement.style.setProperty(
+      '--se-line-height-display',
+      `${theme.typography.display.lineHeight}px`,
     );
 
     rootElement.style.setProperty(

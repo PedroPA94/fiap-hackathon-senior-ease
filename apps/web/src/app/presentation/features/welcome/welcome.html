@@ -1,0 +1,20 @@
+<main class="welcome-page">
+  <section class="welcome-page__intro" aria-labelledby="welcome-brand">
+    <div class="welcome-page__intro-content">
+      <p id="welcome-brand" class="welcome-page__brand welcome-page__brand--desktop">SeniorEase</p>
+
+      <p class="welcome-page__description">
+        Organize suas atividades, ajuste a tela do seu jeito e siga cada tarefa passo a passo, sem
+        medo de errar.
+      </p>
+    </div>
+  </section>
+
+  <section class="welcome-page__content" aria-labelledby="welcome-title">
+    <p class="welcome-page__brand welcome-page__brand--compact">SeniorEase</p>
+
+    <se-card class="welcome-page__card">
+      <se-create-user-form [submitting]="isSubmitting()" (submitted)="createUser($event)" />
+    </se-card>
+  </section>
+</main>
