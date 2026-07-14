@@ -48,6 +48,10 @@
   width: 100%;
 }
 
+.welcome-page__back-action {
+  margin-top: var(--se-spacing-large, 24px);
+}
+
 @media (min-width: 768px) {
   .welcome-page {
     padding: var(--se-spacing-xlarge);

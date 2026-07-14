@@ -14,7 +14,27 @@
     <p class="welcome-page__brand welcome-page__brand--compact">SeniorEase</p>
 
     <se-card class="welcome-page__card">
-      <se-create-user-form [submitting]="isSubmitting()" (submitted)="createUser($event)" />
+      @if (mode() === 'select-user') {
+        <se-local-user-selector
+          [users]="localUsers()"
+          [loadingUserId]="loadingUserId()"
+          (userSelected)="selectUser($event)"
+          (createNewRequested)="showCreateUser()"
+        />
+      } @else {
+        <se-create-user-form [submitting]="isCreatingUser()" (submitted)="createUser($event)" />
+
+        @if (hasLocalUsers()) {
+          <se-button
+            class="welcome-page__back-action"
+            type="button"
+            (click)="showUserSelection()"
+            variant="outline"
+          >
+            Voltar para os perfis existentes
+          </se-button>
+        }
+      }
     </se-card>
   </section>
 </main>

@@ -119,6 +119,12 @@ export class ThemeService {
   private applyTypographyVariables(rootElement: HTMLElement, theme: AccessibilityTheme): void {
     rootElement.style.setProperty('--se-font-family', theme.typography.body.fontFamily);
 
+    rootElement.style.setProperty('--se-font-size-helper', `${theme.typography.helper.fontSize}px`);
+    rootElement.style.setProperty(
+      '--se-line-height-helper',
+      `${theme.typography.helper.lineHeight}px`,
+    );
+
     rootElement.style.setProperty('--se-font-size-body', `${theme.typography.body.fontSize}px`);
     rootElement.style.setProperty('--se-line-height-body', `${theme.typography.body.lineHeight}px`);
 

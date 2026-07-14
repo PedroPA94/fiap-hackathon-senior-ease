@@ -1,0 +1,48 @@
+<section class="user-selector" aria-labelledby="user-selector-title">
+  <header class="user-selector__header">
+    <h1 id="user-selector-title" class="user-selector__title">Quem está usando?</h1>
+
+    <p class="user-selector__description">Escolha seu perfil para continuar.</p>
+  </header>
+
+  <ul class="user-selector__list">
+    @for (user of users(); track user.id) {
+      <li>
+        <button
+          class="user-selector__user"
+          type="button"
+          [disabled]="loadingUserId() !== null"
+          [attr.aria-busy]="loadingUserId() === user.id ? true : null"
+          (click)="selectUser(user.id)"
+        >
+          <span class="user-selector__user-content">
+            <span class="user-selector__user-name">
+              {{ user.name }}
+            </span>
+
+            <span class="user-selector__user-hint"> Continuar com este perfil </span>
+          </span>
+
+          @if (loadingUserId() === user.id) {
+            <span class="user-selector__spinner" aria-hidden="true"></span>
+          } @else {
+            <span class="user-selector__arrow" aria-hidden="true"> → </span>
+          }
+        </button>
+      </li>
+    }
+  </ul>
+
+  <div class="user-selector__divider">
+    <span>ou</span>
+  </div>
+
+  <se-button
+    variant="outline"
+    [fullWidth]="true"
+    [disabled]="loadingUserId() !== null"
+    (click)="requestCreateNew()"
+  >
+    Criar novo usuário
+  </se-button>
+</section>
