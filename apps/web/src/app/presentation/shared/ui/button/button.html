@@ -1,0 +1,26 @@
+<button
+  class="button"
+  [class.button--primary]="variant() === 'primary'"
+  [class.button--secondary]="variant() === 'secondary'"
+  [class.button--outline]="variant() === 'outline'"
+  [class.button--danger]="variant() === 'danger'"
+  [class.button--danger-outline]="variant() === 'danger-outline'"
+  [class.button--full-width]="fullWidth()"
+  [class.button--loading]="loading()"
+  [attr.aria-busy]="loading() ? true : null"
+  [attr.aria-label]="ariaLabel()"
+  [disabled]="isDisabled()"
+  [type]="type()"
+>
+  @if (loading()) {
+    <span class="button__spinner" aria-hidden="true"></span>
+  }
+
+  <span class="button__content" [class.button__content--hidden]="loading()">
+    <ng-content />
+  </span>
+
+  @if (loading()) {
+    <span class="sr-only">Carregando</span>
+  }
+</button>

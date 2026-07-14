@@ -1,1 +1,26 @@
 <h1>SeniorEase</h1>
+
+<se-button (click)="onButtonClick()">Teste</se-button>
+
+<se-button variant="secondary"> Secundário </se-button>
+
+<se-button variant="outline"> Contornado </se-button>
+
+<se-button variant="danger" loading="true"> Excluir </se-button>
+
+<se-button variant="danger-outline"> Excluir </se-button>
+
+<se-text-input
+  inputId="Teste"
+  label="Nome"
+  placeholder="Digite seu nome"
+  required="true"
+  hint="Campo inválido"
+  disabled="true"
+></se-text-input>
+
+<se-card>
+  <h1 id="welcome-title">Vamos começar?</h1>
+
+  <p>Digite seu nome para personalizarmos a sua experiência.</p>
+</se-card>

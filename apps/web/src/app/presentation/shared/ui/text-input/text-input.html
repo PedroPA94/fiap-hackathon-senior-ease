@@ -1,0 +1,42 @@
+<div
+  class="text-input"
+  [class.text-input--invalid]="invalid()"
+  [class.text-input--disabled]="disabled()"
+>
+  <label class="text-input__label" [for]="inputId()">
+    {{ label() }}
+
+    @if (required()) {
+      <span class="text-input__required" aria-hidden="true"> * </span>
+
+      <span class="sr-only">Campo obrigatório</span>
+    }
+  </label>
+
+  <input
+    class="text-input__control"
+    [id]="inputId()"
+    [name]="name()"
+    [type]="type()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [required]="required()"
+    [disabled]="disabled()"
+    [attr.maxlength]="maxLength()"
+    [attr.aria-invalid]="invalid() ? true : null"
+    [attr.aria-required]="required() ? true : null"
+    [attr.aria-describedby]="describedBy"
+    (input)="handleInput($event)"
+    (blur)="handleBlur()"
+  />
+
+  @if (invalid() && errorMessage()) {
+    <p class="text-input__message text-input__message--error" [id]="errorId" role="alert">
+      {{ errorMessage() }}
+    </p>
+  } @else if (hint()) {
+    <p class="text-input__message" [id]="hintId">
+      {{ hint() }}
+    </p>
+  }
+</div>

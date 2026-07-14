@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+
+  width: 100%;
+  padding: var(--se-spacing-xlarge, 32px);
+
+  background-color: var(--se-color-background-surface, #ffffff);
+
+  border: var(--se-border-width-regular, 1px) var(--se-border-style-solid, solid)
+    var(--se-color-border-default, #d6e0e8);
+
+  border-radius: var(--se-radius-large, 28px);
+}
+
+.card--small {
+  padding: var(--se-spacing-medium, 16px);
+}
