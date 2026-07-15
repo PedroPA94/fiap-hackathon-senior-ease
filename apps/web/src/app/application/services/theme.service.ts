@@ -103,15 +103,6 @@ export class ThemeService {
     );
 
     rootElement.style.setProperty('--se-color-disabled-text', theme.colors.disabled.text);
-
-    rootElement.style.setProperty('--se-color-danger-soft', theme.colors.danger.soft);
-
-    rootElement.style.setProperty(
-      '--se-color-disabled-background',
-      theme.colors.disabled.background,
-    );
-
-    rootElement.style.setProperty('--se-color-disabled-text', theme.colors.disabled.text);
   }
 
   private applyTypographyVariables(rootElement: HTMLElement, theme: AccessibilityTheme): void {
