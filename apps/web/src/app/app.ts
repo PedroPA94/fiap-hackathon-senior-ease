@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './application/services/theme.service';
 
@@ -10,8 +11,9 @@ import { ThemeService } from './application/services/theme.service';
 })
 export class App {
   private readonly themeService = inject(ThemeService);
+  private readonly destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
-    this.themeService.initializeTheme();
+    this.themeService.initializeTheme().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 }

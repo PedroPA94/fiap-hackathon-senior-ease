@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { EntityId, UserProfile } from '@senior-ease/core';
+import { createAccessibilityTheme, type AccessibilityTheme } from '@senior-ease/tokens';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import type { Mock } from 'vitest';
 
 import type { LocalUser } from '../../../application/models/local-user';
@@ -99,53 +101,51 @@ describe('Welcome', () => {
     expect(fixture.nativeElement.querySelector('se-create-user-form')).toBeFalsy();
   });
 
-  it('should create a local user and apply the current user theme', async () => {
+  it('should create a local user and apply the current user theme', () => {
     createComponent();
 
-    await component.createUser('Ana Maria');
+    component.createUser('Ana Maria');
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledWith('Ana Maria');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
   });
 
-  it('should ignore duplicate create submissions while a user is being created', async () => {
-    let resolveCreateUser!: () => void;
-    userSessionService.createLocalUser.mockReturnValue(
-      new Promise((resolve) => {
-        resolveCreateUser = () => resolve(createUserProfile('user-3', 'Ana Maria'));
-      }),
-    );
+  it('should ignore duplicate create submissions while a user is being created', () => {
+    const createUserSubject = new Subject<UserProfile>();
+    userSessionService.createLocalUser.mockReturnValue(createUserSubject.asObservable());
     createComponent();
 
-    const firstSubmission = component.createUser('Ana Maria');
-    const secondSubmission = component.createUser('Ana Maria');
+    component.createUser('Ana Maria');
+    component.createUser('Ana Maria');
 
-    resolveCreateUser();
-    await Promise.all([firstSubmission, secondSubmission]);
+    createUserSubject.next(createUserProfile('user-3', 'Ana Maria'));
+    createUserSubject.complete();
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledOnce();
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
   });
 
-  it('should select a local user and apply the current user theme', async () => {
+  it('should select a local user and apply the current user theme', () => {
     userSessionService.listLocalUsers.mockReturnValue(localUsers);
     createComponent();
 
-    await selectUser('user-2');
+    selectUser('user-2');
 
     expect(userSessionService.selectLocalUser).toHaveBeenCalledWith('user-2');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
   });
 
-  it('should refresh the local user list when selecting a user fails', async () => {
+  it('should refresh the local user list when selecting a user fails', () => {
     const refreshedUsers = [localUsers[1]];
     userSessionService.listLocalUsers
       .mockReturnValueOnce(localUsers)
       .mockReturnValue(refreshedUsers);
-    userSessionService.selectLocalUser.mockRejectedValue(new Error('User not found'));
+    userSessionService.selectLocalUser.mockReturnValue(
+      throwError(() => new Error('User not found')),
+    );
     createComponent();
 
-    await selectUser('user-1');
+    selectUser('user-1');
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).not.toContain('Maria Helena');
@@ -179,10 +179,10 @@ describe('Welcome', () => {
     );
   }
 
-  async function selectUser(userId: EntityId): Promise<void> {
-    await (
+  function selectUser(userId: EntityId): void {
+    (
       component as unknown as {
-        selectUser(userId: EntityId): Promise<void>;
+        selectUser(userId: EntityId): void;
       }
     ).selectUser(userId);
   }
@@ -190,14 +190,14 @@ describe('Welcome', () => {
   function createUserSessionServiceMock(): UserSessionServiceMock {
     return {
       listLocalUsers: vi.fn(() => []),
-      createLocalUser: vi.fn(async (name: string) => createUserProfile('user-3', name)),
-      selectLocalUser: vi.fn(async (userId: EntityId) => createUserProfile(userId, 'Selected User')),
+      createLocalUser: vi.fn((name: string) => of(createUserProfile('user-3', name))),
+      selectLocalUser: vi.fn((userId: EntityId) => of(createUserProfile(userId, 'Selected User'))),
     };
   }
 
   function createThemeServiceMock(): ThemeServiceMock {
     return {
-      applyCurrentUserTheme: vi.fn(async () => undefined),
+      applyCurrentUserTheme: vi.fn(() => of(createAccessibilityTheme())),
     };
   }
 
@@ -213,10 +213,10 @@ describe('Welcome', () => {
 
 type UserSessionServiceMock = {
   listLocalUsers: Mock<() => LocalUser[]>;
-  createLocalUser: Mock<(name: string) => Promise<UserProfile>>;
-  selectLocalUser: Mock<(userId: EntityId) => Promise<UserProfile>>;
+  createLocalUser: Mock<(name: string) => Observable<UserProfile>>;
+  selectLocalUser: Mock<(userId: EntityId) => Observable<UserProfile>>;
 };
 
 type ThemeServiceMock = {
-  applyCurrentUserTheme: Mock<() => Promise<void>>;
+  applyCurrentUserTheme: Mock<() => Observable<AccessibilityTheme>>;
 };

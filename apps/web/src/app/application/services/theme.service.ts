@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { computed, Inject, Injectable, signal } from '@angular/core';
+import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 
 import { createAccessibilityTheme, type AccessibilityTheme } from '@senior-ease/tokens';
 
@@ -24,30 +25,27 @@ export class ThemeService {
     private readonly document: Document,
   ) {}
 
-  async initializeTheme(): Promise<AccessibilityTheme> {
-    try {
-      return await this.applyCurrentUserTheme();
-    } catch (error) {
-      if (error instanceof UserSessionError && error.code === 'CURRENT_USER_REQUIRED') {
-        const defaultTheme = createAccessibilityTheme();
+  initializeTheme(): Observable<AccessibilityTheme> {
+    return this.applyCurrentUserTheme().pipe(
+      catchError((error: unknown) => {
+        if (error instanceof UserSessionError && error.code === 'CURRENT_USER_REQUIRED') {
+          const defaultTheme = createAccessibilityTheme();
 
-        this.applyTheme(defaultTheme);
+          this.applyTheme(defaultTheme);
 
-        return defaultTheme;
-      }
+          return of(defaultTheme);
+        }
 
-      throw error;
-    }
+        return throwError(() => error);
+      }),
+    );
   }
 
-  async applyCurrentUserTheme(): Promise<AccessibilityTheme> {
-    const preferences = await this.accessibilityPreferencesService.getPreferences();
-
-    const theme = createAccessibilityTheme(preferences);
-
-    this.applyTheme(theme);
-
-    return theme;
+  applyCurrentUserTheme(): Observable<AccessibilityTheme> {
+    return this.accessibilityPreferencesService.getPreferences().pipe(
+      map((preferences) => createAccessibilityTheme(preferences)),
+      tap((theme) => this.applyTheme(theme)),
+    );
   }
 
   applyTheme(theme: AccessibilityTheme): void {

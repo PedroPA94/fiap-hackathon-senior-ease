@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
 
 import { createAccessibilityTheme } from '@senior-ease/tokens';
 
@@ -7,8 +8,8 @@ import { ThemeService } from './application/services/theme.service';
 
 describe('App', () => {
   const themeServiceMock = {
-    initializeTheme: vi.fn<ThemeService['initializeTheme']>().mockResolvedValue(
-      createAccessibilityTheme(),
+    initializeTheme: vi.fn<ThemeService['initializeTheme']>().mockReturnValue(
+      of(createAccessibilityTheme()),
     ),
   };
 

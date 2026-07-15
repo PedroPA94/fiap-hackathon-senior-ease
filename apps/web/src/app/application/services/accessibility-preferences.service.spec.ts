@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 
 import {
   defaultAccessibilityPreferences,
@@ -57,7 +58,7 @@ describe('AccessibilityPreferencesService', () => {
   it('should get preferences for the current user', async () => {
     preferencesRepositoryMock.findByUserId.mockResolvedValue(preferences);
 
-    await expect(service.getPreferences()).resolves.toEqual(preferences);
+    await expect(firstValueFrom(service.getPreferences())).resolves.toEqual(preferences);
 
     expect(preferencesRepositoryMock.findByUserId).toHaveBeenCalledWith(userId);
   });
@@ -65,13 +66,17 @@ describe('AccessibilityPreferencesService', () => {
   it('should return default preferences when the current user has none saved', async () => {
     preferencesRepositoryMock.findByUserId.mockResolvedValue(null);
 
-    await expect(service.getPreferences()).resolves.toEqual(defaultAccessibilityPreferences);
+    await expect(firstValueFrom(service.getPreferences())).resolves.toEqual(
+      defaultAccessibilityPreferences,
+    );
   });
 
   it('should update preferences for the current user', async () => {
     preferencesRepositoryMock.save.mockResolvedValue(preferences);
 
-    await expect(service.updatePreferences(preferences)).resolves.toEqual(preferences);
+    await expect(firstValueFrom(service.updatePreferences(preferences))).resolves.toEqual(
+      preferences,
+    );
 
     expect(preferencesRepositoryMock.save).toHaveBeenCalledWith(userId, preferences);
   });
@@ -79,7 +84,9 @@ describe('AccessibilityPreferencesService', () => {
   it('should reset preferences for the current user', async () => {
     preferencesRepositoryMock.save.mockResolvedValue(defaultAccessibilityPreferences);
 
-    await expect(service.resetPreferences()).resolves.toEqual(defaultAccessibilityPreferences);
+    await expect(firstValueFrom(service.resetPreferences())).resolves.toEqual(
+      defaultAccessibilityPreferences,
+    );
 
     expect(preferencesRepositoryMock.save).toHaveBeenCalledWith(
       userId,
@@ -90,7 +97,7 @@ describe('AccessibilityPreferencesService', () => {
   it('should require a current user before accessing preferences', async () => {
     userSessionServiceMock.getCurrentUserId.mockReturnValue(null);
 
-    await expect(service.getPreferences()).rejects.toEqual(
+    await expect(firstValueFrom(service.getPreferences())).rejects.toEqual(
       new UserSessionError('CURRENT_USER_REQUIRED'),
     );
     expect(preferencesRepositoryMock.findByUserId).not.toHaveBeenCalled();

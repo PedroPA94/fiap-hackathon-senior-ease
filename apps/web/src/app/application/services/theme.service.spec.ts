@@ -1,5 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { type AccessibilityPreferences } from '@senior-ease/core';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
@@ -49,9 +50,9 @@ describe('ThemeService', () => {
   });
 
   it('should apply the current user theme to state and CSS variables', async () => {
-    preferencesServiceMock.getPreferences.mockResolvedValue(preferences);
+    preferencesServiceMock.getPreferences.mockReturnValue(of(preferences));
 
-    const theme = await service.applyCurrentUserTheme();
+    const theme = await firstValueFrom(service.applyCurrentUserTheme());
     const rootStyle = testDocument.documentElement.style;
 
     expect(theme).toEqual(createAccessibilityTheme(preferences));
@@ -71,11 +72,11 @@ describe('ThemeService', () => {
   });
 
   it('should initialize the default theme when no current user is selected', async () => {
-    preferencesServiceMock.getPreferences.mockRejectedValue(
-      new UserSessionError('CURRENT_USER_REQUIRED'),
+    preferencesServiceMock.getPreferences.mockReturnValue(
+      throwError(() => new UserSessionError('CURRENT_USER_REQUIRED')),
     );
 
-    const theme = await service.initializeTheme();
+    const theme = await firstValueFrom(service.initializeTheme());
 
     expect(theme).toEqual(createAccessibilityTheme());
     expect(service.currentTheme()).toEqual(theme);
@@ -83,8 +84,8 @@ describe('ThemeService', () => {
 
   it('should rethrow unexpected initialization errors', async () => {
     const error = new Error('Unexpected failure');
-    preferencesServiceMock.getPreferences.mockRejectedValue(error);
+    preferencesServiceMock.getPreferences.mockReturnValue(throwError(() => error));
 
-    await expect(service.initializeTheme()).rejects.toBe(error);
+    await expect(firstValueFrom(service.initializeTheme())).rejects.toBe(error);
   });
 });

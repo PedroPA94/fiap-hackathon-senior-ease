@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 
 import {
   ApplicationError,
@@ -84,7 +85,7 @@ describe('UserSessionService', () => {
   it('should return null when there is no current user profile selected', async () => {
     userSessionStoreMock.getCurrentUserId.mockReturnValue(null);
 
-    await expect(service.getCurrentUserProfile()).resolves.toBeNull();
+    await expect(firstValueFrom(service.getCurrentUserProfile())).resolves.toBeNull();
 
     expect(userProfileRepositoryMock.findById).not.toHaveBeenCalled();
   });
@@ -93,7 +94,7 @@ describe('UserSessionService', () => {
     userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
     userProfileRepositoryMock.findById.mockResolvedValue(null);
 
-    await expect(service.getCurrentUserProfile()).resolves.toBeNull();
+    await expect(firstValueFrom(service.getCurrentUserProfile())).resolves.toBeNull();
 
     expect(userSessionStoreMock.clearCurrentUserId).toHaveBeenCalledOnce();
   });
@@ -103,7 +104,7 @@ describe('UserSessionService', () => {
     userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
     userProfileRepositoryMock.findById.mockRejectedValue(error);
 
-    await expect(service.getCurrentUserProfile()).rejects.toBe(error);
+    await expect(firstValueFrom(service.getCurrentUserProfile())).rejects.toBe(error);
   });
 
   it('should list local users from the session store', () => {
@@ -116,7 +117,7 @@ describe('UserSessionService', () => {
   it('should create a local user and persist it as the current session', async () => {
     userProfileRepositoryMock.create.mockResolvedValue(profile);
 
-    await expect(service.createLocalUser(profile.name)).resolves.toEqual(profile);
+    await expect(firstValueFrom(service.createLocalUser(profile.name))).resolves.toEqual(profile);
 
     expect(userProfileRepositoryMock.create).toHaveBeenCalledWith(profile);
     expect(userSessionStoreMock.setCurrentUserId).toHaveBeenCalledWith(profile.id);
@@ -130,7 +131,7 @@ describe('UserSessionService', () => {
   it('should select an existing local user and refresh its last access date', async () => {
     userProfileRepositoryMock.findById.mockResolvedValue(profile);
 
-    await expect(service.selectLocalUser(profile.id)).resolves.toEqual(profile);
+    await expect(firstValueFrom(service.selectLocalUser(profile.id))).resolves.toEqual(profile);
 
     expect(userProfileRepositoryMock.findById).toHaveBeenCalledWith(profile.id);
     expect(userSessionStoreMock.setCurrentUserId).toHaveBeenCalledWith(profile.id);

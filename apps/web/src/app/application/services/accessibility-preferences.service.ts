@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
+import { defer, from, Observable } from 'rxjs';
 
 import {
   GetAccessibilityPreferencesUseCase,
@@ -22,27 +23,33 @@ export class AccessibilityPreferencesService {
     private readonly userSessionService: UserSessionService,
   ) {}
 
-  async getPreferences(): Promise<AccessibilityPreferences> {
-    const useCase = new GetAccessibilityPreferencesUseCase(this.preferencesRepository);
+  getPreferences(): Observable<AccessibilityPreferences> {
+    return defer(() => {
+      const useCase = new GetAccessibilityPreferencesUseCase(this.preferencesRepository);
 
-    return useCase.execute({ userId: this.getRequiredCurrentUserId() });
-  }
-
-  async updatePreferences(
-    preferences: AccessibilityPreferences,
-  ): Promise<AccessibilityPreferences> {
-    const useCase = new UpdateAccessibilityPreferencesUseCase(this.preferencesRepository);
-
-    return useCase.execute({
-      userId: this.getRequiredCurrentUserId(),
-      preferences,
+      return from(useCase.execute({ userId: this.getRequiredCurrentUserId() }));
     });
   }
 
-  async resetPreferences(): Promise<AccessibilityPreferences> {
-    const useCase = new ResetAccessibilityPreferencesUseCase(this.preferencesRepository);
+  updatePreferences(preferences: AccessibilityPreferences): Observable<AccessibilityPreferences> {
+    return defer(() => {
+      const useCase = new UpdateAccessibilityPreferencesUseCase(this.preferencesRepository);
 
-    return useCase.execute({ userId: this.getRequiredCurrentUserId() });
+      return from(
+        useCase.execute({
+          userId: this.getRequiredCurrentUserId(),
+          preferences,
+        }),
+      );
+    });
+  }
+
+  resetPreferences(): Observable<AccessibilityPreferences> {
+    return defer(() => {
+      const useCase = new ResetAccessibilityPreferencesUseCase(this.preferencesRepository);
+
+      return from(useCase.execute({ userId: this.getRequiredCurrentUserId() }));
+    });
   }
 
   private getRequiredCurrentUserId(): EntityId {

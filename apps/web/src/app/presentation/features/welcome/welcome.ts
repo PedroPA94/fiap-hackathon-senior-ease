@@ -1,4 +1,6 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { EMPTY, catchError, concatMap, finalize } from 'rxjs';
 import { CreateUserForm } from './components/create-user-form/create-user-form';
 import { Card } from '../../shared/ui/card/card';
 import { UserSessionService } from '../../../application/services/user-session.service';
@@ -19,6 +21,7 @@ type WelcomeMode = 'select-user' | 'create-user';
 export class Welcome {
   private userSessionService = inject(UserSessionService);
   private themeService = inject(ThemeService);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly mode = signal<WelcomeMode>('create-user');
   protected readonly isCreatingUser = signal(false);
@@ -42,33 +45,42 @@ export class Welcome {
     this.mode.set('select-user');
   }
 
-  async createUser(name: string): Promise<void> {
+  createUser(name: string): void {
     if (this.isCreatingUser()) {
       return;
     }
 
     this.isCreatingUser.set(true);
 
-    await this.userSessionService.createLocalUser(name);
-    await this.themeService.applyCurrentUserTheme();
-
-    this.isCreatingUser.set(false);
+    this.userSessionService
+      .createLocalUser(name)
+      .pipe(
+        concatMap(() => this.themeService.applyCurrentUserTheme()),
+        finalize(() => this.isCreatingUser.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
-  protected async selectUser(userId: EntityId): Promise<void> {
+  protected selectUser(userId: EntityId): void {
     if (this.loadingUserId()) {
       return;
     }
 
     this.loadingUserId.set(userId);
 
-    try {
-      await this.userSessionService.selectLocalUser(userId);
-      await this.themeService.applyCurrentUserTheme();
-    } catch {
-      this.localUsers.set(this.userSessionService.listLocalUsers());
-    } finally {
-      this.loadingUserId.set(null);
-    }
+    this.userSessionService
+      .selectLocalUser(userId)
+      .pipe(
+        concatMap(() => this.themeService.applyCurrentUserTheme()),
+        catchError(() => {
+          this.localUsers.set(this.userSessionService.listLocalUsers());
+
+          return EMPTY;
+        }),
+        finalize(() => this.loadingUserId.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 }

@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
+import { catchError, defer, from, Observable, of, tap, throwError } from 'rxjs';
 
 import {
   ApplicationError,
@@ -35,68 +36,76 @@ export class UserSessionService {
     return this.userSessionStore.getCurrentUserId();
   }
 
-  async getCurrentUserProfile(): Promise<UserProfile | null> {
-    const currentUserId = this.getCurrentUserId();
+  getCurrentUserProfile(): Observable<UserProfile | null> {
+    return defer(() => {
+      const currentUserId = this.getCurrentUserId();
 
-    if (!currentUserId) {
-      return null;
-    }
-
-    const useCase = new GetUserProfileUseCase(this.userProfileRepository);
-
-    try {
-      return await useCase.execute({ id: currentUserId });
-    } catch (error) {
-      if (error instanceof ApplicationError && error.code === 'USER_PROFILE_NOT_FOUND') {
-        this.clearCurrentUser();
-
-        return null;
+      if (!currentUserId) {
+        return of(null);
       }
 
-      throw error;
-    }
+      const useCase = new GetUserProfileUseCase(this.userProfileRepository);
+
+      return from(useCase.execute({ id: currentUserId })).pipe(
+        catchError((error: unknown) => {
+          if (error instanceof ApplicationError && error.code === 'USER_PROFILE_NOT_FOUND') {
+            this.clearCurrentUser();
+
+            return of(null);
+          }
+
+          return throwError(() => error);
+        }),
+      );
+    });
   }
 
   listLocalUsers(): LocalUser[] {
     return this.userSessionStore.listLocalUsers();
   }
 
-  async createLocalUser(name: string): Promise<UserProfile> {
-    const now = this.clock.now();
-    const id = this.idGenerator.generate();
+  createLocalUser(name: string): Observable<UserProfile> {
+    return defer(() => {
+      const now = this.clock.now();
+      const id = this.idGenerator.generate();
 
-    const useCase = new CreateUserProfileUseCase(this.userProfileRepository, this.clock);
+      const useCase = new CreateUserProfileUseCase(this.userProfileRepository, this.clock);
 
-    const profile = await useCase.execute({
-      id,
-      name,
+      return from(
+        useCase.execute({
+          id,
+          name,
+        }),
+      ).pipe(
+        tap((profile) => {
+          this.userSessionStore.setCurrentUserId(profile.id);
+
+          this.userSessionStore.saveLocalUser({
+            id: profile.id,
+            name: profile.name,
+            lastAccessedAt: now,
+          });
+        }),
+      );
     });
-
-    this.userSessionStore.setCurrentUserId(profile.id);
-
-    this.userSessionStore.saveLocalUser({
-      id: profile.id,
-      name: profile.name,
-      lastAccessedAt: now,
-    });
-
-    return profile;
   }
 
-  async selectLocalUser(userId: EntityId): Promise<UserProfile> {
-    const useCase = new GetUserProfileUseCase(this.userProfileRepository);
+  selectLocalUser(userId: EntityId): Observable<UserProfile> {
+    return defer(() => {
+      const useCase = new GetUserProfileUseCase(this.userProfileRepository);
 
-    const profile = await useCase.execute({ id: userId });
+      return from(useCase.execute({ id: userId })).pipe(
+        tap((profile) => {
+          this.userSessionStore.setCurrentUserId(profile.id);
 
-    this.userSessionStore.setCurrentUserId(profile.id);
-
-    this.userSessionStore.saveLocalUser({
-      id: profile.id,
-      name: profile.name,
-      lastAccessedAt: this.clock.now(),
+          this.userSessionStore.saveLocalUser({
+            id: profile.id,
+            name: profile.name,
+            lastAccessedAt: this.clock.now(),
+          });
+        }),
+      );
     });
-
-    return profile;
   }
 
   clearCurrentUser(): void {
