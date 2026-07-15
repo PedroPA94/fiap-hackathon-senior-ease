@@ -1,0 +1,26 @@
+<header class="header">
+  <div class="header__content">
+    <div class="header__brand">
+      <button
+        class="header__menu-button"
+        type="button"
+        aria-label="Abrir menu"
+        (click)="requestMenu()"
+      >
+        <span aria-hidden="true">☰</span>
+      </button>
+
+      <span class="header__logo"> SeniorEase </span>
+    </div>
+
+    <div class="header__user">
+      <span class="header__user-name">
+        {{ userName() }}
+      </span>
+
+      <button class="header__switch-user" type="button" (click)="requestUserSwitch()">
+        Trocar usuário
+      </button>
+    </div>
+  </div>
+</header>
