@@ -14,6 +14,10 @@
     <p class="welcome-page__brand welcome-page__brand--compact">SeniorEase</p>
 
     <se-card class="welcome-page__card">
+      @if (errorMessage()) {
+        <p class="welcome-page__error" role="alert">{{ errorMessage() }}</p>
+      }
+
       @if (mode() === 'select-user') {
         <se-local-user-selector
           [users]="localUsers()"

@@ -48,6 +48,15 @@
   width: 100%;
 }
 
+.welcome-page__error {
+  padding: var(--se-spacing-small);
+  margin: 0 0 var(--se-spacing-medium);
+  border: 1px solid var(--se-color-danger);
+  border-radius: var(--se-radius-medium);
+  color: var(--se-color-danger);
+  font-weight: var(--se-font-weight-bold);
+}
+
 .welcome-page__back-action {
   margin-top: var(--se-spacing-large, 24px);
 }

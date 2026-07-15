@@ -26,6 +26,7 @@ export class Welcome {
   protected readonly mode = signal<WelcomeMode>('create-user');
   protected readonly isCreatingUser = signal(false);
   protected readonly loadingUserId = signal<EntityId | null>(null);
+  protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly localUsers = signal<LocalUser[]>([]);
   protected readonly hasLocalUsers = computed(() => this.localUsers().length > 0);
@@ -38,10 +39,12 @@ export class Welcome {
   }
 
   showCreateUser(): void {
+    this.errorMessage.set(null);
     this.mode.set('create-user');
   }
 
   showUserSelection(): void {
+    this.errorMessage.set(null);
     this.mode.set('select-user');
   }
 
@@ -51,11 +54,17 @@ export class Welcome {
     }
 
     this.isCreatingUser.set(true);
+    this.errorMessage.set(null);
 
     this.userSessionService
       .createLocalUser(name)
       .pipe(
         concatMap(() => this.themeService.applyCurrentUserTheme()),
+        catchError(() => {
+          this.errorMessage.set('Não foi possível criar o perfil. Tente novamente.');
+
+          return EMPTY;
+        }),
         finalize(() => this.isCreatingUser.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
@@ -68,6 +77,7 @@ export class Welcome {
     }
 
     this.loadingUserId.set(userId);
+    this.errorMessage.set(null);
 
     this.userSessionService
       .selectLocalUser(userId)
@@ -75,6 +85,7 @@ export class Welcome {
         concatMap(() => this.themeService.applyCurrentUserTheme()),
         catchError(() => {
           this.localUsers.set(this.userSessionService.listLocalUsers());
+          this.errorMessage.set('Não foi possível abrir este perfil. Selecione outro usuário.');
 
           return EMPTY;
         }),
