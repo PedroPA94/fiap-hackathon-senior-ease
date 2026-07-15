@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import type { EntityId, UserProfile } from '@senior-ease/core';
 import { createAccessibilityTheme, type AccessibilityTheme } from '@senior-ease/tokens';
 import { Observable, of, Subject, throwError } from 'rxjs';
@@ -14,6 +15,7 @@ describe('Welcome', () => {
   let fixture: ComponentFixture<Welcome>;
   let userSessionService: UserSessionServiceMock;
   let themeService: ThemeServiceMock;
+  let router: RouterMock;
 
   const localUsers: LocalUser[] = [
     {
@@ -31,6 +33,7 @@ describe('Welcome', () => {
   beforeEach(async () => {
     userSessionService = createUserSessionServiceMock();
     themeService = createThemeServiceMock();
+    router = createRouterMock();
 
     await TestBed.configureTestingModule({
       imports: [Welcome],
@@ -42,6 +45,10 @@ describe('Welcome', () => {
         {
           provide: ThemeService,
           useValue: themeService,
+        },
+        {
+          provide: Router,
+          useValue: router,
         },
       ],
     }).compileComponents();
@@ -108,6 +115,7 @@ describe('Welcome', () => {
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledWith('Ana Maria');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(router.navigate).toHaveBeenCalledWith(['/personalization']);
   });
 
   it('should ignore duplicate create submissions while a user is being created', () => {
@@ -123,6 +131,22 @@ describe('Welcome', () => {
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledOnce();
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(router.navigate).toHaveBeenCalledOnce();
+  });
+
+  it('should show an error and stay on welcome when creating a user fails', () => {
+    userSessionService.createLocalUser.mockReturnValue(
+      throwError(() => new Error('Create failed')),
+    );
+    createComponent();
+
+    component.createUser('Ana Maria');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      'Não foi possível criar o perfil. Tente novamente.',
+    );
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('should select a local user and apply the current user theme', () => {
@@ -133,6 +157,7 @@ describe('Welcome', () => {
 
     expect(userSessionService.selectLocalUser).toHaveBeenCalledWith('user-2');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(router.navigate).toHaveBeenCalledWith(['/personalization']);
   });
 
   it('should refresh the local user list when selecting a user fails', () => {
@@ -150,7 +175,11 @@ describe('Welcome', () => {
 
     expect(fixture.nativeElement.textContent).not.toContain('Maria Helena');
     expect(fixture.nativeElement.textContent).toContain('Joao Pedro');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Não foi possível abrir este perfil. Selecione outro usuário.',
+    );
     expect(themeService.applyCurrentUserTheme).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   function createComponent(): void {
@@ -201,6 +230,12 @@ describe('Welcome', () => {
     };
   }
 
+  function createRouterMock(): RouterMock {
+    return {
+      navigate: vi.fn(() => Promise.resolve(true)),
+    };
+  }
+
   function createUserProfile(id: EntityId, name: string): UserProfile {
     return {
       id,
@@ -219,4 +254,8 @@ type UserSessionServiceMock = {
 
 type ThemeServiceMock = {
   applyCurrentUserTheme: Mock<() => Observable<AccessibilityTheme>>;
+};
+
+type RouterMock = {
+  navigate: Mock<(commands: unknown[]) => Promise<boolean>>;
 };

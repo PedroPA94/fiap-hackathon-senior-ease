@@ -9,6 +9,7 @@ import { LocalUserSelector } from './local-user-selector/local-user-selector';
 import { EntityId } from '@senior-ease/core';
 import { LocalUser } from '../../../application/models/local-user';
 import { Button } from '../../shared/ui/button/button';
+import { Router } from '@angular/router';
 
 type WelcomeMode = 'select-user' | 'create-user';
 
@@ -22,6 +23,7 @@ export class Welcome {
   private userSessionService = inject(UserSessionService);
   private themeService = inject(ThemeService);
   private destroyRef = inject(DestroyRef);
+  private router = inject(Router);
 
   protected readonly mode = signal<WelcomeMode>('create-user');
   protected readonly isCreatingUser = signal(false);
@@ -68,7 +70,7 @@ export class Welcome {
         finalize(() => this.isCreatingUser.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe();
+      .subscribe({ next: () => this.navigateToPersonalization() });
   }
 
   protected selectUser(userId: EntityId): void {
@@ -92,6 +94,10 @@ export class Welcome {
         finalize(() => this.loadingUserId.set(null)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe();
+      .subscribe({ next: () => this.navigateToPersonalization() });
+  }
+
+  private navigateToPersonalization(): void {
+    this.router.navigate(['/personalization']);
   }
 }

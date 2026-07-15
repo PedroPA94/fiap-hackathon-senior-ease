@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { currentUserGuard } from './core/guards/current-user-guard';
 
 export const routes: Routes = [
   {
@@ -9,5 +10,13 @@ export const routes: Routes = [
   {
     path: 'welcome',
     loadComponent: () => import('./presentation/features/welcome/welcome').then((m) => m.Welcome),
+  },
+  {
+    path: 'personalization',
+    canActivate: [currentUserGuard],
+    loadComponent: () =>
+      import('./presentation/features/personalization/personalization').then(
+        (m) => m.Personalization,
+      ),
   },
 ];
