@@ -10,13 +10,31 @@ describe('SegmentedControl', () => {
     await TestBed.configureTestingModule({
       imports: [SegmentedControl],
     }).compileComponents();
-
-    fixture = TestBed.createComponent(SegmentedControl);
-    component = fixture.componentInstance;
-    await fixture.whenStable();
   });
 
   it('should create', () => {
+    createComponent();
+
     expect(component).toBeTruthy();
   });
+
+  it('should render the label and options', () => {
+    createComponent();
+
+    expect(fixture.nativeElement.textContent).toContain('Tamanho da fonte');
+    expect(fixture.nativeElement.textContent).toContain('Normal');
+    expect(fixture.nativeElement.textContent).toContain('Grande');
+  });
+
+  function createComponent(): void {
+    fixture = TestBed.createComponent(SegmentedControl);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('controlId', 'font-size');
+    fixture.componentRef.setInput('label', 'Tamanho da fonte');
+    fixture.componentRef.setInput('options', [
+      { value: 'normal', label: 'Normal' },
+      { value: 'large', label: 'Grande' },
+    ]);
+    fixture.detectChanges();
+  }
 });

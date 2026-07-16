@@ -1,0 +1,11 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.accessibility-preferences-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-spacing-large);
+  width: 100%;
+}

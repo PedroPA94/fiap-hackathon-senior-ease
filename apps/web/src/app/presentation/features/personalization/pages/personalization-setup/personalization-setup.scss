@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--se-color-background-page);
+}
+
+.personalization-setup {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-spacing-large);
+
+  padding: var(--se-spacing-xlarge) var(--se-spacing-medium);
+}
+
+.personalization-setup__introduction h1 {
+  font-size: var(--se-font-size-heading);
+  line-height: var(--se-line-height-heading);
+  font-weight: var(--se-font-weight-bold);
+}
+
+.personalization-setup__introduction p {
+  color: var(--se-color-text-muted);
+  font-size: var(--se-font-size-body-large);
+  line-height: var(--se-line-height-body-large);
+  font-weight: var(--se-font-weight-regular);
+}
+
+.personalization-setup__card {
+  display: none;
+}
+
+.personalization-setup__mobile {
+  margin-bottom: var(--se-spacing-xlarge);
+}
+
+.personalization-setup__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-spacing-xlarge);
+}
+
+@media (min-width: 576px) {
+  .personalization-setup {
+    gap: var(--se-spacing-xlarge);
+  }
+
+  .personalization-setup__introduction {
+    max-width: 70%;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--se-spacing-small);
+  }
+
+  .personalization-setup__card {
+    display: block;
+    max-width: 420px;
+    margin-inline: auto;
+  }
+
+  .personalization-setup__mobile {
+    display: none;
+  }
+}
+
+@media (min-width: 992px) {
+  .personalization-setup {
+    margin-top: 70px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .personalization-setup__introduction {
+    align-self: flex-start;
+    max-width: 50%;
+    padding-left: 50px;
+  }
+
+  .personalization-setup__introduction h1 {
+    font-size: var(--se-font-size-display);
+    line-height: var(--se-line-height-display);
+  }
+
+  .personalization-setup__introduction p {
+    font-size: var(--se-font-size-title);
+    line-height: var(--se-line-height-title);
+  }
+}

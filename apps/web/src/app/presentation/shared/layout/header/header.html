@@ -5,7 +5,7 @@
         class="header__menu-button"
         type="button"
         aria-label="Abrir menu"
-        (click)="requestMenu()"
+        (click)="openMenu()"
       >
         <span aria-hidden="true">☰</span>
       </button>
@@ -15,10 +15,10 @@
 
     <div class="header__user">
       <span class="header__user-name">
-        {{ userName() }}
+        {{ userName$ | async }}
       </span>
 
-      <button class="header__switch-user" type="button" (click)="requestUserSwitch()">
+      <button class="header__switch-user" type="button" (click)="switchUser()">
         Trocar usuário
       </button>
     </div>

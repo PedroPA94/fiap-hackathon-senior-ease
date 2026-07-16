@@ -12,11 +12,11 @@ export const routes: Routes = [
     loadComponent: () => import('./presentation/features/welcome/welcome').then((m) => m.Welcome),
   },
   {
-    path: 'personalization',
+    path: 'personalization/setup',
     canActivate: [currentUserGuard],
     loadComponent: () =>
-      import('./presentation/features/personalization/personalization').then(
-        (m) => m.Personalization,
+      import('./presentation/features/personalization/pages/personalization-setup/personalization-setup').then(
+        (m) => m.PersonalizationSetup,
       ),
   },
 ];

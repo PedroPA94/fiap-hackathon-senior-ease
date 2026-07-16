@@ -98,6 +98,6 @@ export class Welcome {
   }
 
   private navigateToPersonalization(): void {
-    this.router.navigate(['/personalization']);
+    this.router.navigate(['/personalization/setup']);
   }
 }

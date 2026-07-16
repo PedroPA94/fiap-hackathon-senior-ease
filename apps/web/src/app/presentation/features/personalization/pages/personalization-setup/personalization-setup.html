@@ -1,0 +1,26 @@
+<se-header />
+
+<main class="personalization-setup">
+  <section class="personalization-setup__introduction">
+    <h1>Vamos deixar a tela mais confortável para você</h1>
+
+    <p>Você pode mudar essas opções depois, a qualquer momento.</p>
+  </section>
+
+  <se-card class="personalization-setup__card">
+    <h2>Configuração inicial</h2>
+    <ng-container *ngTemplateOutlet="formTemplate"></ng-container>
+  </se-card>
+
+  <div class="personalization-setup__mobile">
+    <ng-container *ngTemplateOutlet="formTemplate"></ng-container>
+  </div>
+</main>
+
+<ng-template #formTemplate>
+  <form class="personalization-setup__form" [formGroup]="form">
+    <se-accessibility-preferences-form [form]="form" />
+
+    <se-button type="submit"> Começar </se-button>
+  </form>
+</ng-template>

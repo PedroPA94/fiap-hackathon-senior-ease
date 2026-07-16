@@ -115,7 +115,7 @@ describe('Welcome', () => {
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledWith('Ana Maria');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
-    expect(router.navigate).toHaveBeenCalledWith(['/personalization']);
+    expect(router.navigate).toHaveBeenCalledWith(['/personalization/setup']);
   });
 
   it('should ignore duplicate create submissions while a user is being created', () => {
@@ -157,7 +157,7 @@ describe('Welcome', () => {
 
     expect(userSessionService.selectLocalUser).toHaveBeenCalledWith('user-2');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
-    expect(router.navigate).toHaveBeenCalledWith(['/personalization']);
+    expect(router.navigate).toHaveBeenCalledWith(['/personalization/setup']);
   });
 
   it('should refresh the local user list when selecting a user fails', () => {

@@ -1,0 +1,29 @@
+<div class="accessibility-preferences-form">
+  <se-segmented-control
+    controlId="font-size"
+    label="Tamanho da fonte"
+    [options]="fontSizeOptions"
+    [formControl]="form().controls.fontSize"
+  />
+
+  <se-segmented-control
+    controlId="spacing"
+    label="Espaçamento"
+    [options]="spacingOptions"
+    [formControl]="form().controls.spacing"
+  />
+
+  <se-segmented-control
+    controlId="contrast"
+    label="Contraste"
+    [options]="contrastOptions"
+    [formControl]="form().controls.contrast"
+  />
+
+  <se-segmented-control
+    controlId="interface-mode"
+    label="Modo de exibição"
+    [options]="interfaceModeOptions"
+    [formControl]="form().controls.interfaceMode"
+  />
+</div>
