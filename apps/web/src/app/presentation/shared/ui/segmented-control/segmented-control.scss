@@ -1,0 +1,114 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.segmented-control {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.segmented-control__label {
+  margin: 0 0 var(--se-spacing-small);
+  padding: 0;
+
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body-large);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body-large);
+}
+
+.segmented-control__options {
+  display: flex;
+  align-items: stretch;
+  gap: var(--se-spacing-small);
+}
+
+.segmented-control__option {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.segmented-control__input {
+  position: absolute;
+
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+
+  border: 0;
+  white-space: nowrap;
+}
+
+.segmented-control__pill {
+  width: 100%;
+  min-height: 44px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: var(--se-spacing-regular) var(--se-spacing-medium);
+
+  color: var(--se-color-text-default);
+  background: var(--se-color-background-surface);
+
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+
+  border-radius: var(--se-radius-pill);
+
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-helper);
+  font-weight: var(--se-font-weight-regular);
+  line-height: var(--se-line-height-helper);
+  text-align: center;
+  white-space: nowrap;
+
+  cursor: pointer;
+  user-select: none;
+}
+
+.segmented-control__input:checked + .segmented-control__pill {
+  color: var(--se-color-text-inverse);
+  background: var(--se-color-primary);
+  border-color: var(--se-color-primary);
+  font-weight: var(--se-font-weight-bold);
+}
+
+.segmented-control__input:focus-visible + .segmented-control__pill {
+  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .segmented-control__input:not(:checked) + .segmented-control__pill:hover {
+    background: var(--se-color-primary-soft);
+    border-color: var(--se-color-primary);
+  }
+}
+
+@media (min-width: 576px) {
+  .segmented-control__options {
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .segmented-control__option {
+    flex: 0 0 auto;
+  }
+
+  .segmented-control__pill {
+    width: auto;
+    padding-inline: var(--se-spacing-xlarge);
+  }
+}
