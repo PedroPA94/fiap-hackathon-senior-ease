@@ -31,8 +31,14 @@
 
 .personalization-setup__card {
   display: block;
-  max-width: 420px;
+  width: 100%;
   margin-inline: auto;
+}
+
+.personalization-setup__card h2 {
+  font-size: var(--se-font-size-heading);
+  line-height: var(--se-line-height-heading);
+  font-weight: var(--se-font-weight-bold);
 }
 
 .personalization-setup__form {
@@ -53,6 +59,11 @@
     display: flex;
     flex-direction: column;
     gap: var(--se-spacing-small);
+  }
+
+  .personalization-setup__card {
+    width: fit-content;
+    max-width: 100%;
   }
 }
 

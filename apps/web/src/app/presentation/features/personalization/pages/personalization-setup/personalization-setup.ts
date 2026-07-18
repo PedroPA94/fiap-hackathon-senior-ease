@@ -119,7 +119,6 @@ export class PersonalizationSetup {
         })),
         tap((preferences) => {
           this.themeService.applyTheme(createAccessibilityTheme(preferences));
-          console.log('Preferences: ', preferences);
         }),
         takeUntilDestroyed(this.destroyRef),
       )

@@ -24,13 +24,14 @@
 .segmented-control__options {
   display: flex;
   align-items: stretch;
+  flex-wrap: wrap;
   gap: var(--se-spacing-small);
 }
 
 .segmented-control__option {
   position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 0 auto;
+  min-width: max-content;
 }
 
 .segmented-control__input {
@@ -100,7 +101,6 @@
 @media (min-width: 576px) {
   .segmented-control__options {
     align-items: center;
-    flex-wrap: wrap;
   }
 
   .segmented-control__option {
