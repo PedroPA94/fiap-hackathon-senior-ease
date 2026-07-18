@@ -6,7 +6,11 @@ import { InlineAlert, type InlineAlertVariant } from './inline-alert';
 @Component({
   imports: [InlineAlert],
   template: `
-    <se-inline-alert [variant]="variant">
+    <se-inline-alert
+      [variant]="variant"
+      [actionMessage]="actionMessage"
+      (actionTriggered)="onActionTriggered()"
+    >
       <p class="projected-content">{{ message }}</p>
     </se-inline-alert>
   `,
@@ -14,6 +18,8 @@ import { InlineAlert, type InlineAlertVariant } from './inline-alert';
 class InlineAlertHost {
   variant: InlineAlertVariant = 'info';
   message = 'Nao foi possivel carregar suas preferencias.';
+  actionMessage: string | null = null;
+  readonly onActionTriggered = vi.fn();
 }
 
 describe('InlineAlert', () => {
@@ -101,7 +107,30 @@ describe('InlineAlert', () => {
     expect(fixture.nativeElement.querySelector('button')).toBeNull();
   });
 
+  it('should render the action message as a button styled like a link', () => {
+    fixture.componentInstance.actionMessage = 'Tentar novamente';
+
+    fixture.detectChanges();
+
+    const actionButton = getActionButton();
+    expect(actionButton?.type).toBe('button');
+    expect(actionButton?.textContent).toContain('Tentar novamente');
+  });
+
+  it('should emit actionTriggered when the action button is clicked', () => {
+    fixture.componentInstance.actionMessage = 'Tentar novamente';
+    fixture.detectChanges();
+
+    getActionButton()?.click();
+
+    expect(fixture.componentInstance.onActionTriggered).toHaveBeenCalledOnce();
+  });
+
   function getAlertElement(): HTMLElement {
     return fixture.nativeElement.querySelector('.inline-alert')!;
+  }
+
+  function getActionButton(): HTMLButtonElement | null {
+    return fixture.nativeElement.querySelector('.inline-alert__action-message');
   }
 });

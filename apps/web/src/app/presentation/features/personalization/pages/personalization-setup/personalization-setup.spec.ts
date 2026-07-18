@@ -1,13 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import type { UserProfile } from '@senior-ease/core';
+import { defaultAccessibilityPreferences, type UserProfile } from '@senior-ease/core';
 import { Observable, of } from 'rxjs';
 import type { Mock } from 'vitest';
 
+import { AccessibilityPreferencesService } from '../../../../../application/services/accessibility-preferences.service';
 import { UserSessionService } from '../../../../../application/services/user-session.service';
 import { PersonalizationSetup } from './personalization-setup';
 
 describe('PersonalizationSetup', () => {
+  const accessibilityPreferencesServiceMock = {
+    getPreferences: vi
+      .fn<AccessibilityPreferencesService['getPreferences']>()
+      .mockReturnValue(of(defaultAccessibilityPreferences)),
+  };
+
   let component: PersonalizationSetup;
   let fixture: ComponentFixture<PersonalizationSetup>;
   let router: RouterMock;
@@ -22,6 +29,10 @@ describe('PersonalizationSetup', () => {
       providers: [
         { provide: Router, useValue: router },
         { provide: UserSessionService, useValue: userSessionService },
+        {
+          provide: AccessibilityPreferencesService,
+          useValue: accessibilityPreferencesServiceMock,
+        },
       ],
     }).compileComponents();
 

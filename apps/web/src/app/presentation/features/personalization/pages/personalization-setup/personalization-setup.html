@@ -1,5 +1,21 @@
 <se-header />
 
+@if (loadErrorMessage()) {
+  <se-inline-alert
+    variant="error"
+    actionMessage="Tentar novamente"
+    (actionTriggered)="loadPreferences()"
+  >
+    {{ loadErrorMessage() }}
+  </se-inline-alert>
+}
+
+@if (saveErrorMessage()) {
+  <se-inline-alert variant="error" actionMessage="Tentar novamente" (actionTriggered)="submit()">
+    {{ saveErrorMessage() }}
+  </se-inline-alert>
+}
+
 <main class="personalization-setup">
   <section class="personalization-setup__introduction">
     <h1>Vamos deixar a tela mais confortável para você</h1>

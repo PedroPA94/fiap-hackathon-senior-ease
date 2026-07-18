@@ -9,5 +9,10 @@
 >
   <div class="inline-alert__content">
     <ng-content />
+    @if (actionMessage()) {
+      <button class="inline-alert__action-message" type="button" (click)="actionTriggered.emit()">
+        {{ actionMessage() }}
+      </button>
+    }
   </div>
 </div>

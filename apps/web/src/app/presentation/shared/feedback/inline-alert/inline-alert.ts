@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 export type InlineAlertVariant = 'error' | 'success' | 'info';
 
@@ -10,4 +10,6 @@ export type InlineAlertVariant = 'error' | 'success' | 'info';
 })
 export class InlineAlert {
   readonly variant = input<InlineAlertVariant>('info');
+  readonly actionMessage = input<string | null>(null);
+  readonly actionTriggered = output<void>();
 }
