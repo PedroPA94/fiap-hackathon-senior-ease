@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.inline-alert {
+  width: 100%;
+  padding: var(--se-spacing-medium, 16px);
+
+  color: var(--se-color-text-default, #0f1a24);
+  background-color: var(--se-color-background-surface, #ffffff);
+  overflow-wrap: anywhere;
+
+  font-family: var(--se-font-family, Inter, Arial, sans-serif);
+  font-size: var(--se-font-size-body, 16px);
+  line-height: var(--se-line-height-body, 19px);
+
+  border: var(--se-border-width-strong, 2px) var(--se-border-style-solid, solid)
+    var(--se-color-border-strong, #8293a3);
+  border-radius: var(--se-radius-medium, 14px);
+}
+
+.inline-alert--error {
+  color: var(--se-color-danger-strong, #8f0f0f);
+  background-color: var(--se-color-danger-soft, #fdecec);
+  border-color: var(--se-color-danger, #bf1414);
+}
+
+.inline-alert--success {
+  border-color: var(--se-color-success, #287a3d);
+}
+
+.inline-alert--info {
+  background-color: var(--se-color-primary-soft, #e0f0f2);
+  border-color: var(--se-color-primary, #0d5261);
+}
+
+.inline-alert__content {
+  min-width: 0;
+}
+
+.inline-alert__content > :first-child {
+  margin-top: 0;
+}
+
+.inline-alert__content > :last-child {
+  margin-bottom: 0;
+}

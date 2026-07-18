@@ -1,0 +1,89 @@
+:host {
+  pointer-events: none;
+}
+
+.toast {
+  position: fixed;
+  z-index: 1000;
+  top: var(--se-spacing-medium, 16px);
+  right: var(--se-spacing-medium, 16px);
+  left: var(--se-spacing-medium, 16px);
+
+  display: flex;
+  align-items: center;
+  gap: var(--se-spacing-small, 8px);
+
+  width: auto;
+  max-width: 640px;
+  min-height: 52px;
+  padding: var(--se-spacing-small, 8px) var(--se-spacing-small, 8px) var(--se-spacing-small, 8px)
+    var(--se-spacing-medium, 16px);
+  margin-inline: auto;
+
+  color: var(--se-color-text-inverse, #ffffff);
+  overflow-wrap: anywhere;
+
+  font-family: var(--se-font-family, Inter, Arial, sans-serif);
+  font-size: var(--se-font-size-body, 16px);
+  font-weight: var(--se-font-weight-bold, 700);
+  line-height: var(--se-line-height-body, 19px);
+
+  border: var(--se-border-width-strong, 2px) var(--se-border-style-solid, solid) transparent;
+  border-radius: var(--se-radius-medium, 14px);
+
+  pointer-events: auto;
+}
+
+.toast--success {
+  background-color: var(--se-color-success, #287a3d);
+  border-color: var(--se-color-success, #287a3d);
+}
+
+.toast--error {
+  background-color: var(--se-color-danger-strong, #8f0f0f);
+  border-color: var(--se-color-danger, #bf1414);
+}
+
+.toast--info {
+  background-color: var(--se-color-primary, #0d5261);
+  border-color: var(--se-color-primary, #0d5261);
+}
+
+.toast__message {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.toast__close {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+
+  color: inherit;
+  background: transparent;
+
+  font-size: 28px;
+  line-height: 1;
+
+  border: var(--se-border-width-regular, 1px) var(--se-border-style-solid, solid) transparent;
+  border-radius: var(--se-radius-medium, 14px);
+
+  cursor: pointer;
+}
+
+.toast__close:focus-visible {
+  outline: var(--se-border-width-strong, 2px) solid var(--se-color-focus, #2563eb);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .toast {
+    top: var(--se-spacing-large, 24px);
+  }
+}

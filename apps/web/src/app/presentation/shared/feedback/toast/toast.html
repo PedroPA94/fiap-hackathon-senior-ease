@@ -1,0 +1,17 @@
+@if (toast(); as currentToast) {
+  <div
+    class="toast"
+    [class.toast--success]="currentToast.variant === 'success'"
+    [class.toast--error]="currentToast.variant === 'error'"
+    [class.toast--info]="currentToast.variant === 'info'"
+    [attr.role]="currentToast.variant === 'error' ? 'alert' : 'status'"
+    [attr.aria-live]="currentToast.variant === 'error' ? 'assertive' : 'polite'"
+    aria-atomic="true"
+  >
+    <p class="toast__message">{{ currentToast.message }}</p>
+
+    <button class="toast__close" type="button" aria-label="Fechar mensagem" (click)="dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+}

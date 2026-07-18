@@ -1,0 +1,13 @@
+<div
+  class="inline-alert"
+  [class.inline-alert--error]="variant() === 'error'"
+  [class.inline-alert--success]="variant() === 'success'"
+  [class.inline-alert--info]="variant() === 'info'"
+  [attr.role]="variant() === 'error' ? 'alert' : 'status'"
+  [attr.aria-live]="variant() === 'error' ? 'assertive' : 'polite'"
+  aria-atomic="true"
+>
+  <div class="inline-alert__content">
+    <ng-content />
+  </div>
+</div>
