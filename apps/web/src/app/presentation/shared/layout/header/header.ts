@@ -23,6 +23,7 @@ export class Header {
   private userSessionService = inject(UserSessionService);
   private router = inject(Router);
 
+  readonly showMenu = input(true);
   readonly menuOpen = input(false);
   readonly menuRequested = output<void>();
 

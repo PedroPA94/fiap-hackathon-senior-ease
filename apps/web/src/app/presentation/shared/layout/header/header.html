@@ -1,16 +1,18 @@
 <header class="header">
   <div class="header__content">
     <div class="header__brand">
-      <button
-        class="header__menu-button"
-        type="button"
-        aria-label="Abrir menu principal"
-        aria-controls="main-navigation-menu"
-        [attr.aria-expanded]="menuOpen()"
-        (click)="requestMenu()"
-      >
-        <span aria-hidden="true">☰</span>
-      </button>
+      @if (showMenu()) {
+        <button
+          class="header__menu-button"
+          type="button"
+          aria-label="Abrir menu principal"
+          aria-controls="main-navigation-menu"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="requestMenu()"
+        >
+          <span aria-hidden="true">☰</span>
+        </button>
+      }
 
       <span class="header__logo"> SeniorEase </span>
     </div>

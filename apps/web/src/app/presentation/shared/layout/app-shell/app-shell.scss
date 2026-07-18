@@ -1,0 +1,44 @@
+:host {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: 100dvh;
+
+  background: var(--se-color-background-page);
+}
+
+.app-shell {
+  display: flex;
+  flex: 1 1 auto;
+
+  width: 100%;
+  min-height: 0;
+}
+
+.app-shell__content {
+  flex: 1 1 auto;
+
+  width: 100%;
+  min-width: 0;
+
+  padding: var(--se-spacing-xlarge) var(--se-spacing-medium);
+
+  background: var(--se-color-background-page);
+}
+
+.app-shell__content:focus {
+  outline: none;
+}
+
+@media (min-width: 576px) {
+  .app-shell__content {
+    padding-inline: var(--se-spacing-xlarge);
+  }
+}
+
+@media (min-width: 992px) {
+  .app-shell__content {
+    overflow-x: hidden;
+  }
+}

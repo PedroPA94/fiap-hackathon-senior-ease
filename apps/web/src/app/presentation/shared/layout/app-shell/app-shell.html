@@ -1,0 +1,9 @@
+<se-header [menuOpen]="isMenuOpen()" (menuRequested)="toggleMenu()" />
+
+<div class="app-shell">
+  <se-navigation-menu [open]="isMenuOpen()" (closed)="closeMenu()" />
+
+  <main id="main-content" class="app-shell__content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
