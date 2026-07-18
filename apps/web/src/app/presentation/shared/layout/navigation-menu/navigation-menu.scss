@@ -1,0 +1,128 @@
+:host {
+  display: contents;
+}
+
+.navigation-menu__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+
+  width: 100%;
+  height: 100%;
+
+  padding: 0;
+  border: 0;
+
+  background: rgb(15 26 36 / 45%);
+  cursor: pointer;
+}
+
+.navigation-menu {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 100;
+
+  width: min(320px, calc(100vw - var(--se-spacing-xlarge)));
+  min-height: 100dvh;
+
+  padding: var(--se-spacing-xlarge) var(--se-spacing-large);
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  background: var(--se-color-background-surface);
+
+  border-inline-end: var(--se-border-width-regular) var(--se-border-style-solid)
+    var(--se-color-border-default);
+
+  visibility: hidden;
+  pointer-events: none;
+
+  transform: translateX(-100%);
+  transition:
+    transform 180ms ease,
+    visibility 180ms ease;
+}
+
+.navigation-menu--open {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.navigation-menu__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--se-spacing-medium);
+}
+
+.navigation-menu__item {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  min-height: 52px;
+
+  padding: var(--se-spacing-medium);
+
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: var(--se-line-height-body);
+  font-weight: var(--se-font-weight-regular);
+  text-decoration: none;
+
+  border-radius: var(--se-radius-medium);
+
+  cursor: pointer;
+}
+
+.navigation-menu__item--active {
+  color: var(--se-color-primary);
+  font-weight: var(--se-font-weight-bold);
+  background: var(--se-color-primary-soft);
+}
+
+.navigation-menu__item:focus-visible {
+  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .navigation-menu__item:hover:not(.navigation-menu__item--active) {
+    background: var(--se-color-background-surface-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navigation-menu {
+    transition: none;
+  }
+}
+
+@media (min-width: 762px) {
+  .navigation-menu__backdrop {
+    display: none;
+  }
+
+  .navigation-menu {
+    position: static;
+    z-index: auto;
+
+    flex: 0 0 256px;
+
+    width: 256px;
+    min-height: 100%;
+    height: 100%;
+
+    padding: var(--se-spacing-xlarge);
+
+    visibility: visible;
+    pointer-events: auto;
+
+    transform: none;
+    transition: none;
+  }
+}

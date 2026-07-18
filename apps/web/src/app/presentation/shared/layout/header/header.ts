@@ -23,6 +23,9 @@ export class Header {
   private userSessionService = inject(UserSessionService);
   private router = inject(Router);
 
+  readonly menuOpen = input(false);
+  readonly menuRequested = output<void>();
+
   readonly userName$ = this.userSessionService.getCurrentUserProfile().pipe(
     map((userProfile) => userProfile?.name ?? 'Usuário'),
     catchError(() => of('Usuário')),
@@ -33,5 +36,7 @@ export class Header {
     void this.router.navigateByUrl('/welcome');
   }
 
-  openMenu(): void {}
+  requestMenu(): void {
+    this.menuRequested.emit();
+  }
 }

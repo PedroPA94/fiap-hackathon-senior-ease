@@ -1,0 +1,29 @@
+@if (open()) {
+  <button
+    class="navigation-menu__backdrop"
+    type="button"
+    aria-label="Fechar menu principal"
+    tabindex="-1"
+    (click)="close()"
+  ></button>
+}
+
+<aside id="main-navigation-menu" class="navigation-menu" [class.navigation-menu--open]="open()">
+  <nav class="navigation-menu__nav" aria-label="Navegação principal">
+    @for (item of items(); track item.route) {
+      <a
+        class="navigation-menu__item"
+        [routerLink]="item.route"
+        routerLinkActive="navigation-menu__item--active"
+        [routerLinkActiveOptions]="{
+          exact: item.exact ?? false,
+        }"
+        #activeLink="routerLinkActive"
+        [attr.aria-current]="activeLink.isActive ? 'page' : null"
+        (click)="handleNavigation()"
+      >
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+</aside>

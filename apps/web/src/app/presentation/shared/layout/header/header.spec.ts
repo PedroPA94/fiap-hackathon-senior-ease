@@ -39,9 +39,7 @@ describe('Header', () => {
   });
 
   it('should show the current user name from the session', () => {
-    userSessionService.getCurrentUserProfile.mockReturnValue(
-      of(createUserProfile('Maria Helena')),
-    );
+    userSessionService.getCurrentUserProfile.mockReturnValue(of(createUserProfile('Maria Helena')));
 
     createComponent();
 
@@ -69,7 +67,7 @@ describe('Header', () => {
   it('should render the menu button with an accessible label', () => {
     createComponent();
 
-    expect(getMenuButton().getAttribute('aria-label')).toBe('Abrir menu');
+    expect(getMenuButton().getAttribute('aria-label')).toBe('Abrir menu principal');
   });
 
   it('should clear the current user and navigate to welcome when switching users', () => {

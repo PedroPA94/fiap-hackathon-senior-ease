@@ -4,8 +4,10 @@
       <button
         class="header__menu-button"
         type="button"
-        aria-label="Abrir menu"
-        (click)="openMenu()"
+        aria-label="Abrir menu principal"
+        aria-controls="main-navigation-menu"
+        [attr.aria-expanded]="menuOpen()"
+        (click)="requestMenu()"
       >
         <span aria-hidden="true">☰</span>
       </button>

@@ -97,7 +97,7 @@
 
 .header__menu-button:focus-visible,
 .header__switch-user:focus-visible {
-  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+  outline: var(--se-border-width-strong) var(--se-border-style-solid) var(--se-color-focus);
   outline-offset: 2px;
 }
 
