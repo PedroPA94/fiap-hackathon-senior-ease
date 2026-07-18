@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-
 import { Header } from '../../../../shared/layout/header/header';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
@@ -19,6 +18,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
 import { catchError, EMPTY, filter, from, map, switchMap, tap } from 'rxjs';
 import { ThemeService } from '../../../../../application/services/theme.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'se-personalization-setup',
@@ -31,6 +31,7 @@ export class PersonalizationSetup {
   private accessibilityPreferencesService = inject(AccessibilityPreferencesService);
   private themeService = inject(ThemeService);
   private toastService = inject(ToastService);
+  private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
   protected readonly loadErrorMessage = signal<string | null>(null);
@@ -100,6 +101,7 @@ export class PersonalizationSetup {
 
           this.toastService.success('Preferências salvas com sucesso.');
         }),
+        switchMap(() => from(this.router.navigateByUrl('/home'))),
         catchError(() => {
           this.saveErrorMessage.set('Não foi possível salvar suas preferências.');
           return EMPTY;

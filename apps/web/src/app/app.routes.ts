@@ -12,6 +12,10 @@ export const routes: Routes = [
     loadComponent: () => import('./presentation/features/welcome/welcome').then((m) => m.Welcome),
   },
   {
+    path: 'home',
+    loadComponent: () => import('./presentation/features/home/home').then((m) => m.Home),
+  },
+  {
     path: 'personalization/setup',
     canActivate: [currentUserGuard],
     loadComponent: () =>
