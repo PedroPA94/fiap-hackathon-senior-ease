@@ -30,11 +30,9 @@
 }
 
 .personalization-setup__card {
-  display: none;
-}
-
-.personalization-setup__mobile {
-  margin-bottom: var(--se-spacing-xlarge);
+  display: block;
+  max-width: 420px;
+  margin-inline: auto;
 }
 
 .personalization-setup__form {
@@ -55,16 +53,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--se-spacing-small);
-  }
-
-  .personalization-setup__card {
-    display: block;
-    max-width: 420px;
-    margin-inline: auto;
-  }
-
-  .personalization-setup__mobile {
-    display: none;
   }
 }
 

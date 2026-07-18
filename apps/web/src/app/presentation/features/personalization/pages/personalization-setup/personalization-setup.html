@@ -9,18 +9,11 @@
 
   <se-card class="personalization-setup__card">
     <h2>Configuração inicial</h2>
-    <ng-container *ngTemplateOutlet="formTemplate"></ng-container>
+
+    <form class="personalization-setup__form" [formGroup]="form" (ngSubmit)="submit()">
+      <se-accessibility-preferences-form [form]="form" />
+
+      <se-button type="submit"> Começar </se-button>
+    </form>
   </se-card>
-
-  <div class="personalization-setup__mobile">
-    <ng-container *ngTemplateOutlet="formTemplate"></ng-container>
-  </div>
 </main>
-
-<ng-template #formTemplate>
-  <form class="personalization-setup__form" [formGroup]="form">
-    <se-accessibility-preferences-form [form]="form" />
-
-    <se-button type="submit"> Começar </se-button>
-  </form>
-</ng-template>
