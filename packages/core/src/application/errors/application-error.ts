@@ -1,6 +1,7 @@
 export type ApplicationErrorCode =
   | "ACTIVITY_NOT_FOUND"
   | "ACTIVITY_RECENT_LIMIT_INVALID"
+  | "ACTIVITY_ALREADY_EXISTS"
   | "USER_PROFILE_NOT_FOUND";
 
 export class ApplicationError extends Error {
