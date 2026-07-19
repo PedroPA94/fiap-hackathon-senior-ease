@@ -44,6 +44,38 @@ describe('LocalStorageUserSessionStore', () => {
     expect(store.getCurrentUserId()).toBeNull();
   });
 
+  it('should return false when onboarding completion is not stored', () => {
+    expect(store.hasCompletedOnboarding(currentUserId)).toBe(false);
+  });
+
+  it('should persist onboarding completion for the informed user only', () => {
+    store.markOnboardingCompleted(currentUserId);
+
+    expect(store.hasCompletedOnboarding(currentUserId)).toBe(true);
+    expect(store.hasCompletedOnboarding(olderLocalUser.id)).toBe(false);
+    expect(localStorage.getItem(storageKeys.onboardingCompleted(currentUserId))).toBe('true');
+  });
+
+  it('should treat malformed onboarding completion as pending without throwing', () => {
+    const onboardingKey = storageKeys.onboardingCompleted(currentUserId);
+    localStorage.setItem(onboardingKey, '{invalid-json');
+
+    expect(() => store.hasCompletedOnboarding(currentUserId)).not.toThrow();
+    expect(store.hasCompletedOnboarding(currentUserId)).toBe(false);
+    expect(localStorage.getItem(onboardingKey)).toBeNull();
+  });
+
+  it('should not change the current user or user index when completing onboarding', () => {
+    localStorage.setItem(storageKeys.currentUserId, olderLocalUser.id);
+    localStorage.setItem(storageKeys.userIndex, JSON.stringify([localUser, olderLocalUser]));
+    const storedUserIndex = localStorage.getItem(storageKeys.userIndex);
+
+    store.markOnboardingCompleted(currentUserId);
+
+    expect(localStorage.getItem(storageKeys.currentUserId)).toBe(olderLocalUser.id);
+    expect(localStorage.getItem(storageKeys.userIndex)).toBe(storedUserIndex);
+  });
+
   it('should return an empty list when there are no local users', () => {
     expect(store.listLocalUsers()).toEqual([]);
   });

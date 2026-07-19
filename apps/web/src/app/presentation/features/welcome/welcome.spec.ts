@@ -115,7 +115,11 @@ describe('Welcome', () => {
 
     expect(userSessionService.createLocalUser).toHaveBeenCalledWith('Ana Maria');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(userSessionService.getInitialRouteForUser).toHaveBeenCalledOnce();
     expect(router.navigate).toHaveBeenCalledWith(['/personalization/setup']);
+    expect(themeService.applyCurrentUserTheme.mock.invocationCallOrder[0]).toBeLessThan(
+      userSessionService.getInitialRouteForUser.mock.invocationCallOrder[0],
+    );
   });
 
   it('should ignore duplicate create submissions while a user is being created', () => {
@@ -146,6 +150,7 @@ describe('Welcome', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'Não foi possível criar o perfil. Tente novamente.',
     );
+    expect(userSessionService.getInitialRouteForUser).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
@@ -157,7 +162,25 @@ describe('Welcome', () => {
 
     expect(userSessionService.selectLocalUser).toHaveBeenCalledWith('user-2');
     expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(userSessionService.getInitialRouteForUser).toHaveBeenCalledOnce();
     expect(router.navigate).toHaveBeenCalledWith(['/personalization/setup']);
+  });
+
+  it('should navigate a user with completed onboarding directly to home', () => {
+    userSessionService.listLocalUsers.mockReturnValue(localUsers);
+    userSessionService.getInitialRouteForUser.mockReturnValue('/home');
+    createComponent();
+
+    selectUser('user-2');
+
+    expect(userSessionService.selectLocalUser).toHaveBeenCalledWith('user-2');
+    expect(themeService.applyCurrentUserTheme).toHaveBeenCalledOnce();
+    expect(userSessionService.getInitialRouteForUser).toHaveBeenCalledOnce();
+    expect(router.navigate).toHaveBeenCalledOnce();
+    expect(router.navigate).toHaveBeenCalledWith(['/home']);
+    expect(themeService.applyCurrentUserTheme.mock.invocationCallOrder[0]).toBeLessThan(
+      userSessionService.getInitialRouteForUser.mock.invocationCallOrder[0],
+    );
   });
 
   it('should refresh the local user list when selecting a user fails', () => {
@@ -179,6 +202,7 @@ describe('Welcome', () => {
       'Não foi possível abrir este perfil. Selecione outro usuário.',
     );
     expect(themeService.applyCurrentUserTheme).not.toHaveBeenCalled();
+    expect(userSessionService.getInitialRouteForUser).not.toHaveBeenCalled();
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
@@ -221,6 +245,7 @@ describe('Welcome', () => {
       listLocalUsers: vi.fn(() => []),
       createLocalUser: vi.fn((name: string) => of(createUserProfile('user-3', name))),
       selectLocalUser: vi.fn((userId: EntityId) => of(createUserProfile(userId, 'Selected User'))),
+      getInitialRouteForUser: vi.fn(() => '/personalization/setup'),
     };
   }
 
@@ -250,6 +275,9 @@ type UserSessionServiceMock = {
   listLocalUsers: Mock<() => LocalUser[]>;
   createLocalUser: Mock<(name: string) => Observable<UserProfile>>;
   selectLocalUser: Mock<(userId: EntityId) => Observable<UserProfile>>;
+  getInitialRouteForUser: Mock<
+    (userId?: EntityId) => '/home' | '/personalization/setup'
+  >;
 };
 
 type ThemeServiceMock = {

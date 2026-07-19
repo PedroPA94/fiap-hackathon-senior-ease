@@ -19,6 +19,25 @@ export class LocalStorageUserSessionStore {
     localStorage.removeItem(storageKeys.currentUserId);
   }
 
+  hasCompletedOnboarding(userId: EntityId): boolean {
+    const key = storageKeys.onboardingCompleted(userId);
+    const storedValue = localStorage.getItem(key);
+
+    if (storedValue === 'true') {
+      return true;
+    }
+
+    if (storedValue !== null) {
+      localStorage.removeItem(key);
+    }
+
+    return false;
+  }
+
+  markOnboardingCompleted(userId: EntityId): void {
+    localStorage.setItem(storageKeys.onboardingCompleted(userId), 'true');
+  }
+
   listLocalUsers(): LocalUser[] {
     const rawValue = localStorage.getItem(storageKeys.userIndex);
 

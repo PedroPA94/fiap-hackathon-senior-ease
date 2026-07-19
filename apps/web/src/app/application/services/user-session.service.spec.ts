@@ -12,6 +12,7 @@ import {
 import { USER_PROFILE_REPOSITORY } from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { LocalStorageUserSessionStore } from '../../infrastructure/stores/local-storage-user-session.store';
+import { UserSessionError } from '../errors/user-session.error';
 import { UserSessionService } from './user-session.service';
 
 describe('UserSessionService', () => {
@@ -42,6 +43,12 @@ describe('UserSessionService', () => {
     >;
     listLocalUsers: ReturnType<typeof vi.fn<LocalStorageUserSessionStore['listLocalUsers']>>;
     saveLocalUser: ReturnType<typeof vi.fn<LocalStorageUserSessionStore['saveLocalUser']>>;
+    hasCompletedOnboarding: ReturnType<
+      typeof vi.fn<LocalStorageUserSessionStore['hasCompletedOnboarding']>
+    >;
+    markOnboardingCompleted: ReturnType<
+      typeof vi.fn<LocalStorageUserSessionStore['markOnboardingCompleted']>
+    >;
   };
 
   beforeEach(() => {
@@ -61,6 +68,10 @@ describe('UserSessionService', () => {
       clearCurrentUserId: vi.fn<LocalStorageUserSessionStore['clearCurrentUserId']>(),
       listLocalUsers: vi.fn<LocalStorageUserSessionStore['listLocalUsers']>().mockReturnValue([]),
       saveLocalUser: vi.fn<LocalStorageUserSessionStore['saveLocalUser']>(),
+      hasCompletedOnboarding:
+        vi.fn<LocalStorageUserSessionStore['hasCompletedOnboarding']>(),
+      markOnboardingCompleted:
+        vi.fn<LocalStorageUserSessionStore['markOnboardingCompleted']>(),
     };
 
     TestBed.configureTestingModule({
@@ -80,6 +91,67 @@ describe('UserSessionService', () => {
     userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
 
     expect(service.getCurrentUserId()).toBe(profile.id);
+  });
+
+  it('should check onboarding for an explicitly informed user', () => {
+    userSessionStoreMock.hasCompletedOnboarding.mockReturnValue(true);
+
+    expect(service.hasCompletedOnboarding('user-2')).toBe(true);
+    expect(userSessionStoreMock.hasCompletedOnboarding).toHaveBeenCalledWith('user-2');
+    expect(userSessionStoreMock.getCurrentUserId).not.toHaveBeenCalled();
+  });
+
+  it('should check onboarding for the current user when no user is informed', () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
+
+    service.hasCompletedOnboarding();
+
+    expect(userSessionStoreMock.hasCompletedOnboarding).toHaveBeenCalledWith(profile.id);
+  });
+
+  it('should return false for onboarding when there is no current user', () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue(null);
+
+    expect(service.hasCompletedOnboarding()).toBe(false);
+    expect(userSessionStoreMock.hasCompletedOnboarding).not.toHaveBeenCalled();
+  });
+
+  it('should mark onboarding completion for the current user', () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
+
+    service.markOnboardingCompleted();
+
+    expect(userSessionStoreMock.markOnboardingCompleted).toHaveBeenCalledWith(profile.id);
+  });
+
+  it('should require a current user to mark onboarding completion', () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue(null);
+    let thrownError: unknown;
+
+    try {
+      service.markOnboardingCompleted();
+    } catch (error: unknown) {
+      thrownError = error;
+    }
+
+    expect(thrownError).toBeInstanceOf(UserSessionError);
+    expect(thrownError).toMatchObject({ code: 'CURRENT_USER_REQUIRED' });
+    expect(userSessionStoreMock.markOnboardingCompleted).not.toHaveBeenCalled();
+  });
+
+  it('should return the personalization setup route for pending onboarding', () => {
+    userSessionStoreMock.hasCompletedOnboarding.mockReturnValue(false);
+
+    expect(service.getInitialRouteForUser('user-1')).toBe('/personalization/setup');
+  });
+
+  it('should return home for a user with completed onboarding', () => {
+    userSessionStoreMock.hasCompletedOnboarding.mockImplementation(
+      (userId) => userId === 'user-2',
+    );
+
+    expect(service.getInitialRouteForUser('user-1')).toBe('/personalization/setup');
+    expect(service.getInitialRouteForUser('user-2')).toBe('/home');
   });
 
   it('should return null when there is no current user profile selected', async () => {

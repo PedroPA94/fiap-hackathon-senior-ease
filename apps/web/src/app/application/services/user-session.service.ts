@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@angular/core';
-import { catchError, defer, from, Observable, of, tap, throwError } from 'rxjs';
+import { catchError, defer, from, of, tap, throwError, type Observable } from 'rxjs';
 
 import {
   ApplicationError,
@@ -15,6 +15,7 @@ import {
 import { USER_PROFILE_REPOSITORY } from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { LocalStorageUserSessionStore } from '../../infrastructure/stores/local-storage-user-session.store';
+import { UserSessionError } from '../errors/user-session.error';
 import type { LocalUser } from '../models/local-user';
 
 @Injectable({ providedIn: 'root' })
@@ -34,6 +35,26 @@ export class UserSessionService {
 
   getCurrentUserId(): EntityId | null {
     return this.userSessionStore.getCurrentUserId();
+  }
+
+  hasCompletedOnboarding(userId?: EntityId): boolean {
+    const resolvedUserId = userId ?? this.getCurrentUserId();
+
+    return resolvedUserId ? this.userSessionStore.hasCompletedOnboarding(resolvedUserId) : false;
+  }
+
+  markOnboardingCompleted(): void {
+    const currentUserId = this.getCurrentUserId();
+
+    if (!currentUserId) {
+      throw new UserSessionError('CURRENT_USER_REQUIRED');
+    }
+
+    this.userSessionStore.markOnboardingCompleted(currentUserId);
+  }
+
+  getInitialRouteForUser(userId?: EntityId): '/home' | '/personalization/setup' {
+    return this.hasCompletedOnboarding(userId) ? '/home' : '/personalization/setup';
   }
 
   getCurrentUserProfile(): Observable<UserProfile | null> {

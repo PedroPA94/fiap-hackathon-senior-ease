@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import type { AccessibilityPreferences, UserProfile } from '@senior-ease/core';
+import type { AccessibilityPreferences } from '@senior-ease/core';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
-import { Observable, of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import type { Mock } from 'vitest';
 
 import { AccessibilityPreferencesService } from '../../../../../application/services/accessibility-preferences.service';
@@ -63,6 +63,7 @@ describe('PersonalizationSetup', () => {
       'Vamos deixar a tela mais confortável para você',
     );
     expect(fixture.nativeElement.textContent).toContain('Configuração inicial');
+    expect(userSessionService.markOnboardingCompleted).not.toHaveBeenCalled();
   });
 
   it('should load preferences on initialization and select their form options', () => {
@@ -93,6 +94,7 @@ describe('PersonalizationSetup', () => {
         fontSize: 'normal',
       }),
     );
+    expect(userSessionService.markOnboardingCompleted).not.toHaveBeenCalled();
   });
 
   it('should show a load error with a retry action when loading fails', () => {
@@ -144,8 +146,15 @@ describe('PersonalizationSetup', () => {
     expect(themeService.applyTheme).toHaveBeenCalledWith(
       createAccessibilityTheme(savedPreferences),
     );
+    expect(userSessionService.markOnboardingCompleted).toHaveBeenCalledOnce();
     expect(toastService.success).toHaveBeenCalledWith('Preferências salvas com sucesso.');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/home');
+    expect(themeService.applyTheme.mock.invocationCallOrder[0]).toBeLessThan(
+      userSessionService.markOnboardingCompleted.mock.invocationCallOrder[0],
+    );
+    expect(userSessionService.markOnboardingCompleted.mock.invocationCallOrder[0]).toBeLessThan(
+      router.navigateByUrl.mock.invocationCallOrder[0],
+    );
   });
 
   it('should preserve preferences not represented by form controls when saving', () => {
@@ -161,6 +170,22 @@ describe('PersonalizationSetup', () => {
     );
   });
 
+  it('should mark onboarding only after preference persistence succeeds', () => {
+    const updateSubject = new Subject<AccessibilityPreferences>();
+    accessibilityPreferencesService.updatePreferences.mockReturnValue(updateSubject.asObservable());
+    renderComponent();
+
+    submitForm();
+
+    expect(userSessionService.markOnboardingCompleted).not.toHaveBeenCalled();
+    expect(router.navigateByUrl).not.toHaveBeenCalled();
+
+    updateSubject.next(loadedPreferences);
+
+    expect(userSessionService.markOnboardingCompleted).toHaveBeenCalledOnce();
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/home');
+  });
+
   it('should show a save error and avoid side effects when saving fails', () => {
     accessibilityPreferencesService.updatePreferences.mockReturnValue(
       throwError(() => new Error('Save failed')),
@@ -174,6 +199,7 @@ describe('PersonalizationSetup', () => {
     expect(getAlerts()[0].textContent).toContain('Não foi possível salvar suas preferências.');
     expect(getAlertAction()?.textContent).toContain('Tentar novamente');
     expect(themeService.applyTheme).not.toHaveBeenCalled();
+    expect(userSessionService.markOnboardingCompleted).not.toHaveBeenCalled();
     expect(toastService.success).not.toHaveBeenCalled();
     expect(router.navigateByUrl).not.toHaveBeenCalled();
   });
@@ -191,6 +217,7 @@ describe('PersonalizationSetup', () => {
 
     expect(accessibilityPreferencesService.updatePreferences).toHaveBeenCalledTimes(2);
     expect(getAlerts()).toHaveLength(0);
+    expect(userSessionService.markOnboardingCompleted).toHaveBeenCalledOnce();
     expect(toastService.success).toHaveBeenCalledWith('Preferências salvas com sucesso.');
   });
 
@@ -251,17 +278,7 @@ describe('PersonalizationSetup', () => {
 
   function createUserSessionServiceMock(): UserSessionServiceMock {
     return {
-      getCurrentUserProfile: vi.fn(() => of(createUserProfile())),
-      clearCurrentUser: vi.fn(),
-    };
-  }
-
-  function createUserProfile(): UserProfile {
-    return {
-      id: 'user-1',
-      name: 'Maria Helena',
-      createdAt: '2026-07-14T10:00:00.000Z',
-      updatedAt: '2026-07-14T10:00:00.000Z',
+      markOnboardingCompleted: vi.fn(),
     };
   }
 });
@@ -284,6 +301,5 @@ type ToastServiceMock = {
 };
 
 type UserSessionServiceMock = {
-  getCurrentUserProfile: Mock<() => Observable<UserProfile | null>>;
-  clearCurrentUser: Mock<() => void>;
+  markOnboardingCompleted: Mock<() => void>;
 };

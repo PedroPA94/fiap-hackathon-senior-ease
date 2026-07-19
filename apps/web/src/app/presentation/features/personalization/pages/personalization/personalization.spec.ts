@@ -74,7 +74,7 @@ describe('Personalization', () => {
     expect(fixture.nativeElement.querySelector('se-navigation-menu')).toBeNull();
   });
 
-  it('keeps /personalization lazy-loaded inside AppShell without changing setup', async () => {
+  it('keeps personalization routes lazy-loaded in their respective layouts', async () => {
     const shellRoute = routes.find((route) => route.path === '' && route.children);
     const personalizationRoute = shellRoute?.children?.find(
       (route) => route.path === 'personalization',

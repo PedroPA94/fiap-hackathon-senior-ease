@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { Header } from '../../../../shared/layout/header/header';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import {
+import type {
   AccessibilityPreferences,
   ContrastPreference,
   FontSizePreference,
@@ -18,6 +18,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
 import { catchError, EMPTY, filter, from, map, switchMap, tap } from 'rxjs';
 import { ThemeService } from '../../../../../application/services/theme.service';
+import { UserSessionService } from '../../../../../application/services/user-session.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -31,6 +32,7 @@ export class PersonalizationSetup {
   private accessibilityPreferencesService = inject(AccessibilityPreferencesService);
   private themeService = inject(ThemeService);
   private toastService = inject(ToastService);
+  private userSessionService = inject(UserSessionService);
   private router = inject(Router);
   private destroyRef = inject(DestroyRef);
 
@@ -98,6 +100,8 @@ export class PersonalizationSetup {
           this.loadedPreferences = savedPreferences;
 
           this.themeService.applyTheme(createAccessibilityTheme(savedPreferences));
+
+          this.userSessionService.markOnboardingCompleted();
 
           this.toastService.success('Preferências salvas com sucesso.');
         }),

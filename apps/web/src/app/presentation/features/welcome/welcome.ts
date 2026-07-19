@@ -6,8 +6,8 @@ import { Card } from '../../shared/ui/card/card';
 import { UserSessionService } from '../../../application/services/user-session.service';
 import { ThemeService } from '../../../application/services/theme.service';
 import { LocalUserSelector } from './local-user-selector/local-user-selector';
-import { EntityId } from '@senior-ease/core';
-import { LocalUser } from '../../../application/models/local-user';
+import type { EntityId } from '@senior-ease/core';
+import type { LocalUser } from '../../../application/models/local-user';
 import { Button } from '../../shared/ui/button/button';
 import { Router } from '@angular/router';
 
@@ -70,7 +70,7 @@ export class Welcome {
         finalize(() => this.isCreatingUser.set(false)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ next: () => this.navigateToPersonalization() });
+      .subscribe({ next: () => this.navigateToInitialRoute() });
   }
 
   protected selectUser(userId: EntityId): void {
@@ -94,10 +94,10 @@ export class Welcome {
         finalize(() => this.loadingUserId.set(null)),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe({ next: () => this.navigateToPersonalization() });
+      .subscribe({ next: () => this.navigateToInitialRoute() });
   }
 
-  private navigateToPersonalization(): void {
-    this.router.navigate(['/personalization/setup']);
+  private navigateToInitialRoute(): void {
+    this.router.navigate([this.userSessionService.getInitialRouteForUser()]);
   }
 }

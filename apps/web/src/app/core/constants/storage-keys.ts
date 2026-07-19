@@ -12,5 +12,8 @@ export const storageKeys = {
   accessibilityPreferences: (userId: EntityId) =>
     `${STORAGE_PREFIX}:users:${userId}:accessibility-preferences`,
 
+  onboardingCompleted: (userId: EntityId) =>
+    `${STORAGE_PREFIX}:users:${userId}:onboarding-completed`,
+
   activities: (userId: EntityId) => `${STORAGE_PREFIX}:users:${userId}:activities`,
 } as const;

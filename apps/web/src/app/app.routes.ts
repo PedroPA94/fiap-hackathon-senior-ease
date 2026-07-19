@@ -1,5 +1,7 @@
-import { Routes } from '@angular/router';
+import type { Routes } from '@angular/router';
 import { currentUserGuard } from './core/guards/current-user-guard';
+import { onboardingCompletedGuard } from './core/guards/onboarding-completed-guard';
+import { onboardingSetupGuard } from './core/guards/onboarding-setup-guard';
 
 export const routes: Routes = [
   {
@@ -13,7 +15,7 @@ export const routes: Routes = [
   },
   {
     path: 'personalization/setup',
-    canActivate: [currentUserGuard],
+    canActivate: [currentUserGuard, onboardingSetupGuard],
     loadComponent: () =>
       import('./presentation/features/personalization/pages/personalization-setup/personalization-setup').then(
         (m) => m.PersonalizationSetup,
@@ -21,7 +23,7 @@ export const routes: Routes = [
   },
   {
     path: '',
-    canActivate: [currentUserGuard],
+    canActivate: [currentUserGuard, onboardingCompletedGuard],
     loadComponent: () =>
       import('./presentation/shared/layout/app-shell/app-shell').then((module) => module.AppShell),
     children: [
