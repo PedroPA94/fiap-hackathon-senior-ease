@@ -1,4 +1,4 @@
-import { DomainError } from "../errors";
+import { DomainError, type DomainErrorCode } from "../errors";
 
 import {
   assertNonEmpty,
@@ -239,4 +239,112 @@ function normalizeActivitySteps(
   );
 
   return sortActivitySteps(normalizedSteps);
+}
+
+export function parseActivity(input: unknown): Activity {
+  if (!isRecord(input)) {
+    throw new DomainError("ACTIVITY_INVALID");
+  }
+
+  if (!Array.isArray(input.steps)) {
+    throw new DomainError("ACTIVITY_STEPS_INVALID");
+  }
+
+  const steps = sortActivitySteps(input.steps.map(parseActivityStep));
+
+  const activity = createActivity({
+    id: parseRequiredText(input.id, "ACTIVITY_ID_REQUIRED"),
+    userId: parseRequiredText(input.userId, "ACTIVITY_USER_ID_REQUIRED"),
+    title: parseRequiredText(input.title, "ACTIVITY_TITLE_REQUIRED"),
+    description: parseOptionalText(input.description, "ACTIVITY_INVALID"),
+    date: parseRequiredText(input.date, "ACTIVITY_DATE_REQUIRED"),
+    time: parseOptionalText(input.time, "ACTIVITY_TIME_INVALID"),
+    steps: steps.map((step) => ({
+      id: step.id,
+      description: step.description,
+      order: step.order,
+    })),
+    createdAt: parseRequiredText(
+      input.createdAt,
+      "ACTIVITY_CREATED_AT_REQUIRED",
+    ),
+    updatedAt: parseRequiredText(
+      input.updatedAt,
+      "ACTIVITY_UPDATED_AT_REQUIRED",
+    ),
+  });
+
+  return {
+    ...activity,
+    steps,
+  };
+}
+
+function parseActivityStep(input: unknown): ActivityStep {
+  if (!isRecord(input)) {
+    throw new DomainError("ACTIVITY_STEP_INVALID");
+  }
+
+  const completedAt = parseOptionalNonEmptyText(
+    input.completedAt,
+    "ACTIVITY_STEP_COMPLETED_AT_REQUIRED",
+  );
+
+  return {
+    id: parseRequiredText(input.id, "ACTIVITY_STEP_ID_REQUIRED"),
+    description: parseRequiredText(
+      input.description,
+      "ACTIVITY_STEP_DESCRIPTION_REQUIRED",
+    ),
+    order: parsePositiveInteger(input.order, "ACTIVITY_STEP_ORDER_INVALID"),
+    ...(completedAt === undefined ? {} : { completedAt }),
+  };
+}
+
+function parseRequiredText(value: unknown, code: DomainErrorCode): string {
+  if (typeof value !== "string") {
+    throw new DomainError(code);
+  }
+
+  return normalizeRequiredText(value, code);
+}
+
+function parseOptionalText(
+  value: unknown,
+  code: DomainErrorCode,
+): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    throw new DomainError(code);
+  }
+
+  return normalizeOptionalText(value);
+}
+
+function parseOptionalNonEmptyText(
+  value: unknown,
+  code: DomainErrorCode,
+): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  return parseRequiredText(value, code);
+}
+
+function parsePositiveInteger(value: unknown, code: DomainErrorCode): number {
+  if (typeof value !== "number") {
+    throw new DomainError(code);
+  }
+
+  assertPositiveInteger(value, code);
+
+  return value;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

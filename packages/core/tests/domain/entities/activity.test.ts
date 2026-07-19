@@ -8,6 +8,7 @@ import {
   getActivityProgress,
   getActivityStepsView,
   getCurrentActivityStep,
+  parseActivity,
   resolveActivityStatus,
   type Activity,
   type CreateActivityInput,
@@ -67,9 +68,7 @@ describe("Activity entity", () => {
     const activity = makeActivity({
       title: "  Tomar remédio  ",
       description: "  Após o almoço  ",
-      steps: [
-        { id: "step-1", description: "  Pegar o remédio  ", order: 1 },
-      ],
+      steps: [{ id: "step-1", description: "  Pegar o remédio  ", order: 1 }],
     });
 
     expect(activity.title).toBe("Tomar remédio");
@@ -102,7 +101,10 @@ describe("Activity entity", () => {
   });
 
   it("rejects an empty date", () => {
-    expectDomainError(() => makeActivity({ date: "" }), "ACTIVITY_DATE_REQUIRED");
+    expectDomainError(
+      () => makeActivity({ date: "" }),
+      "ACTIVITY_DATE_REQUIRED",
+    );
   });
 
   it("rejects an invalid date", () => {
@@ -113,7 +115,10 @@ describe("Activity entity", () => {
   });
 
   it("rejects activity without steps", () => {
-    expectDomainError(() => makeActivity({ steps: [] }), "ACTIVITY_STEPS_REQUIRED");
+    expectDomainError(
+      () => makeActivity({ steps: [] }),
+      "ACTIVITY_STEPS_REQUIRED",
+    );
   });
 
   it("rejects a step with empty id", () => {
@@ -204,7 +209,9 @@ describe("Activity entity", () => {
   });
 
   it("returns null current step when all steps are completed", () => {
-    expect(getCurrentActivityStep(completeActivity(makeActivity(), laterAt))).toBeNull();
+    expect(
+      getCurrentActivityStep(completeActivity(makeActivity(), laterAt)),
+    ).toBeNull();
   });
 
   it("returns sorted steps view with completed, current and pending statuses", () => {
@@ -245,9 +252,9 @@ describe("Activity entity", () => {
   it("marks only the informed step as completed", () => {
     const activity = completeActivityStep(makeActivity(), "step-1", laterAt);
 
-    expect(activity.steps.find((step) => step.id === "step-1")?.completedAt).toBe(
-      laterAt,
-    );
+    expect(
+      activity.steps.find((step) => step.id === "step-1")?.completedAt,
+    ).toBe(laterAt);
     expect(
       activity.steps.find((step) => step.id === "step-2")?.completedAt,
     ).toBeUndefined();
@@ -269,7 +276,9 @@ describe("Activity entity", () => {
   it("completes all steps", () => {
     const activity = completeActivity(makeActivity(), laterAt);
 
-    expect(activity.steps.every((step) => step.completedAt === laterAt)).toBe(true);
+    expect(activity.steps.every((step) => step.completedAt === laterAt)).toBe(
+      true,
+    );
   });
 
   it("preserves existing step completedAt when completing all steps", () => {
@@ -288,5 +297,126 @@ describe("Activity entity", () => {
     const activity = completeActivity(makeActivity(), laterAt);
 
     expect(activity.updatedAt).toBe(laterAt);
+  });
+
+  describe("parseActivity", () => {
+    it("parses and normalizes an unknown value into an Activity", () => {
+      const activity = parseActivity({
+        ...makeActivityInput(),
+        id: "  activity-1  ",
+        title: "  Tomar remédio  ",
+        description: "  Após o almoço  ",
+      });
+
+      expect(activity).toMatchObject({
+        id: "activity-1",
+        userId: "user-1",
+        title: "Tomar remédio",
+        description: "Após o almoço",
+        date: "2026-07-09",
+        time: "12:30",
+        createdAt,
+        updatedAt: createdAt,
+      });
+    });
+
+    it("sorts parsed steps and preserves completedAt", () => {
+      const activity = parseActivity({
+        ...makeActivityInput(),
+        steps: [
+          {
+            id: "step-2",
+            description: "Beber água",
+            order: 2,
+            completedAt: laterAt,
+          },
+          {
+            id: "step-1",
+            description: "Pegar o remédio",
+            order: 1,
+          },
+        ],
+      });
+
+      expect(activity.steps.map((step) => step.id)).toEqual([
+        "step-1",
+        "step-2",
+      ]);
+      expect(activity.steps[1]?.completedAt).toBe(laterAt);
+    });
+
+    it.each([null, [], "activity", 1])(
+      "rejects a non-object activity value: %j",
+      (input) => {
+        expectDomainError(() => parseActivity(input), "ACTIVITY_INVALID");
+      },
+    );
+
+    it.each([undefined, null, {}, "steps"])(
+      "rejects a non-array steps value: %j",
+      (steps) => {
+        expectDomainError(
+          () => parseActivity({ ...makeActivityInput(), steps }),
+          "ACTIVITY_STEPS_INVALID",
+        );
+      },
+    );
+
+    it("rejects a malformed step value", () => {
+      expectDomainError(
+        () => parseActivity({ ...makeActivityInput(), steps: [null] }),
+        "ACTIVITY_STEP_INVALID",
+      );
+    });
+
+    it.each([
+      [{ id: 1 }, "ACTIVITY_ID_REQUIRED"],
+      [{ userId: null }, "ACTIVITY_USER_ID_REQUIRED"],
+      [{ title: true }, "ACTIVITY_TITLE_REQUIRED"],
+      [{ createdAt: {} }, "ACTIVITY_CREATED_AT_REQUIRED"],
+      [{ updatedAt: [] }, "ACTIVITY_UPDATED_AT_REQUIRED"],
+      [{ description: 1 }, "ACTIVITY_INVALID"],
+      [{ time: 1230 }, "ACTIVITY_TIME_INVALID"],
+    ] as const)("rejects invalid activity field %j", (override, code) => {
+      expectDomainError(
+        () => parseActivity({ ...makeActivityInput(), ...override }),
+        code,
+      );
+    });
+
+    it.each([
+      [{ id: 1 }, "ACTIVITY_STEP_ID_REQUIRED"],
+      [{ description: null }, "ACTIVITY_STEP_DESCRIPTION_REQUIRED"],
+      [{ order: "1" }, "ACTIVITY_STEP_ORDER_INVALID"],
+      [{ completedAt: 1 }, "ACTIVITY_STEP_COMPLETED_AT_REQUIRED"],
+      [{ completedAt: " " }, "ACTIVITY_STEP_COMPLETED_AT_REQUIRED"],
+    ] as const)("rejects invalid step field %j", (override, code) => {
+      expectDomainError(
+        () =>
+          parseActivity({
+            ...makeActivityInput(),
+            steps: [
+              {
+                id: "step-1",
+                description: "Pegar o remédio",
+                order: 1,
+                ...override,
+              },
+            ],
+          }),
+        code,
+      );
+    });
+
+    it("reuses Activity invariants when parsing", () => {
+      expectDomainError(
+        () =>
+          parseActivity({
+            ...makeActivityInput(),
+            date: "09/07/2026",
+          }),
+        "ACTIVITY_DATE_INVALID",
+      );
+    });
   });
 });

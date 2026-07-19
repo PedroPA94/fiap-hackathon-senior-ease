@@ -1,6 +1,7 @@
 import type { DomainErrorCode } from "./domain-error";
 
 export const domainErrorMessagesPtBr: Record<DomainErrorCode, string> = {
+  ACTIVITY_INVALID: "Os dados da atividade estão inválidos.",
   ACTIVITY_ID_REQUIRED: "Não foi possível identificar a atividade.",
   ACTIVITY_USER_ID_REQUIRED: "Não foi possível identificar o usuário.",
   ACTIVITY_TITLE_REQUIRED: "Digite um nome para esta atividade.",
@@ -15,6 +16,8 @@ export const domainErrorMessagesPtBr: Record<DomainErrorCode, string> = {
     "Não foi possível identificar quando a atividade foi concluída.",
 
   ACTIVITY_STEPS_REQUIRED: "Adicione pelo menos um passo para continuar.",
+  ACTIVITY_STEPS_INVALID: "Os passos da atividade estão inválidos.",
+  ACTIVITY_STEP_INVALID: "Os dados do passo da atividade estão inválidos.",
   ACTIVITY_STEP_ID_REQUIRED:
     "Não foi possível identificar o passo da atividade.",
   ACTIVITY_STEP_COMPLETED_AT_REQUIRED:
