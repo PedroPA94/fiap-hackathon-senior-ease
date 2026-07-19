@@ -30,6 +30,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./presentation/features/home/home').then((module) => module.Home),
       },
+      {
+        path: 'personalization',
+        loadComponent: () =>
+          import(
+            './presentation/features/personalization/pages/personalization/personalization'
+          ).then((module) => module.Personalization),
+      },
     ],
   },
 ];

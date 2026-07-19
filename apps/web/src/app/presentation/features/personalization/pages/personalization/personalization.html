@@ -1,0 +1,77 @@
+<section class="personalization" aria-labelledby="personalization-title">
+  <header class="personalization__header">
+    <h1 id="personalization-title">Personalização</h1>
+    <p>Ajuste o visual para uma experiência mais confortável.</p>
+  </header>
+
+  @if (loadErrorMessage()) {
+    <se-inline-alert
+      variant="error"
+      actionMessage="Tentar novamente"
+      (actionTriggered)="loadPreferences()"
+    >
+      {{ loadErrorMessage() }}
+    </se-inline-alert>
+  }
+
+  <div
+    class="personalization__content"
+    [attr.aria-busy]="isLoading() || isSaving() || isResetting()"
+  >
+    @if (isLoading()) {
+      <p class="personalization__loading" role="status" aria-live="polite">
+        Carregando preferências...
+      </p>
+    } @else if (persistedPreferences) {
+      <form
+        class="personalization__form"
+        [formGroup]="visualPreferencesForm"
+        (ngSubmit)="submit()"
+      >
+        <se-card class="personalization__visual-card">
+          <se-accessibility-preferences-form [form]="visualPreferencesForm" />
+        </se-card>
+
+        <div class="personalization__behavior">
+          <se-switch
+            inputId="enhanced-feedback"
+            label="Feedback visual reforçado"
+            [formControl]="enhancedFeedbackControl"
+          />
+
+          <se-switch
+            inputId="confirm-critical-actions"
+            label="Confirmar ações importantes"
+            [formControl]="confirmCriticalActionsControl"
+          />
+
+          @if (saveErrorMessage()) {
+            <se-inline-alert variant="error">
+              {{ saveErrorMessage() }}
+            </se-inline-alert>
+          }
+
+          <div class="personalization__actions">
+            <se-button
+              type="submit"
+              [loading]="isSaving()"
+              [disabled]="isLoading() || isResetting()"
+            >
+              Salvar preferências
+            </se-button>
+
+            <se-button
+              type="button"
+              variant="secondary"
+              [loading]="isResetting()"
+              [disabled]="isLoading() || isSaving()"
+              (click)="resetPreferences()"
+            >
+              Restaurar padrão
+            </se-button>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</section>
