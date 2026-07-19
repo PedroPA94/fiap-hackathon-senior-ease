@@ -1,10 +1,6 @@
 import type { Activity, EntityId } from "../../domain";
 
-import {
-  assertPositiveInteger,
-  resolveActivityStatus,
-  sortActivitySteps,
-} from "../../domain";
+import { resolveActivityStatus, sortActivitySteps } from "../../domain";
 import { ApplicationError } from "../errors";
 
 import type { ActivityRepository } from "../repositories";
