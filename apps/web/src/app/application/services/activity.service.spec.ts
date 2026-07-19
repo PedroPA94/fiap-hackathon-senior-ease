@@ -11,7 +11,7 @@ import {
 import { ACTIVITY_REPOSITORY } from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { UserSessionError } from '../errors/user-session.error';
-import { ActivityService } from './activity';
+import { ActivityService } from './activity.service';
 import { UserSessionService } from './user-session.service';
 
 describe('ActivityService', () => {
