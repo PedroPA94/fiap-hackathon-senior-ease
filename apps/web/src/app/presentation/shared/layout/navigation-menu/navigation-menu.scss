@@ -111,13 +111,10 @@
     position: static;
     z-index: auto;
 
-    flex: 0 0 256px;
+    width: 15rem;
+    height: 100vh;
 
-    width: 256px;
-    min-height: 90vh;
-    height: 100%;
-
-    padding: var(--se-spacing-xlarge);
+    padding: 20px;
 
     visibility: visible;
     pointer-events: auto;
