@@ -2,6 +2,7 @@ export * from "./create-activity-use-case";
 export * from "./list-activities-by-user-use-case";
 export * from "./complete-activity-step-use-case";
 export * from "./complete-activity-use-case";
+export * from "./delete-activity-use-case";
 export * from "./create-user-profile-use-case";
 export * from "./get-user-profile-use-case";
 export * from "./get-user-experience-profile-use-case";
