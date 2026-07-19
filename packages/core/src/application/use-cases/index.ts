@@ -8,3 +8,4 @@ export * from "./get-user-experience-profile-use-case";
 export * from "./get-accessibility-preferences-use-case";
 export * from "./reset-accessibility-preferences-use-case";
 export * from "./update-accessibility-preferences-use-case";
+export * from "./list-recent-completed-activities-by-user-use-case";

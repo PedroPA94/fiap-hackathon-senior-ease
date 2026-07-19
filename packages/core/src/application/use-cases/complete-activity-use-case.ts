@@ -1,10 +1,16 @@
-import { completeActivity, type Activity, type EntityId } from "../../domain";
+import {
+  assertNonEmpty,
+  completeActivity,
+  type Activity,
+  type EntityId,
+} from "../../domain";
 import { ApplicationError } from "../errors";
 import type { ActivityRepository } from "../repositories";
 import type { Clock } from "../services";
 
 export type CompleteActivityUseCaseInput = {
   activityId: EntityId;
+  userId: EntityId;
 };
 
 export class CompleteActivityUseCase {
@@ -14,9 +20,15 @@ export class CompleteActivityUseCase {
   ) {}
 
   async execute(input: CompleteActivityUseCaseInput): Promise<Activity> {
-    const activity = await this.activityRepository.findById(input.activityId);
+    assertNonEmpty(input.userId, "ACTIVITY_USER_ID_REQUIRED");
+    assertNonEmpty(input.activityId, "ACTIVITY_ID_REQUIRED");
 
-    if (!activity) {
+    const activity = await this.activityRepository.findById({
+      activityId: input.activityId,
+      userId: input.userId,
+    });
+
+    if (!activity || activity.userId !== input.userId) {
       throw new ApplicationError("ACTIVITY_NOT_FOUND");
     }
 

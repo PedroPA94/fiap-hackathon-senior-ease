@@ -28,7 +28,9 @@ describe("CreateActivityUseCase", () => {
       steps: ["Pegar o remédio", "Beber água"],
     });
 
-    await expect(repository.findById(activity.id)).resolves.toBe(activity);
+    await expect(
+      repository.findById({ activityId: activity.id, userId: "user-1" }),
+    ).resolves.toBe(activity);
   });
 
   it("uses the first generated id as activity id", async () => {

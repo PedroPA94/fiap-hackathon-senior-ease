@@ -1,4 +1,5 @@
 import {
+  assertNonEmpty,
   completeActivityStep,
   type Activity,
   type EntityId,
@@ -10,6 +11,7 @@ import type { Clock } from "../services";
 export type CompleteActivityStepUseCaseInput = {
   activityId: EntityId;
   stepId: EntityId;
+  userId: EntityId;
 };
 
 export class CompleteActivityStepUseCase {
@@ -19,9 +21,16 @@ export class CompleteActivityStepUseCase {
   ) {}
 
   async execute(input: CompleteActivityStepUseCaseInput): Promise<Activity> {
-    const activity = await this.activityRepository.findById(input.activityId);
+    assertNonEmpty(input.userId, "ACTIVITY_USER_ID_REQUIRED");
+    assertNonEmpty(input.activityId, "ACTIVITY_ID_REQUIRED");
+    assertNonEmpty(input.stepId, "ACTIVITY_STEP_ID_REQUIRED");
 
-    if (!activity) {
+    const activity = await this.activityRepository.findById({
+      activityId: input.activityId,
+      userId: input.userId,
+    });
+
+    if (!activity || activity.userId !== input.userId) {
       throw new ApplicationError("ACTIVITY_NOT_FOUND");
     }
 

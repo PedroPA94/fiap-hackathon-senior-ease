@@ -5,14 +5,15 @@ export type ActivityQuery = {
   date?: DateOnlyString;
 };
 
+export type ActivityIdentity = {
+  userId: EntityId;
+  activityId: EntityId;
+};
+
 export interface ActivityRepository {
   list(query: ActivityQuery): Promise<Activity[]>;
-
-  findById(id: EntityId): Promise<Activity | null>;
-
+  findById(identity: ActivityIdentity): Promise<Activity | null>;
   create(activity: Activity): Promise<Activity>;
-
   update(activity: Activity): Promise<Activity>;
-
-  delete(id: EntityId): Promise<void>;
+  delete(identity: ActivityIdentity): Promise<void>;
 }

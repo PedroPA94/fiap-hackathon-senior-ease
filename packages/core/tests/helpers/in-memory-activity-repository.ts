@@ -1,4 +1,5 @@
 import type {
+  ActivityIdentity,
   ActivityQuery,
   ActivityRepository,
 } from "../../src/application";
@@ -17,8 +18,14 @@ export class InMemoryActivityRepository implements ActivityRepository {
     });
   }
 
-  async findById(id: EntityId): Promise<Activity | null> {
-    return this.activities.get(id) ?? null;
+  async findById(identity: ActivityIdentity): Promise<Activity | null> {
+    const activity = this.activities.get(identity.activityId);
+
+    if (!activity || activity.userId !== identity.userId) {
+      return null;
+    }
+
+    return activity;
   }
 
   async create(activity: Activity): Promise<Activity> {
@@ -33,7 +40,11 @@ export class InMemoryActivityRepository implements ActivityRepository {
     return activity;
   }
 
-  async delete(id: EntityId): Promise<void> {
-    this.activities.delete(id);
+  async delete(identity: ActivityIdentity): Promise<void> {
+    const activity = this.activities.get(identity.activityId);
+
+    if (activity?.userId === identity.userId) {
+      this.activities.delete(identity.activityId);
+    }
   }
 }
