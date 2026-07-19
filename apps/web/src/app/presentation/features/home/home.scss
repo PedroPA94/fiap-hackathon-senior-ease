@@ -25,6 +25,19 @@
   gap: var(--se-spacing-large);
 }
 
+.home__content {
+  display: grid;
+  gap: var(--se-spacing-large);
+}
+
+.home__status {
+  margin: 0;
+  color: var(--se-color-text-muted);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: 1.4;
+}
+
 .home-card {
   display: flex;
   flex-direction: column;
@@ -49,6 +62,11 @@
   font-family: var(--se-font-family);
   font-size: var(--se-font-size-body);
   line-height: 1.4;
+}
+
+.home-card__activity-title {
+  color: var(--se-color-text-default);
+  overflow-wrap: anywhere;
 }
 
 .home-card__action {
@@ -116,6 +134,10 @@
   .home {
     gap: var(--se-spacing-xlarge);
     margin: 0;
+  }
+
+  .home__content {
+    gap: var(--se-spacing-xlarge);
   }
 
   .home__summary-grid {

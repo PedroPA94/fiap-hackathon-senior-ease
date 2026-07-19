@@ -5,13 +5,14 @@ import {
   CompleteActivityStepUseCase,
   CompleteActivityUseCase,
   CreateActivityUseCase,
+  GetHomeActivityOverviewUseCase,
   ListActivitiesByUserUseCase,
-  ListRecentCompletedActivitiesByUserUseCase,
   type Activity,
   type ActivityListFilter,
   type ActivityRepository,
   type CreateActivityUseCaseInput,
   type EntityId,
+  type HomeActivityOverview,
   type Clock,
   type IdGenerator,
 } from '@senior-ease/core';
@@ -51,14 +52,14 @@ export class ActivityService {
     });
   }
 
-  getRecentCompletedActivities(limit = 2): Observable<Activity[]> {
+  getHomeOverview(recentActivitiesLimit?: number): Observable<HomeActivityOverview> {
     return defer(() => {
-      const useCase = new ListRecentCompletedActivitiesByUserUseCase(this.activityRepository);
+      const useCase = new GetHomeActivityOverviewUseCase(this.activityRepository, this.clock);
 
       return from(
         useCase.execute({
           userId: this.getRequiredCurrentUserId(),
-          limit,
+          recentActivitiesLimit,
         }),
       );
     });

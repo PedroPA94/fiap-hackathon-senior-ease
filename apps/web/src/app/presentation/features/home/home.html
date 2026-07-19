@@ -1,72 +1,91 @@
 <section class="home" aria-labelledby="home-title">
   <h1 id="home-title" class="home__title">Início</h1>
 
-  <div class="home__summary-grid">
-    <se-card class="home__next-activity-card">
-      <section class="home-card" aria-labelledby="next-activity-title">
-        <div>
-          <h2 id="next-activity-title" class="home-card__title">Próxima atividade</h2>
+  <div class="home__content" [attr.aria-busy]="isLoading()">
+    @if (isLoading()) {
+      <p class="home__status" role="status" aria-live="polite">
+        Carregando dados da página inicial...
+      </p>
+    }
 
-          <p class="home-card__description">Enviar documento para secretaria • Hoje, 14:00</p>
-        </div>
+    @if (errorMessage(); as message) {
+      <se-inline-alert
+        variant="error"
+        actionMessage="Tentar novamente"
+        (actionTriggered)="loadOverview()"
+      >
+        {{ message }}
+      </se-inline-alert>
+    }
 
-        <se-button class="home-card__action" routerLink="/activities/example">
-          Ver etapas
-        </se-button>
-      </section>
-    </se-card>
+    <div class="home__summary-grid">
+      <se-card class="home__next-activity-card">
+        <section class="home-card" aria-labelledby="next-activity-title">
+          <div>
+            <h2 id="next-activity-title" class="home-card__title">Próxima atividade</h2>
 
-    <se-card class="home__day-summary-card">
-      <section class="home-card" aria-labelledby="day-summary-title">
-        <div>
-          <h2 id="day-summary-title" class="home-card__title">Resumo do dia</h2>
+            @if (overview()?.nextActivity; as nextActivity) {
+              <p class="home-card__description">
+                <strong class="home-card__activity-title">{{ nextActivity.title }}</strong>
+                <span aria-hidden="true"> • </span>
+                {{ formatActivitySchedule(nextActivity) }}
+              </p>
+            } @else if (!isLoading()) {
+              <p class="home-card__description">Você não possui atividades pendentes.</p>
+            }
+          </div>
 
-          <p class="home-card__description">3 pendentes • 1 em andamento • 2 concluídas</p>
-        </div>
+          @if (overview()?.nextActivity) {
+            <se-button class="home-card__action" [disabled]="true"> Ver etapas </se-button>
+          }
+        </section>
+      </se-card>
+
+      <se-card class="home__day-summary-card">
+        <section class="home-card" aria-labelledby="day-summary-title">
+          <div>
+            <h2 id="day-summary-title" class="home-card__title">Resumo do dia</h2>
+
+            <p class="home-card__description">
+              {{ pendingLabel(todaySummary().pending) }} • {{ todaySummary().inProgress }} em
+              andamento •
+              {{ completedLabel(todaySummary().completed) }}
+            </p>
+          </div>
+        </section>
+      </se-card>
+    </div>
+
+    <nav class="home__quick-actions" aria-label="Ações rápidas">
+      <se-button routerLink="/activities/new" [fullWidth]="true"> Nova atividade </se-button>
+
+      <se-button variant="secondary" routerLink="/personalization" [fullWidth]="true">
+        Ajustar visual
+      </se-button>
+    </nav>
+
+    <se-card class="home__recent-history">
+      <section class="recent-history" aria-labelledby="recent-history-title">
+        <h2 id="recent-history-title" class="recent-history__title">Histórico recente</h2>
+
+        @if (overview()?.recentCompletedActivities; as recentActivities) {
+          @if (recentActivities.length === 0) {
+            <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
+          } @else {
+            <ul class="recent-history__list">
+              @for (activity of recentActivities; track activity.id) {
+                <li class="recent-history__item">
+                  Você concluiu
+                  <strong class="recent-history__activity-title">“{{ activity.title }}”</strong>
+                  {{ formatCompletionDate(activity.updatedAt) }}.
+                </li>
+              }
+            </ul>
+          }
+        } @else if (!isLoading()) {
+          <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
+        }
       </section>
     </se-card>
   </div>
-
-  <nav class="home__quick-actions" aria-label="Ações rápidas">
-    <se-button routerLink="/activities/new" [fullWidth]="true"> Nova atividade </se-button>
-
-    <se-button variant="secondary" routerLink="/personalization" [fullWidth]="true">
-      Ajustar visual
-    </se-button>
-  </nav>
-
-  <se-card class="home__recent-history">
-    <section
-      class="recent-history"
-      aria-labelledby="recent-history-title"
-      aria-busy="{{ isRecentActivitiesLoading() }}"
-    >
-      <h2 id="recent-history-title" class="recent-history__title">Histórico recente</h2>
-
-      @if (isRecentActivitiesLoading()) {
-        <p class="recent-history__status" role="status" aria-live="polite">
-          Carregando histórico recente...
-        </p>
-      } @else if (recentActivitiesError(); as errorMessage) {
-        <se-inline-alert
-          variant="error"
-          actionLabel="Tentar novamente"
-          (actionRequested)="loadRecentActivities()"
-          >{{ errorMessage }}</se-inline-alert
-        >
-      } @else if (recentActivities().length === 0) {
-        <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
-      } @else {
-        <ul class="recent-history__list">
-          @for (activity of recentActivities(); track activity.id) {
-            <li class="recent-history__item">
-              Você concluiu
-              <strong class="recent-history__activity-title"> “{{ activity.title }}” </strong>
-              {{ formatCompletionDate(activity.updatedAt) }}.
-            </li>
-          }
-        </ul>
-      }
-    </section>
-  </se-card>
 </section>

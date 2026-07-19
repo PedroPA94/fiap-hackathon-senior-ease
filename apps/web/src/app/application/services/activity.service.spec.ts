@@ -110,31 +110,55 @@ describe('ActivityService', () => {
     expect(activities.map((activity) => activity.id)).toEqual(['completed-activity']);
   });
 
-  it('should return the two most recent completed activities by default', async () => {
+  it('should return the home overview with the default recent activity limit', async () => {
     activityRepository.list.mockResolvedValue([
       makeCompletedActivity('oldest-activity', '2026-07-09T11:00:00.000Z'),
       makeCompletedActivity('newest-activity', '2026-07-09T14:00:00.000Z'),
       makeCompletedActivity('middle-activity', '2026-07-09T13:00:00.000Z'),
     ]);
 
-    const activities = await firstValueFrom(service.getRecentCompletedActivities());
+    const overview = await firstValueFrom(service.getHomeOverview());
 
     expect(activityRepository.list).toHaveBeenCalledWith({ userId });
-    expect(activities.map((activity) => activity.id)).toEqual([
+    expect(overview.recentCompletedActivities.map((activity) => activity.id)).toEqual([
       'newest-activity',
       'middle-activity',
     ]);
+    expect(overview.todaySummary.completed).toBe(3);
   });
 
-  it('should respect the informed recent activities limit', async () => {
+  it('should forward a custom recent activity limit to the home overview', async () => {
     activityRepository.list.mockResolvedValue([
       makeCompletedActivity('activity-1', '2026-07-09T11:00:00.000Z'),
       makeCompletedActivity('activity-2', '2026-07-09T12:00:00.000Z'),
     ]);
 
-    const activities = await firstValueFrom(service.getRecentCompletedActivities(1));
+    const overview = await firstValueFrom(service.getHomeOverview(1));
 
-    expect(activities.map((activity) => activity.id)).toEqual(['activity-2']);
+    expect(overview.recentCompletedActivities.map((activity) => activity.id)).toEqual([
+      'activity-2',
+    ]);
+  });
+
+  it('should keep the home overview observable cold and execute once per subscription', async () => {
+    const overview$ = service.getHomeOverview();
+
+    expect(userSessionService.getCurrentUserId).not.toHaveBeenCalled();
+    expect(activityRepository.list).not.toHaveBeenCalled();
+
+    await firstValueFrom(overview$);
+    await firstValueFrom(overview$);
+
+    expect(userSessionService.getCurrentUserId).toHaveBeenCalledTimes(2);
+    expect(activityRepository.list).toHaveBeenCalledTimes(2);
+    expect(clock.today).toHaveBeenCalledTimes(2);
+  });
+
+  it('should propagate home overview repository errors without changing them', async () => {
+    const repositoryError = new Error('Overview unavailable');
+    activityRepository.list.mockRejectedValue(repositoryError);
+
+    await expect(firstValueFrom(service.getHomeOverview())).rejects.toBe(repositoryError);
   });
 
   it('should create an activity for the current user using generated ids and clock', async () => {
@@ -202,10 +226,7 @@ describe('ActivityService', () => {
     readonly [string, (target: ActivityService) => Observable<unknown>]
   > = [
     ['listActivities', (target: ActivityService) => target.listActivities()],
-    [
-      'getRecentCompletedActivities',
-      (target: ActivityService) => target.getRecentCompletedActivities(),
-    ],
+    ['getHomeOverview', (target: ActivityService) => target.getHomeOverview()],
     [
       'createActivity',
       (target: ActivityService) =>
