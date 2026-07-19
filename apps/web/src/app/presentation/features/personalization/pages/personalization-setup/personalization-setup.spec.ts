@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import type { AccessibilityPreferences } from '@senior-ease/core';
+import type { AccessibilityPreferences, UserProfile } from '@senior-ease/core';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
-import { of, Subject, throwError } from 'rxjs';
+import { of, Subject, throwError, type Observable } from 'rxjs';
 import type { Mock } from 'vitest';
 
 import { AccessibilityPreferencesService } from '../../../../../application/services/accessibility-preferences.service';
@@ -278,7 +278,18 @@ describe('PersonalizationSetup', () => {
 
   function createUserSessionServiceMock(): UserSessionServiceMock {
     return {
+      getCurrentUserProfile: vi.fn(() => of(createUserProfile())),
+      clearCurrentUser: vi.fn(),
       markOnboardingCompleted: vi.fn(),
+    };
+  }
+
+  function createUserProfile(): UserProfile {
+    return {
+      id: 'user-1',
+      name: 'Maria Helena',
+      createdAt: '2026-07-14T10:00:00.000Z',
+      updatedAt: '2026-07-14T10:00:00.000Z',
     };
   }
 });
@@ -301,5 +312,7 @@ type ToastServiceMock = {
 };
 
 type UserSessionServiceMock = {
+  getCurrentUserProfile: Mock<() => Observable<UserProfile | null>>;
+  clearCurrentUser: Mock<() => void>;
   markOnboardingCompleted: Mock<() => void>;
 };
