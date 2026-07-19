@@ -1,0 +1,130 @@
+:host {
+  display: block;
+}
+
+.home {
+  display: grid;
+  gap: var(--se-spacing-large);
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: var(--se-spacing-large);
+}
+
+.home__title {
+  margin: 0;
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-heading);
+  font-weight: var(--se-font-weight-bold);
+  line-height: 1.2;
+}
+
+.home__summary-grid {
+  display: grid;
+  gap: var(--se-spacing-large);
+}
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--se-spacing-xlarge);
+  min-height: 100%;
+}
+
+.home-card__title,
+.recent-history__title {
+  margin: 0;
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-title);
+  font-weight: var(--se-font-weight-bold);
+  line-height: 1.2;
+}
+
+.home-card__description {
+  margin: var(--se-spacing-small) 0 0;
+  color: var(--se-color-text-muted);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: 1.4;
+}
+
+.home-card__action {
+  width: 100%;
+}
+
+.home__quick-actions {
+  display: grid;
+  gap: var(--se-spacing-medium);
+}
+
+.recent-history {
+  display: grid;
+  gap: var(--se-spacing-medium);
+}
+
+.recent-history__status,
+.recent-history__empty {
+  margin: 0;
+  color: var(--se-color-text-muted);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: 1.4;
+}
+
+.recent-history__list {
+  display: grid;
+  gap: var(--se-spacing-medium);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-history__item {
+  margin: 0;
+  color: var(--se-color-text-muted);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.recent-history__activity-title {
+  color: inherit;
+  font-weight: inherit;
+}
+
+@media (min-width: 576px) {
+  .home {
+    padding: var(--se-spacing-xlarge);
+  }
+
+  .home__quick-actions {
+    grid-template-columns:
+      minmax(0, 15rem)
+      minmax(0, 15rem);
+  }
+
+  .home-card__action {
+    max-width: 26rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .home {
+    gap: var(--se-spacing-xlarge);
+    margin: 0;
+  }
+
+  .home__summary-grid {
+    grid-template-columns:
+      minmax(0, 1.6fr)
+      minmax(18rem, 1fr);
+  }
+
+  .home__recent-history {
+    width: min(100%, 36rem);
+  }
+}
