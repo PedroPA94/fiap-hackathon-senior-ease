@@ -1,0 +1,191 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.step-input {
+  display: grid;
+  gap: var(--se-spacing-large);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.step-input__legend {
+  margin: 0;
+  margin-bottom: var(--se-spacing-medium);
+  padding: 0;
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-title);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-title);
+}
+
+.step-input__list {
+  display: grid;
+  gap: var(--se-spacing-small);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step-input__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--se-spacing-small);
+  align-items: center;
+  min-width: 0;
+  width: 100%;
+  padding: var(--se-spacing-small);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+}
+
+.step-input__number {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--se-color-primary);
+  background: var(--se-color-primary-soft);
+  border-radius: var(--se-radius-pill);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body-large);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body-large);
+}
+
+.step-input__field {
+  display: grid;
+  flex: 1 1 auto;
+  gap: var(--se-spacing-small);
+  min-width: 0;
+}
+
+.step-input__control {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 51px;
+  padding: var(--se-spacing-medium);
+  color: var(--se-color-text-default);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: var(--se-line-height-body);
+}
+
+.step-input__control::placeholder {
+  color: var(--se-color-text-muted);
+}
+
+.step-input__control:focus-visible,
+.step-input__item-actions button:focus-visible {
+  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+  outline-offset: var(--se-spacing-xsmall);
+}
+
+.step-input__control[aria-invalid='true'] {
+  border-color: var(--se-color-danger);
+}
+
+.step-input__control:disabled {
+  color: var(--se-color-disabled-text);
+  background: var(--se-color-disabled-background);
+  cursor: not-allowed;
+}
+
+.step-input__error {
+  margin: 0;
+  color: var(--se-color-danger);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-helper);
+  line-height: var(--se-line-height-helper);
+}
+
+.step-input__item-actions {
+  grid-column: 2;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: var(--se-spacing-small);
+}
+
+.step-input__item-actions button {
+  display: inline-flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: var(--se-spacing-small);
+  color: var(--se-color-primary);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+  cursor: pointer;
+}
+
+.step-input__item-actions ng-icon {
+  display: block;
+  color: currentColor;
+}
+
+.step-input__item-actions .step-input__remove {
+  color: var(--se-color-text-inverse);
+  background: var(--se-color-danger);
+  border-color: var(--se-color-danger);
+}
+
+.step-input__item-actions button:disabled {
+  color: var(--se-color-disabled-text);
+  background: var(--se-color-disabled-background);
+  border-color: var(--se-color-disabled-background);
+  cursor: not-allowed;
+}
+
+.step-input__add {
+  width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .step-input__item-actions button:not(:disabled):hover {
+    background: var(--se-color-primary-soft);
+    border-color: var(--se-color-primary);
+  }
+
+  .step-input__item-actions .step-input__remove:not(:disabled):hover {
+    background: var(--se-color-danger-strong);
+    border-color: var(--se-color-danger-strong);
+  }
+}
+
+@media (min-width: 768px) {
+  .step-input__item {
+    display: flex;
+  }
+
+  .step-input__item-actions {
+    flex-wrap: nowrap;
+  }
+}

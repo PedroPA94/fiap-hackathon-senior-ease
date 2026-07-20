@@ -1,0 +1,75 @@
+<fieldset class="step-input" [disabled]="disabled()">
+  <legend class="step-input__legend">Etapas da atividade</legend>
+
+  <ol class="step-input__list">
+    @for (control of steps().controls; track control; let index = $index) {
+      <li class="step-input__item">
+        <span class="step-input__number" aria-hidden="true">{{ index + 1 }}</span>
+
+        <div class="step-input__field">
+          <label class="sr-only" [for]="stepId(index)">Descrição da etapa {{ index + 1 }}</label>
+          <input
+            class="step-input__control"
+            type="text"
+            [id]="stepId(index)"
+            [formControl]="control"
+            placeholder="Descreva a etapa"
+            [attr.disabled]="disabled() ? '' : null"
+            [attr.aria-invalid]="showError(index) ? true : null"
+            [attr.aria-describedby]="showError(index) ? errorId(index) : null"
+            required
+          />
+
+          @if (showError(index)) {
+            <p class="step-input__error" [id]="errorId(index)" role="alert">Descreva esta etapa.</p>
+          }
+        </div>
+
+        <div
+          class="step-input__item-actions"
+          role="group"
+          [attr.aria-label]="'Ações da etapa ' + (index + 1)"
+        >
+          <button
+            type="button"
+            [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para cima'"
+            [disabled]="disabled() || index === 0"
+            (click)="moveStep(index, index - 1)"
+          >
+            <ng-icon name="matArrowUpwardRound" size="24" aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para baixo'"
+            [disabled]="disabled() || index === steps().length - 1"
+            (click)="moveStep(index, index + 1)"
+          >
+            <ng-icon name="matArrowDownwardRound" size="24" aria-hidden="true" />
+          </button>
+
+          <button
+            class="step-input__remove"
+            type="button"
+            [attr.aria-label]="'Remover etapa ' + (index + 1)"
+            [disabled]="disabled() || steps().length === 1"
+            (click)="removeStep(index)"
+          >
+            <ng-icon name="matDeleteForeverFillRound" size="24" aria-hidden="true" />
+          </button>
+        </div>
+      </li>
+    }
+  </ol>
+
+  <se-button
+    class="step-input__add"
+    type="button"
+    variant="secondary"
+    [disabled]="disabled()"
+    [fullWidth]="true"
+    (click)="addStep()"
+  >
+    + Adicionar etapa
+  </se-button>
+</fieldset>
