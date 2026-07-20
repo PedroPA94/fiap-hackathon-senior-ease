@@ -33,6 +33,27 @@ export const routes: Routes = [
           import('./presentation/features/home/home').then((module) => module.Home),
       },
       {
+        path: 'activities',
+        loadComponent: () =>
+          import('./presentation/features/activities/pages/activities/activities').then(
+            (module) => module.Activities,
+          ),
+      },
+      {
+        path: 'activities/new',
+        loadComponent: () =>
+          import(
+            './presentation/features/activities/pages/activity-create/activity-create'
+          ).then((module) => module.ActivityCreate),
+      },
+      {
+        path: 'activities/:activityId',
+        loadComponent: () =>
+          import(
+            './presentation/features/activities/pages/activity-details/activity-details'
+          ).then((module) => module.ActivityDetails),
+      },
+      {
         path: 'personalization',
         loadComponent: () =>
           import(

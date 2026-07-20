@@ -1,0 +1,50 @@
+<se-card>
+  <article class="activity-item">
+    <div class="activity-item__content">
+      <div class="activity-item__heading">
+        <h2 class="activity-item__title">
+          {{ activity().title }}
+        </h2>
+        <span
+          class="activity-item__status"
+          [class.activity-item__status--inProgress]="status() === 'inProgress'"
+          [class.activity-item__status--completed]="status() === 'completed'"
+        >
+          {{ statusLabel() }}
+        </span>
+      </div>
+
+      @if (activity().description; as description) {
+        <p class="activity-item__description">{{ description }}</p>
+      }
+
+      <dl class="activity-item__metadata">
+        <div>
+          <dt>Data</dt>
+          <dd>{{ formatDate(activity().date) }}</dd>
+        </div>
+
+        @if (activity().time; as time) {
+          <div>
+            <dt>Horário</dt>
+            <dd>{{ time }}</dd>
+          </div>
+        }
+
+        <div>
+          <dt>Progresso</dt>
+          <dd>{{ progress().completedSteps }} de {{ progress().totalSteps }} etapas</dd>
+        </div>
+      </dl>
+    </div>
+
+    <se-button
+      class="activity-item__action"
+      variant="outline"
+      [routerLink]="['/activities', activity().id]"
+      [ariaLabel]="'Ver etapas de ' + activity().title"
+    >
+      Ver etapas
+    </se-button>
+  </article>
+</se-card>

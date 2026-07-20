@@ -21,7 +21,7 @@ const DEFAULT_NAVIGATION_ITEMS: readonly NavigationMenuItem[] = [
   {
     label: 'Atividades',
     route: '/activities',
-    exact: true,
+    exact: false,
   },
 ];
 

@@ -1,0 +1,52 @@
+<section class="activities" aria-labelledby="activities-title">
+  <header class="activities__header">
+    <div>
+      <h1 id="activities-title" class="activities__title">Atividades</h1>
+      <p class="activities__description">Organize suas tarefas e acompanhe cada etapa.</p>
+    </div>
+
+    <se-button class="activities__primary-action" routerLink="/activities/new">
+      Nova atividade
+    </se-button>
+  </header>
+
+  <se-segmented-control
+    class="activities__filters"
+    controlId="activities-filter"
+    label="Filtrar atividades"
+    [options]="filterOptions"
+    [formControl]="filterControl"
+  />
+
+  <div class="activities__results" [attr.aria-busy]="isLoading()">
+    @if (isLoading()) {
+      <p class="activities__status" role="status" aria-live="polite">
+        Carregando atividades...
+      </p>
+    } @else if (errorMessage(); as message) {
+      <se-inline-alert
+        variant="error"
+        actionMessage="Tentar novamente"
+        (actionTriggered)="retry()"
+      >
+        {{ message }}
+      </se-inline-alert>
+    } @else if (activities().length === 0) {
+      <div class="activities__empty">
+        <p>{{ emptyMessage() }}</p>
+
+        @if (selectedFilter() === 'all') {
+          <se-button routerLink="/activities/new">Criar atividade</se-button>
+        }
+      </div>
+    } @else {
+      <ul class="activities__list" aria-label="Lista de atividades">
+        @for (activity of activities(); track activity.id) {
+          <li>
+            <se-activity-list-item [activity]="activity" />
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>

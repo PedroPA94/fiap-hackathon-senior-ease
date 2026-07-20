@@ -29,4 +29,18 @@ describe('app routes onboarding protection', () => {
     expect(shellRoute?.children?.some((route) => route.path === 'home')).toBe(true);
     expect(shellRoute?.children?.some((route) => route.path === 'personalization')).toBe(true);
   });
+
+  it('lazy-loads all activity pages inside AppShell without duplicated guards', () => {
+    const shellRoute = routes.find((route) => route.path === '' && route.children);
+    const activityPaths = ['activities', 'activities/new', 'activities/:activityId'];
+
+    for (const path of activityPaths) {
+      const activityRoute = shellRoute?.children?.find((route) => route.path === path);
+
+      expect(activityRoute).toBeDefined();
+      expect(activityRoute?.loadComponent).toBeTypeOf('function');
+      expect(activityRoute?.component).toBeUndefined();
+      expect(activityRoute?.canActivate).toBeUndefined();
+    }
+  });
 });

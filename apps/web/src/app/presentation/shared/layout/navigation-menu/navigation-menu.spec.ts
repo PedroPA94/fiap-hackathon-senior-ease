@@ -24,6 +24,7 @@ describe('NavigationMenu', () => {
           { path: 'personalization', component: EmptyRoute },
           { path: 'personalization/setup', component: EmptyRoute },
           { path: 'activities', component: EmptyRoute },
+          { path: 'activities/new', component: EmptyRoute },
         ]),
       ],
     }).compileComponents();
@@ -163,6 +164,16 @@ describe('NavigationMenu', () => {
     const personalizationLink = getLinks()[0];
     expect(personalizationLink.classList.contains('navigation-menu__item--active')).toBe(true);
     expect(personalizationLink.getAttribute('aria-current')).toBe('page');
+  });
+
+  it('should keep Activities active on its child routes', async () => {
+    renderComponent();
+
+    await navigateTo('/activities/new');
+
+    const activitiesLink = getLinks()[2];
+    expect(activitiesLink.classList.contains('navigation-menu__item--active')).toBe(true);
+    expect(activitiesLink.getAttribute('aria-current')).toBe('page');
   });
 
   function renderComponent(): void {
