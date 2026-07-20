@@ -1,6 +1,9 @@
 import { currentUserGuard } from './core/guards/current-user-guard';
 import { onboardingCompletedGuard } from './core/guards/onboarding-completed-guard';
 import { onboardingSetupGuard } from './core/guards/onboarding-setup-guard';
+import { ActivityCreate } from './presentation/features/activities/pages/activity-create/activity-create';
+import { ActivityDetails } from './presentation/features/activities/pages/activity-details/activity-details';
+import { Activities } from './presentation/features/activities/pages/activities/activities';
 import { routes } from './app.routes';
 
 describe('app routes onboarding protection', () => {
@@ -42,5 +45,18 @@ describe('app routes onboarding protection', () => {
       expect(activityRoute?.component).toBeUndefined();
       expect(activityRoute?.canActivate).toBeUndefined();
     }
+  });
+
+  it('loads the real activity pages for listing, creation and parameterized details', async () => {
+    const shellRoute = routes.find((route) => route.path === '' && route.children);
+    const activitiesRoute = shellRoute?.children?.find((route) => route.path === 'activities');
+    const createRoute = shellRoute?.children?.find((route) => route.path === 'activities/new');
+    const detailsRoute = shellRoute?.children?.find(
+      (route) => route.path === 'activities/:activityId',
+    );
+
+    expect(await activitiesRoute?.loadComponent?.()).toBe(Activities);
+    expect(await createRoute?.loadComponent?.()).toBe(ActivityCreate);
+    expect(await detailsRoute?.loadComponent?.()).toBe(ActivityDetails);
   });
 });

@@ -19,9 +19,9 @@
 .activity-item__heading {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--se-spacing-small) var(--se-spacing-medium);
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--se-spacing-medium) var(--se-spacing-large);
 }
 
 .activity-item__title {
@@ -37,7 +37,7 @@
 
 .activity-item__status {
   flex: 0 0 auto;
-  padding: var(--se-spacing-xsmall) var(--se-spacing-small);
+  padding: var(--se-spacing-xsmall) var(--se-spacing-medium);
   color: var(--se-color-text-default);
   background: var(--se-color-background-surface-soft);
   border-radius: var(--se-radius-pill);

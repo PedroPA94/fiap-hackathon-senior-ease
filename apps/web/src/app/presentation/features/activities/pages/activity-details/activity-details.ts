@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'se-activity-details',
@@ -6,4 +7,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   styleUrl: '../activity-placeholder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ActivityDetails {}
+export class ActivityDetails {
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly activityId = this.route.snapshot.paramMap.get('activityId');
+}

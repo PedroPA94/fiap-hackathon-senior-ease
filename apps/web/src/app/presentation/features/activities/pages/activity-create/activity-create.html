@@ -1,4 +1,84 @@
-<section class="activity-placeholder" aria-labelledby="activity-create-title">
-  <h1 id="activity-create-title">Nova atividade</h1>
-  <p>O fluxo de criação de atividades será implementado na próxima etapa.</p>
+<section class="activity-create" aria-labelledby="activity-create-title">
+  <header class="activity-create__header">
+    <h1 id="activity-create-title">Nova atividade</h1>
+    <p>Crie uma atividade com etapas guiadas.</p>
+  </header>
+
+  <form
+    class="activity-create__form"
+    [formGroup]="form"
+    [attr.aria-busy]="isSubmitting()"
+    (ngSubmit)="submit()"
+  >
+    <div class="activity-create__sections">
+      <se-card class="activity-create__card">
+        <section class="activity-create__details" aria-label="Dados da atividade">
+          <se-text-input
+            inputId="activity-title"
+            label="Título"
+            placeholder="Digite o título da atividade"
+            formControlName="title"
+            [required]="true"
+            [autofocus]="true"
+            [invalid]="showControlError(form.controls.title)"
+            errorMessage="Digite um nome para a atividade."
+          />
+
+          <div class="activity-create__schedule">
+            <se-text-input
+              inputId="activity-date"
+              label="Data"
+              type="date"
+              formControlName="date"
+              [required]="true"
+              [invalid]="showControlError(form.controls.date)"
+              errorMessage="Escolha uma data para a atividade."
+            />
+
+            <se-text-input
+              inputId="activity-time"
+              label="Hora (opcional)"
+              type="time"
+              formControlName="time"
+            />
+          </div>
+
+          <div class="activity-create__textarea">
+            <label for="activity-description">Descrição (opcional)</label>
+            <textarea
+              id="activity-description"
+              formControlName="description"
+              placeholder="Descreva a atividade..."
+              rows="4"
+            ></textarea>
+          </div>
+        </section>
+      </se-card>
+
+      <se-card class="activity-create__card">
+        <se-step-input
+          controlId="activity-step"
+          [steps]="form.controls.steps"
+          [disabled]="isSubmitting()"
+        />
+      </se-card>
+    </div>
+
+    @if (errorMessage(); as message) {
+      <se-inline-alert variant="error">{{ message }}</se-inline-alert>
+    }
+
+    <div class="activity-create__actions">
+      <se-button type="submit" [loading]="isSubmitting()">Salvar atividade</se-button>
+
+      <se-button
+        type="button"
+        variant="danger-outline"
+        routerLink="/activities"
+        [disabled]="isSubmitting()"
+      >
+        Cancelar
+      </se-button>
+    </div>
+  </form>
 </section>

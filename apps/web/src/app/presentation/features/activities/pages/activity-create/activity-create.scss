@@ -1,0 +1,119 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.activity-create {
+  display: grid;
+  gap: var(--se-spacing-large);
+  width: 100%;
+  max-width: 75rem;
+  margin-inline: auto;
+  padding: var(--se-spacing-large);
+}
+
+.activity-create__header {
+  display: grid;
+  gap: var(--se-spacing-small);
+}
+
+.activity-create__header h1,
+.activity-create__header p {
+  margin: 0;
+}
+
+.activity-create__header h1 {
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-heading);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-heading);
+}
+
+.activity-create__header p {
+  color: var(--se-color-text-muted);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body-large);
+  line-height: var(--se-line-height-body-large);
+}
+
+.activity-create__form,
+.activity-create__sections,
+.activity-create__details,
+.activity-create__schedule,
+.activity-create__actions {
+  display: grid;
+  gap: var(--se-spacing-large);
+  min-width: 0;
+}
+
+.activity-create__textarea {
+  display: grid;
+  gap: var(--se-spacing-small);
+}
+
+.activity-create__textarea label {
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body);
+}
+
+.activity-create__textarea textarea {
+  width: 100%;
+  min-height: 7rem;
+  padding: var(--se-spacing-medium);
+  resize: vertical;
+  color: var(--se-color-text-default);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid)
+    var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body);
+  line-height: var(--se-line-height-body);
+}
+
+.activity-create__textarea textarea::placeholder {
+  color: var(--se-color-text-muted);
+}
+
+.activity-create__textarea textarea:focus-visible {
+  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+  outline-offset: var(--se-spacing-xsmall);
+}
+
+.activity-create__textarea textarea:disabled {
+  color: var(--se-color-disabled-text);
+  background: var(--se-color-disabled-background);
+  cursor: not-allowed;
+}
+
+@media (min-width: 576px) {
+  .activity-create {
+    padding: var(--se-spacing-xlarge);
+  }
+
+  .activity-create__schedule,
+  .activity-create__actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 992px) {
+  .activity-create {
+    gap: var(--se-spacing-xlarge);
+    margin: 0;
+  }
+
+  .activity-create__sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--se-spacing-xlarge);
+  }
+
+  .activity-create__actions {
+    width: calc((100% - var(--se-spacing-xlarge)) / 2);
+  }
+}

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormArray } from '@angular/forms';
 
@@ -10,11 +10,11 @@ import {
 
 @Component({
   imports: [StepInput],
-  template: `<se-step-input [steps]="steps" [disabled]="disabled" />`,
+  template: `<se-step-input [steps]="steps" [disabled]="disabled()" />`,
 })
 class StepInputHost {
   readonly steps: ActivityStepsFormArray = new FormArray([createActivityStepControl()]);
-  disabled = false;
+  readonly disabled = signal(false);
 }
 
 describe('StepInput', () => {
@@ -109,7 +109,7 @@ describe('StepInput', () => {
     expect(item.querySelector('.step-input__number')?.textContent).toContain('1');
     expect(item.querySelector('.step-input__control')).toBe(getInputs()[0]);
     expect(item.querySelectorAll('.step-input__item-actions button')).toHaveLength(3);
-    expect(getInputs()[0].placeholder).toBe('Descreva esta etapa');
+    expect(getInputs()[0].placeholder).toBe('Descreva a etapa');
   });
 
   it('renders an enabled danger delete action when more than one step exists', () => {
@@ -119,7 +119,7 @@ describe('StepInput', () => {
     expect(removeButton.disabled).toBe(false);
     expect(removeButton.classList.contains('step-input__remove')).toBe(true);
     expect(removeButton.querySelector('ng-icon')?.getAttribute('name')).toBe(
-      'matDeleteForeverRound',
+      'matDeleteForeverFillRound',
     );
   });
 
@@ -129,7 +129,7 @@ describe('StepInput', () => {
     expect(icons.map((icon) => icon.getAttribute('name'))).toEqual([
       'matArrowUpwardRound',
       'matArrowDownwardRound',
-      'matDeleteForeverRound',
+      'matDeleteForeverFillRound',
     ]);
     expect(icons.every((icon) => icon.getAttribute('aria-hidden') === 'true')).toBe(true);
     expect(fixture.nativeElement.querySelector('.step-input__item-actions img')).toBeNull();
@@ -148,10 +148,10 @@ describe('StepInput', () => {
 
   it('disables editing and actions during submission', () => {
     addSteps('Primeiro', 'Segundo');
-    host.disabled = true;
+    host.disabled.set(true);
     fixture.detectChanges();
 
-    expect(getInputs().every((input) => input.disabled)).toBe(true);
+    expect(getInputs().every((input) => input.matches(':disabled'))).toBe(true);
     expect(getButtons().every((button) => button.disabled)).toBe(true);
   });
 
@@ -171,17 +171,20 @@ describe('StepInput', () => {
     addSteps('Primeiro', 'Segundo', '');
     host.steps.at(2).markAsTouched();
     fixture.detectChanges();
-    const ids = Array.from(fixture.nativeElement.querySelectorAll('[id]')).map(
-      (element: Element) => element.id,
+    const ids = Array.from<Element>(fixture.nativeElement.querySelectorAll('[id]')).map(
+      (element) => element.id,
     );
 
     expect(new Set(ids).size).toBe(ids.length);
   });
 
   function addSteps(...values: string[]): void {
-    host.steps.clear();
-    values.forEach((value) => host.steps.push(createActivityStepControl(value)));
-    fixture.detectChanges();
+    setStepValue(0, values[0] ?? '');
+
+    values.slice(1).forEach((value, index) => {
+      clickButton('+ Adicionar etapa');
+      setStepValue(index + 1, value);
+    });
   }
 
   function setStepValue(index: number, value: string): void {
