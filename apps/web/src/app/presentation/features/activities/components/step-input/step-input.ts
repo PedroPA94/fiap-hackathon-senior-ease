@@ -41,6 +41,9 @@ export class StepInput {
   readonly steps = input.required<ActivityStepsFormArray>();
   readonly controlId = input('activity-steps');
   readonly disabled = input(false, { transform: booleanAttribute });
+  readonly reorderable = input(true, {
+    transform: booleanAttribute,
+  });
 
   protected addStep(): void {
     if (this.disabled()) {

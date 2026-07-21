@@ -30,23 +30,25 @@
           role="group"
           [attr.aria-label]="'Ações da etapa ' + (index + 1)"
         >
-          <button
-            type="button"
-            [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para cima'"
-            [disabled]="disabled() || index === 0"
-            (click)="moveStep(index, index - 1)"
-          >
-            <ng-icon name="matArrowUpwardRound" size="24" aria-hidden="true" />
-          </button>
+          @if (reorderable()) {
+            <button
+              type="button"
+              [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para cima'"
+              [disabled]="disabled() || index === 0"
+              (click)="moveStep(index, index - 1)"
+            >
+              <ng-icon name="matArrowUpwardRound" size="24" aria-hidden="true" />
+            </button>
 
-          <button
-            type="button"
-            [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para baixo'"
-            [disabled]="disabled() || index === steps().length - 1"
-            (click)="moveStep(index, index + 1)"
-          >
-            <ng-icon name="matArrowDownwardRound" size="24" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              [attr.aria-label]="'Mover etapa ' + (index + 1) + ' para baixo'"
+              [disabled]="disabled() || index === steps().length - 1"
+              (click)="moveStep(index, index + 1)"
+            >
+              <ng-icon name="matArrowDownwardRound" size="24" aria-hidden="true" />
+            </button>
+          }
 
           <button
             class="step-input__remove"

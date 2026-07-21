@@ -1,7 +1,18 @@
-<section class="activity-create" aria-labelledby="activity-create-title">
+<section
+  class="activity-create"
+  [class.activity-create--basic]="!isAdvancedMode()"
+  [class.activity-create--advanced]="isAdvancedMode()"
+  aria-labelledby="activity-create-title"
+>
   <header class="activity-create__header">
     <h1 id="activity-create-title">Nova atividade</h1>
-    <p>Crie uma atividade com etapas guiadas.</p>
+    <p>
+      @if (isAdvancedMode()) {
+        Crie uma atividade com etapas guiadas.
+      } @else {
+        Dê um nome à atividade e informe os passos.
+      }
+    </p>
   </header>
 
   <form
@@ -24,7 +35,10 @@
             errorMessage="Digite um nome para a atividade."
           />
 
-          <div class="activity-create__schedule">
+          <div
+            class="activity-create__schedule"
+            [class.activity-create__schedule--single]="!isAdvancedMode()"
+          >
             <se-text-input
               inputId="activity-date"
               label="Data"
@@ -35,23 +49,28 @@
               errorMessage="Escolha uma data para a atividade."
             />
 
-            <se-text-input
-              inputId="activity-time"
-              label="Hora (opcional)"
-              type="time"
-              formControlName="time"
-            />
+            @if (isAdvancedMode()) {
+              <se-text-input
+                inputId="activity-time"
+                label="Hora (opcional)"
+                type="time"
+                formControlName="time"
+              />
+            }
           </div>
 
-          <div class="activity-create__textarea">
-            <label for="activity-description">Descrição (opcional)</label>
-            <textarea
-              id="activity-description"
-              formControlName="description"
-              placeholder="Descreva a atividade..."
-              rows="4"
-            ></textarea>
-          </div>
+          @if (isAdvancedMode()) {
+            <div class="activity-create__textarea">
+              <label for="activity-description"> Descrição (opcional) </label>
+
+              <textarea
+                id="activity-description"
+                formControlName="description"
+                placeholder="Descreva a atividade..."
+                rows="4"
+              ></textarea>
+            </div>
+          }
         </section>
       </se-card>
 
@@ -60,6 +79,7 @@
           controlId="activity-step"
           [steps]="form.controls.steps"
           [disabled]="isSubmitting()"
+          [reorderable]="isAdvancedMode()"
         />
       </se-card>
     </div>

@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -24,6 +31,7 @@ import {
   StepInput,
   type ActivityStepsFormArray,
 } from '../../components/step-input/step-input';
+import { ThemeService } from '../../../../../application/services/theme.service';
 
 type ActivityCreateForm = FormGroup<{
   title: FormControl<string>;
@@ -38,21 +46,14 @@ const CREATE_ERROR_MESSAGE =
 
 @Component({
   selector: 'se-activity-create',
-  imports: [
-    ReactiveFormsModule,
-    RouterLink,
-    Button,
-    Card,
-    InlineAlert,
-    StepInput,
-    TextInput,
-  ],
+  imports: [ReactiveFormsModule, RouterLink, Button, Card, InlineAlert, StepInput, TextInput],
   templateUrl: './activity-create.html',
   styleUrl: './activity-create.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ActivityCreate {
   private readonly activityService = inject(ActivityService);
+  private readonly themeService = inject(ThemeService);
   private readonly toastService = inject(ToastService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -69,6 +70,9 @@ export class ActivityCreate {
     time: new FormControl('', { nonNullable: true }),
     steps: new FormArray([createActivityStepControl()]),
   });
+
+  protected readonly interfaceMode = this.themeService.interfaceMode;
+  protected readonly isAdvancedMode = computed(() => this.interfaceMode() === 'advanced');
 
   protected submit(): void {
     if (this.isSubmitting()) {

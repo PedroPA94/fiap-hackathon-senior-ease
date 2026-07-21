@@ -67,8 +67,7 @@
   resize: vertical;
   color: var(--se-color-text-default);
   background: var(--se-color-background-surface);
-  border: var(--se-border-width-regular) var(--se-border-style-solid)
-    var(--se-color-border-default);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
   border-radius: var(--se-radius-medium);
   font-family: var(--se-font-family);
   font-size: var(--se-font-size-body);
@@ -99,6 +98,10 @@
   .activity-create__actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .activity-create__schedule--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (min-width: 992px) {
@@ -107,13 +110,26 @@
     margin: 0;
   }
 
-  .activity-create__sections {
+  .activity-create--advanced .activity-create__sections {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
     gap: var(--se-spacing-xlarge);
   }
 
-  .activity-create__actions {
+  .activity-create--basic {
+    max-width: 52rem;
+  }
+
+  .activity-create--basic .activity-create__sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .activity-create--advanced .activity-create__actions {
     width: calc((100% - var(--se-spacing-xlarge)) / 2);
+  }
+
+  .activity-create--basic .activity-create__actions {
+    width: 100%;
+    max-width: 32rem;
   }
 }
