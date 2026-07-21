@@ -21,6 +21,7 @@ import { Card } from '../../shared/ui/card/card';
 import { InlineAlert } from '../../shared/feedback/inline-alert/inline-alert';
 import { ActivityService } from '../../../application/services/activity.service';
 import { formatRelativeDate } from '../../shared/utils/format-relative-date';
+import { ThemeService } from '../../../application/services/theme.service';
 
 @Component({
   selector: 'se-home',
@@ -32,6 +33,7 @@ import { formatRelativeDate } from '../../shared/utils/format-relative-date';
 })
 export class Home implements OnInit {
   private readonly activityService = inject(ActivityService);
+  private readonly themeService = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly overview = signal<HomeActivityOverview | null>(null);
@@ -45,6 +47,12 @@ export class Home implements OnInit {
         completed: 0,
       },
   );
+  protected readonly todayOpenActivities = computed(
+    () => this.todaySummary().pending + this.todaySummary().inProgress,
+  );
+
+  protected readonly interfaceMode = this.themeService.interfaceMode;
+  protected readonly isAdvancedMode = computed(() => this.interfaceMode() === 'advanced');
 
   ngOnInit(): void {
     this.loadOverview();
@@ -98,5 +106,17 @@ export class Home implements OnInit {
 
   protected completedLabel(count: number): string {
     return `${count} ${count === 1 ? 'concluída' : 'concluídas'}`;
+  }
+
+  protected basicTodaySummaryLabel(count: number): string {
+    if (count === 0) {
+      return 'Você não possui atividades para fazer hoje.';
+    }
+
+    if (count === 1) {
+      return 'Você tem 1 atividade para fazer hoje.';
+    }
+
+    return `Você tem ${count} atividades para fazer hoje.`;
   }
 }

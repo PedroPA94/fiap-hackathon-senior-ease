@@ -49,6 +49,7 @@
 .home-card__title,
 .recent-history__title {
   margin: 0;
+  margin-bottom: var(--se-spacing-large);
   color: var(--se-color-text-default);
   font-family: var(--se-font-family);
   font-size: var(--se-font-size-title);
@@ -76,6 +77,10 @@
 .home__quick-actions {
   display: grid;
   gap: var(--se-spacing-medium);
+}
+
+.home__quick-actions--single {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .recent-history {
@@ -123,6 +128,10 @@
     grid-template-columns:
       minmax(0, 15rem)
       minmax(0, 15rem);
+  }
+
+  .home__quick-actions--single {
+    grid-template-columns: minmax(0, 15rem);
   }
 
   .home-card__action {

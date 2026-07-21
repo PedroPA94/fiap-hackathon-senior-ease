@@ -1,7 +1,12 @@
 <section class="home" aria-labelledby="home-title">
   <h1 id="home-title" class="home__title">Início</h1>
 
-  <div class="home__content" [attr.aria-busy]="isLoading()">
+  <div
+    class="home__content"
+    [class.home__content--basic]="!isAdvancedMode()"
+    [class.home__content--advanced]="isAdvancedMode()"
+    [attr.aria-busy]="isLoading()"
+  >
     @if (isLoading()) {
       <p class="home__status" role="status" aria-live="polite">
         Carregando dados da página inicial...
@@ -52,46 +57,62 @@
           <div>
             <h2 id="day-summary-title" class="home-card__title">Resumo do dia</h2>
 
-            <p class="home-card__description">
-              {{ pendingLabel(todaySummary().pending) }} • {{ todaySummary().inProgress }} em
-              andamento •
-              {{ completedLabel(todaySummary().completed) }}
-            </p>
+            @if (isAdvancedMode()) {
+              <p class="home-card__description">
+                {{ pendingLabel(todaySummary().pending) }}
+                <span aria-hidden="true"> • </span>
+                {{ todaySummary().inProgress }} em andamento
+                <span aria-hidden="true"> • </span>
+                {{ completedLabel(todaySummary().completed) }}
+              </p>
+            } @else {
+              <p class="home-card__description">
+                {{ basicTodaySummaryLabel(todayOpenActivities()) }}
+              </p>
+            }
           </div>
         </section>
       </se-card>
     </div>
 
-    <nav class="home__quick-actions" aria-label="Ações rápidas">
+    <nav
+      class="home__quick-actions"
+      [class.home__quick-actions--single]="!isAdvancedMode()"
+      aria-label="Ações rápidas"
+    >
       <se-button routerLink="/activities/new" [fullWidth]="true"> Nova atividade </se-button>
 
-      <se-button variant="secondary" routerLink="/personalization" [fullWidth]="true">
-        Ajustar visual
-      </se-button>
+      @if (isAdvancedMode()) {
+        <se-button variant="secondary" routerLink="/personalization" [fullWidth]="true">
+          Ajustar visual
+        </se-button>
+      }
     </nav>
 
-    <se-card class="home__recent-history">
-      <section class="recent-history" aria-labelledby="recent-history-title">
-        <h2 id="recent-history-title" class="recent-history__title">Histórico recente</h2>
+    @if (isAdvancedMode()) {
+      <se-card class="home__recent-history">
+        <section class="recent-history" aria-labelledby="recent-history-title">
+          <h2 id="recent-history-title" class="recent-history__title">Histórico recente</h2>
 
-        @if (overview()?.recentCompletedActivities; as recentActivities) {
-          @if (recentActivities.length === 0) {
+          @if (overview()?.recentCompletedActivities; as recentActivities) {
+            @if (recentActivities.length === 0) {
+              <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
+            } @else {
+              <ul class="recent-history__list">
+                @for (activity of recentActivities; track activity.id) {
+                  <li class="recent-history__item">
+                    Você concluiu
+                    <strong class="recent-history__activity-title"> “{{ activity.title }}” </strong>
+                    {{ formatCompletionDate(activity.updatedAt) }}.
+                  </li>
+                }
+              </ul>
+            }
+          } @else if (!isLoading()) {
             <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
-          } @else {
-            <ul class="recent-history__list">
-              @for (activity of recentActivities; track activity.id) {
-                <li class="recent-history__item">
-                  Você concluiu
-                  <strong class="recent-history__activity-title">“{{ activity.title }}”</strong>
-                  {{ formatCompletionDate(activity.updatedAt) }}.
-                </li>
-              }
-            </ul>
           }
-        } @else if (!isLoading()) {
-          <p class="recent-history__empty">Você ainda não concluiu nenhuma atividade.</p>
-        }
-      </section>
-    </se-card>
+        </section>
+      </se-card>
+    }
   </div>
 </section>
