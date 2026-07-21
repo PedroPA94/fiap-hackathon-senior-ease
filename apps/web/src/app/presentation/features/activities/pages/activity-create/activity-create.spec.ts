@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
@@ -9,6 +10,7 @@ import {
   ActivityService,
   type CreateCurrentUserActivityInput,
 } from '../../../../../application/services/activity.service';
+import { ThemeService } from '../../../../../application/services/theme.service';
 import { ToastService } from '../../../../shared/feedback/toast/toast.service';
 import { ActivityCreate } from './activity-create';
 
@@ -27,6 +29,10 @@ describe('ActivityCreate', () => {
       providers: [
         provideRouter([]),
         { provide: ActivityService, useValue: activityService },
+        {
+          provide: ThemeService,
+          useValue: { interfaceMode: signal<'basic' | 'advanced'>('advanced') },
+        },
         { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
@@ -198,7 +204,7 @@ describe('ActivityCreate', () => {
     expect(titleField.querySelector('.text-input__required')).toBeTruthy();
     expect(dateField.querySelector('.text-input__required')).toBeTruthy();
     expect(timeField.querySelector('.text-input__required')).toBeNull();
-    expect(descriptionLabel.textContent).toBe('Descrição (opcional)');
+    expect(descriptionLabel.textContent.trim()).toBe('Descrição (opcional)');
   });
 
   function createComponent(): void {

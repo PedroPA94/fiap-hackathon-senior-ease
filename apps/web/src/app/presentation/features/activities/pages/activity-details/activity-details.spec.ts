@@ -29,7 +29,7 @@ describe('ActivityDetails', () => {
       completeActivity: vi.fn(() => of(makeCompletedActivity())),
       deleteActivity: vi.fn(() => of(undefined)),
     };
-    interfaceMode = signal<'basic' | 'advanced'>('basic');
+    interfaceMode = signal<'basic' | 'advanced'>('advanced');
     enhancedFeedback = signal(true);
     confirmCriticalActions = signal(true);
     themeService = {

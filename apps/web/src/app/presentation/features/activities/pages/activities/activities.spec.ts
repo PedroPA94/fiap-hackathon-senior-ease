@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
@@ -6,6 +7,7 @@ import { Observable, of, Subject, throwError } from 'rxjs';
 import type { Mock } from 'vitest';
 
 import { ActivityService } from '../../../../../application/services/activity.service';
+import { ThemeService } from '../../../../../application/services/theme.service';
 import { Activities } from './activities';
 
 describe('Activities', () => {
@@ -19,7 +21,14 @@ describe('Activities', () => {
 
     await TestBed.configureTestingModule({
       imports: [Activities],
-      providers: [provideRouter([]), { provide: ActivityService, useValue: activityService }],
+      providers: [
+        provideRouter([]),
+        { provide: ActivityService, useValue: activityService },
+        {
+          provide: ThemeService,
+          useValue: { interfaceMode: signal<'basic' | 'advanced'>('advanced') },
+        },
+      ],
     }).compileComponents();
   });
 
