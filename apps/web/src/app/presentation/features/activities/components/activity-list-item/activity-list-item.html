@@ -1,10 +1,11 @@
 <se-card>
-  <article class="activity-item">
+  <article class="activity-item" [class.activity-item--compact]="compact()">
     <div class="activity-item__content">
       <div class="activity-item__heading">
         <h2 class="activity-item__title">
           {{ activity().title }}
         </h2>
+
         <span
           class="activity-item__status"
           [class.activity-item__status--inProgress]="status() === 'inProgress'"
@@ -14,8 +15,10 @@
         </span>
       </div>
 
-      @if (activity().description; as description) {
-        <p class="activity-item__description">{{ description }}</p>
+      @if (!compact() && activity().description; as description) {
+        <p class="activity-item__description">
+          {{ description }}
+        </p>
       }
 
       <dl class="activity-item__metadata">
@@ -31,10 +34,17 @@
           </div>
         }
 
-        <div>
-          <dt>Progresso</dt>
-          <dd>{{ progress().completedSteps }} de {{ progress().totalSteps }} etapas</dd>
-        </div>
+        @if (!compact()) {
+          <div>
+            <dt>Progresso</dt>
+            <dd>
+              {{ progress().completedSteps }}
+              de
+              {{ progress().totalSteps }}
+              etapas
+            </dd>
+          </div>
+        }
       </dl>
     </div>
 

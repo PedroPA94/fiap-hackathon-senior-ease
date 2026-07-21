@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
+  effect,
   inject,
   OnInit,
   signal,
@@ -20,6 +22,7 @@ import {
   type SegmentedControlOption,
 } from '../../../../shared/ui/segmented-control/segmented-control';
 import { ActivityListItem } from '../../components/activity-list-item/activity-list-item';
+import { ThemeService } from '../../../../../application/services/theme.service';
 
 type ActivityFilterOption = SegmentedControlOption & { value: ActivityListFilter };
 
@@ -30,6 +33,20 @@ const EMPTY_MESSAGES: Readonly<Record<ActivityListFilter, string>> = {
   inProgress: 'Você não possui atividades em andamento.',
   completed: 'Você ainda não concluiu nenhuma atividade.',
 };
+
+const BASIC_FILTER_OPTIONS: readonly ActivityFilterOption[] = [
+  { value: 'all', label: 'Todas' },
+  { value: 'today', label: 'Hoje' },
+  { value: 'completed', label: 'Concluídas' },
+];
+
+const ADVANCED_FILTER_OPTIONS: readonly ActivityFilterOption[] = [
+  { value: 'all', label: 'Todas' },
+  { value: 'today', label: 'Hoje' },
+  { value: 'pending', label: 'Não iniciadas' },
+  { value: 'inProgress', label: 'Em andamento' },
+  { value: 'completed', label: 'Concluídas' },
+];
 
 @Component({
   selector: 'se-activities',
@@ -47,16 +64,10 @@ const EMPTY_MESSAGES: Readonly<Record<ActivityListFilter, string>> = {
 })
 export class Activities implements OnInit {
   private readonly activityService = inject(ActivityService);
+  private readonly themeService = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly retryRequested = new Subject<void>();
 
-  protected readonly filterOptions: readonly ActivityFilterOption[] = [
-    { value: 'all', label: 'Todas' },
-    { value: 'today', label: 'Hoje' },
-    { value: 'pending', label: 'Não iniciadas' },
-    { value: 'inProgress', label: 'Em andamento' },
-    { value: 'completed', label: 'Concluídas' },
-  ];
   protected readonly filterControl = new FormControl<ActivityListFilter>('all', {
     nonNullable: true,
   });
@@ -64,6 +75,26 @@ export class Activities implements OnInit {
   protected readonly activities = signal<readonly Activity[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly interfaceMode = this.themeService.interfaceMode;
+  protected readonly isAdvancedMode = computed(() => this.interfaceMode() === 'advanced');
+  protected readonly filterOptions = computed<readonly ActivityFilterOption[]>(() =>
+    this.isAdvancedMode() ? ADVANCED_FILTER_OPTIONS : BASIC_FILTER_OPTIONS,
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.isAdvancedMode()) {
+        return;
+      }
+
+      const selectedFilter = this.filterControl.value;
+
+      if (selectedFilter === 'pending' || selectedFilter === 'inProgress') {
+        this.filterControl.setValue('all');
+      }
+    });
+  }
 
   ngOnInit(): void {
     const filterChanges = this.filterControl.valueChanges.pipe(

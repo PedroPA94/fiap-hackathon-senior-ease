@@ -16,6 +16,7 @@ import { getActivityStatusLabel } from '../../utils/activity-status-label';
 })
 export class ActivityListItem {
   readonly activity = input.required<Activity>();
+  readonly compact = input(false);
 
   protected readonly status = computed(() => resolveActivityStatus(this.activity()));
   protected readonly statusLabel = computed(() => getActivityStatusLabel(this.status()));

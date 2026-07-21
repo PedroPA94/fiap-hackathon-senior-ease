@@ -10,10 +10,18 @@
   min-width: 0;
 }
 
+.activity-item--compact {
+  gap: var(--se-spacing-medium);
+}
+
 .activity-item__content {
   display: grid;
   gap: var(--se-spacing-medium);
   min-width: 0;
+}
+
+.activity-item--compact .activity-item__content {
+  gap: var(--se-spacing-small);
 }
 
 .activity-item__heading {
