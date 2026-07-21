@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { provideRouter, RouterLink } from '@angular/router';
 import type { Activity, HomeActivityOverview } from '@senior-ease/core';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import type { Mock } from 'vitest';
@@ -64,12 +65,25 @@ describe('Home', () => {
     expect(getText()).not.toContain('Enviar documento para secretaria');
   });
 
+  it('links Ver etapas to the real next activity ID', () => {
+    createComponent();
+    const link = fixture.debugElement
+      .queryAll(By.directive(RouterLink))
+      .find((element) => element.nativeElement.textContent?.includes('Ver etapas'));
+
+    expect(link?.injector.get(RouterLink).urlTree?.toString()).toBe('/activities/next-activity');
+    expect(link?.query(By.css('button')).nativeElement.getAttribute('aria-label')).toBe(
+      'Ver etapas de Consulta médica',
+    );
+  });
+
   it('renders a welcoming empty state when there is no next activity', () => {
     activityService.getHomeOverview.mockReturnValue(of(makeOverview({ nextActivity: null })));
 
     createComponent();
 
     expect(getText()).toContain('Você não possui atividades pendentes.');
+    expect(getText()).not.toContain('Ver etapas');
   });
 
   it('renders the recent completed activities as a semantic list', () => {

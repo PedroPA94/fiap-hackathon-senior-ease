@@ -1,0 +1,105 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.activity-step-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--se-spacing-medium);
+  align-items: center;
+  min-width: 0;
+  padding: var(--se-spacing-medium);
+  color: var(--se-color-text-default);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+}
+
+.activity-step-item--current {
+  background: var(--se-color-primary-soft);
+  border-color: var(--se-color-primary);
+  border-width: var(--se-border-width-strong);
+}
+
+.activity-step-item--completed {
+  border-color: var(--se-color-success);
+}
+
+.activity-step-item--pending {
+  color: var(--se-color-text-muted);
+}
+
+.activity-step-item__indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--se-color-primary);
+  background: var(--se-color-background-surface-soft);
+  border-radius: var(--se-radius-pill);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body-large);
+  font-weight: var(--se-font-weight-bold);
+}
+
+.activity-step-item--completed .activity-step-item__indicator {
+  color: var(--se-color-text-inverse);
+  background: var(--se-color-success);
+}
+
+.activity-step-item__indicator ng-icon {
+  display: block;
+  color: currentColor;
+}
+
+.activity-step-item__content {
+  display: grid;
+  gap: var(--se-spacing-xsmall);
+  min-width: 0;
+}
+
+.activity-step-item__description,
+.activity-step-item__status {
+  margin: 0;
+  font-family: var(--se-font-family);
+  overflow-wrap: anywhere;
+}
+
+.activity-step-item__description {
+  font-size: var(--se-font-size-body-large);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body-large);
+}
+
+.activity-step-item__status {
+  color: var(--se-color-text-muted);
+  font-size: var(--se-font-size-helper);
+  line-height: var(--se-line-height-helper);
+}
+
+.activity-step-item--completed .activity-step-item__status {
+  color: var(--se-color-success);
+}
+
+.activity-step-item--current .activity-step-item__status {
+  color: var(--se-color-primary);
+  font-weight: var(--se-font-weight-bold);
+}
+
+.activity-step-item__action {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .activity-step-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .activity-step-item__action {
+    grid-column: auto;
+    min-width: 11rem;
+  }
+}

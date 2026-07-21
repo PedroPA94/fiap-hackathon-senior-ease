@@ -1,4 +1,154 @@
-<section class="activity-placeholder" aria-labelledby="activity-details-title">
-  <h1 id="activity-details-title">Detalhes da atividade</h1>
-  <p>Os detalhes e as etapas desta atividade serão exibidos aqui.</p>
+<section class="activity-details" [attr.aria-busy]="loadState().kind === 'loading'">
+  <a class="activity-details__back" routerLink="/activities">
+    <ng-icon name="matArrowBackRound" size="24" aria-hidden="true" />
+    Voltar para atividades
+  </a>
+
+  @if (loadState().kind === 'loading') {
+    <div class="activity-details__state">
+      <h1>Detalhes da atividade</h1>
+      <p role="status" aria-live="polite">Carregando atividade...</p>
+    </div>
+  } @else if (loadState().kind === 'notFound') {
+    <div class="activity-details__state">
+      <h1>Atividade não encontrada</h1>
+      <p>Ela pode ter sido removida ou não pertence ao usuário atual.</p>
+      <se-button routerLink="/activities" [fullWidth]="false">Voltar para atividades</se-button>
+    </div>
+  } @else if (loadState().kind === 'error') {
+    <div class="activity-details__state">
+      <h1>Detalhes da atividade</h1>
+      <se-inline-alert
+        variant="error"
+        [actionMessage]="currentActivityId() ? 'Tentar novamente' : null"
+        (actionTriggered)="retryLoad()"
+      >
+        Não foi possível carregar esta atividade.
+      </se-inline-alert>
+    </div>
+  } @else if (activityView(); as view) {
+    <header class="activity-details__header">
+      <div class="activity-details__heading">
+        <h1>{{ view.activity.title }}</h1>
+
+        @if (view.activity.description; as description) {
+          <p>{{ description }}</p>
+        }
+      </div>
+
+      <dl class="activity-details__metadata">
+        <div>
+          <dt>Status</dt>
+          <dd
+            #activityStatus
+            tabindex="-1"
+            class="activity-details__status"
+            [class.activity-details__status--in-progress]="view.status === 'inProgress'"
+            [class.activity-details__status--completed]="view.status === 'completed'"
+          >
+            {{ view.statusLabel }}
+          </dd>
+        </div>
+        <div>
+          <dt>Data</dt>
+          <dd>{{ formatDate(view.activity.date) }}</dd>
+        </div>
+        @if (view.activity.time; as time) {
+          <div>
+            <dt>Horário</dt>
+            <dd>{{ time }}</dd>
+          </div>
+        }
+      </dl>
+    </header>
+
+    @if (positiveMessage(); as message) {
+      <se-inline-alert #feedback tabindex="-1" variant="success">
+        {{ message }}
+      </se-inline-alert>
+    }
+
+    <div class="activity-details__layout">
+      <se-card>
+        <div class="activity-details__progress">
+          <div>
+            <h2 id="activity-progress-heading">Progresso</h2>
+            <p>{{ view.progressLabel }}</p>
+          </div>
+
+          <progress
+            [max]="view.progress.totalSteps"
+            [value]="view.progress.completedSteps"
+            [attr.aria-valuetext]="view.progressLabel"
+            aria-labelledby="activity-progress-heading"
+          ></progress>
+        </div>
+
+        <section class="activity-details__steps">
+          <h2>Etapas</h2>
+          <ol>
+            @for (step of view.steps; track step.id; let position = $index) {
+              <li>
+                <se-activity-step-item
+                  [step]="step"
+                  [position]="position + 1"
+                  [loading]="isStepProcessing(step.id)"
+                  [actionsDisabled]="isProcessing()"
+                  (completionRequested)="completeStep($event)"
+                />
+              </li>
+            }
+          </ol>
+        </section>
+      </se-card>
+
+      <aside class="activity-details__actions">
+        <se-card>
+          <div class="activity-details__actions-content">
+            <h2>Ações</h2>
+
+            @if (actionErrorMessage(); as actionError) {
+              <se-inline-alert variant="error">{{ actionError }}</se-inline-alert>
+            }
+
+            @if (view.status !== 'completed') {
+              <se-button
+                [loading]="isProcessingAction('complete')"
+                [disabled]="isProcessing()"
+                [fullWidth]="true"
+                (click)="requestCompleteActivity()"
+              >
+                Concluir atividade
+              </se-button>
+
+              <se-button
+                variant="danger-outline"
+                [loading]="isProcessingAction('delete')"
+                [disabled]="isProcessing()"
+                [fullWidth]="true"
+                (click)="requestDelete()"
+              >
+                Excluir atividade
+              </se-button>
+            } @else {
+              <p class="activity-details__completed-message">Todas as etapas foram concluídas.</p>
+            }
+          </div>
+        </se-card>
+      </aside>
+    </div>
+  }
 </section>
+
+@if (dialogConfig(); as dialog) {
+  <se-confirmation-dialog
+    [title]="dialog.title"
+    [description]="dialog.description"
+    [confirmLabel]="dialog.confirmLabel"
+    cancelLabel="Cancelar"
+    [variant]="dialog.variant"
+    [processing]="isProcessing()"
+    (confirmed)="confirmAction()"
+    (cancelled)="cancelConfirmation()"
+  />
+}

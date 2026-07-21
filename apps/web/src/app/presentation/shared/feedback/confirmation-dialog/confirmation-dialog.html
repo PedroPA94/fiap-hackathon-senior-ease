@@ -1,0 +1,36 @@
+<dialog
+  #dialog
+  class="confirmation-dialog"
+  [class.confirmation-dialog--danger]="variant() === 'danger'"
+  [attr.aria-labelledby]="titleId"
+  [attr.aria-describedby]="descriptionId"
+  aria-modal="true"
+  (cancel)="cancel($event)"
+>
+  <div class="confirmation-dialog__content">
+    <header class="confirmation-dialog__header">
+      <h2 [id]="titleId">{{ title() }}</h2>
+      <p [id]="descriptionId">{{ description() }}</p>
+    </header>
+
+    <div class="confirmation-dialog__actions">
+      <se-button
+        variant="secondary"
+        [disabled]="processing()"
+        [fullWidth]="true"
+        (click)="cancel()"
+      >
+        {{ cancelLabel() }}
+      </se-button>
+
+      <se-button
+        [variant]="variant() === 'danger' ? 'danger' : 'primary'"
+        [loading]="processing()"
+        [fullWidth]="true"
+        (click)="confirm()"
+      >
+        {{ confirmLabel() }}
+      </se-button>
+    </div>
+  </div>
+</dialog>

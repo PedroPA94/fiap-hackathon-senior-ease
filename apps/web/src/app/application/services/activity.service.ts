@@ -5,6 +5,8 @@ import {
   CompleteActivityStepUseCase,
   CompleteActivityUseCase,
   CreateActivityUseCase,
+  DeleteActivityUseCase,
+  GetActivityByIdUseCase,
   GetHomeActivityOverviewUseCase,
   ListActivitiesByUserUseCase,
   type Activity,
@@ -82,6 +84,19 @@ export class ActivityService {
     });
   }
 
+  getActivityById(activityId: EntityId): Observable<Activity> {
+    return defer(() => {
+      const useCase = new GetActivityByIdUseCase(this.activityRepository);
+
+      return from(
+        useCase.execute({
+          userId: this.getRequiredCurrentUserId(),
+          activityId,
+        }),
+      );
+    });
+  }
+
   completeActivity(activityId: EntityId): Observable<Activity> {
     return defer(() => {
       const useCase = new CompleteActivityUseCase(this.activityRepository, this.clock);
@@ -104,6 +119,19 @@ export class ActivityService {
           userId: this.getRequiredCurrentUserId(),
           activityId,
           stepId,
+        }),
+      );
+    });
+  }
+
+  deleteActivity(activityId: EntityId): Observable<void> {
+    return defer(() => {
+      const useCase = new DeleteActivityUseCase(this.activityRepository);
+
+      return from(
+        useCase.execute({
+          userId: this.getRequiredCurrentUserId(),
+          activityId,
         }),
       );
     });

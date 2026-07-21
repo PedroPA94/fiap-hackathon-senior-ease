@@ -194,6 +194,42 @@ describe('ActivityService', () => {
     expect(activity.id).toBe('activity-generated');
   });
 
+  it('should get an activity using the current user identity', async () => {
+    const expectedActivity = makeActivity();
+    activityRepository.findById.mockResolvedValue(expectedActivity);
+
+    await expect(firstValueFrom(service.getActivityById('activity-1'))).resolves.toBe(
+      expectedActivity,
+    );
+    expect(activityRepository.findById).toHaveBeenCalledWith({
+      userId,
+      activityId: 'activity-1',
+    });
+  });
+
+  it('should keep activity lookup cold and execute it once per subscription', async () => {
+    activityRepository.findById.mockResolvedValue(makeActivity());
+    const activity$ = service.getActivityById('activity-1');
+
+    expect(userSessionService.getCurrentUserId).not.toHaveBeenCalled();
+    expect(activityRepository.findById).not.toHaveBeenCalled();
+
+    await firstValueFrom(activity$);
+    await firstValueFrom(activity$);
+
+    expect(userSessionService.getCurrentUserId).toHaveBeenCalledTimes(2);
+    expect(activityRepository.findById).toHaveBeenCalledTimes(2);
+  });
+
+  it('should propagate activity lookup errors without changing them', async () => {
+    const repositoryError = new Error('Lookup unavailable');
+    activityRepository.findById.mockRejectedValue(repositoryError);
+
+    await expect(firstValueFrom(service.getActivityById('activity-1'))).rejects.toBe(
+      repositoryError,
+    );
+  });
+
   it('should complete a current user activity and persist the update', async () => {
     activityRepository.findById.mockResolvedValue(makeActivity());
 
@@ -222,6 +258,39 @@ describe('ActivityService', () => {
     expect(activityRepository.update).toHaveBeenCalledWith(activity);
   });
 
+  it('should delete an activity using the current user identity', async () => {
+    await expect(firstValueFrom(service.deleteActivity('activity-1'))).resolves.toBeUndefined();
+
+    expect(activityRepository.delete).toHaveBeenCalledOnce();
+    expect(activityRepository.delete).toHaveBeenCalledWith({
+      userId,
+      activityId: 'activity-1',
+    });
+    expect(activityRepository.findById).not.toHaveBeenCalled();
+  });
+
+  it('should keep deletion cold and delegate once per subscription', async () => {
+    const deletion$ = service.deleteActivity('activity-1');
+
+    expect(userSessionService.getCurrentUserId).not.toHaveBeenCalled();
+    expect(activityRepository.delete).not.toHaveBeenCalled();
+
+    await firstValueFrom(deletion$);
+    await firstValueFrom(deletion$);
+
+    expect(userSessionService.getCurrentUserId).toHaveBeenCalledTimes(2);
+    expect(activityRepository.delete).toHaveBeenCalledTimes(2);
+  });
+
+  it('should propagate deletion errors without changing them', async () => {
+    const repositoryError = new Error('Deletion unavailable');
+    activityRepository.delete.mockRejectedValue(repositoryError);
+
+    await expect(firstValueFrom(service.deleteActivity('activity-1'))).rejects.toBe(
+      repositoryError,
+    );
+  });
+
   const operationsRequiringCurrentUser: ReadonlyArray<
     readonly [string, (target: ActivityService) => Observable<unknown>]
   > = [
@@ -237,10 +306,12 @@ describe('ActivityService', () => {
         }),
     ],
     ['completeActivity', (target: ActivityService) => target.completeActivity('activity-1')],
+    ['getActivityById', (target: ActivityService) => target.getActivityById('activity-1')],
     [
       'completeActivityStep',
       (target: ActivityService) => target.completeActivityStep('activity-1', 'step-1'),
     ],
+    ['deleteActivity', (target: ActivityService) => target.deleteActivity('activity-1')],
   ];
 
   it.each(operationsRequiringCurrentUser)(
@@ -255,6 +326,7 @@ describe('ActivityService', () => {
       expect(activityRepository.findById).not.toHaveBeenCalled();
       expect(activityRepository.create).not.toHaveBeenCalled();
       expect(activityRepository.update).not.toHaveBeenCalled();
+      expect(activityRepository.delete).not.toHaveBeenCalled();
     },
   );
 

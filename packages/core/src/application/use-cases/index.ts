@@ -10,3 +10,4 @@ export * from "./get-accessibility-preferences-use-case";
 export * from "./reset-accessibility-preferences-use-case";
 export * from "./update-accessibility-preferences-use-case";
 export * from "./get-home-activity-overview-use-case";
+export * from "./get-activity-by-id-use-case";

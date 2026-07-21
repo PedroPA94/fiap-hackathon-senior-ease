@@ -1,0 +1,34 @@
+<article
+  #item
+  class="activity-step-item"
+  [class.activity-step-item--completed]="step().viewStatus === 'completed'"
+  [class.activity-step-item--current]="step().viewStatus === 'current'"
+  [class.activity-step-item--pending]="step().viewStatus === 'pending'"
+  [attr.aria-current]="step().viewStatus === 'current' ? 'step' : null"
+  tabindex="-1"
+>
+  <span class="activity-step-item__indicator" aria-hidden="true">
+    @if (step().viewStatus === 'completed') {
+      <ng-icon name="matCheckRound" size="24" aria-hidden="true" />
+    } @else {
+      {{ position() }}
+    }
+  </span>
+
+  <div class="activity-step-item__content">
+    <p class="activity-step-item__description">{{ step().description }}</p>
+    <span class="activity-step-item__status">{{ statusLabel() }}</span>
+  </div>
+
+  @if (step().viewStatus === 'current') {
+    <se-button
+      class="activity-step-item__action"
+      [loading]="loading()"
+      [disabled]="actionsDisabled()"
+      [fullWidth]="true"
+      (click)="requestCompletion()"
+    >
+      Concluir etapa
+    </se-button>
+  }
+</article>

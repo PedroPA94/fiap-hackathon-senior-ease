@@ -35,8 +35,14 @@
             }
           </div>
 
-          @if (overview()?.nextActivity) {
-            <se-button class="home-card__action" [disabled]="true"> Ver etapas </se-button>
+          @if (overview()?.nextActivity; as nextActivity) {
+            <se-button
+              class="home-card__action"
+              [routerLink]="['/activities', nextActivity.id]"
+              [ariaLabel]="'Ver etapas de ' + nextActivity.title"
+            >
+              Ver etapas
+            </se-button>
           }
         </section>
       </se-card>
