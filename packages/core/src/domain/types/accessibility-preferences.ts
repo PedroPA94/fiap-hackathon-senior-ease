@@ -6,6 +6,12 @@ export type SpacingPreference = "comfortable" | "wide" | "extraWide";
 
 export type InterfaceMode = "basic" | "advanced";
 
+export type ReminderAdvance =
+  | "atTime"
+  | "thirtyMinutes"
+  | "oneHour"
+  | "oneDay";
+
 export type AccessibilityPreferences = {
   fontSize: FontSizePreference;
   contrast: ContrastPreference;
@@ -13,6 +19,8 @@ export type AccessibilityPreferences = {
   interfaceMode: InterfaceMode;
   enhancedFeedback: boolean;
   confirmCriticalActions: boolean;
+  remindersEnabled: boolean;
+  reminderAdvance: ReminderAdvance;
 };
 
 export const defaultAccessibilityPreferences: AccessibilityPreferences = {
@@ -22,4 +30,6 @@ export const defaultAccessibilityPreferences: AccessibilityPreferences = {
   interfaceMode: "basic",
   enhancedFeedback: true,
   confirmCriticalActions: true,
+  remindersEnabled: false,
+  reminderAdvance: "atTime",
 };

@@ -23,6 +23,8 @@ describe('Personalization', () => {
     interfaceMode: 'advanced',
     enhancedFeedback: false,
     confirmCriticalActions: true,
+    remindersEnabled: true,
+    reminderAdvance: 'oneDay',
   };
 
   let accessibilityPreferencesService: AccessibilityPreferencesServiceMock;
@@ -68,7 +70,8 @@ describe('Personalization', () => {
     expect(fixture.nativeElement.querySelectorAll('se-accessibility-preferences-form')).toHaveLength(
       1,
     );
-    expect(fixture.nativeElement.querySelectorAll('se-switch')).toHaveLength(2);
+    expect(fixture.nativeElement.querySelectorAll('se-switch')).toHaveLength(3);
+    expect(getText()).toContain('Lembretes');
     expect(getButtons()).toHaveLength(2);
     expect(fixture.nativeElement.querySelector('se-header')).toBeNull();
     expect(fixture.nativeElement.querySelector('se-navigation-menu')).toBeNull();
@@ -100,7 +103,7 @@ describe('Personalization', () => {
     expect(fixture.nativeElement.querySelector('form')).toBeNull();
   });
 
-  it('fills all six controls without treating initialization as an edit preview', () => {
+  it('fills all eight controls without treating initialization as an edit preview', () => {
     createComponent();
 
     expect(getPreferenceInput('font-size', 'extra').checked).toBe(true);
@@ -109,6 +112,9 @@ describe('Personalization', () => {
     expect(getPreferenceInput('interface-mode', 'advanced').checked).toBe(true);
     expect(getSwitchInput('enhanced-feedback').checked).toBe(false);
     expect(getSwitchInput('confirm-critical-actions').checked).toBe(true);
+    expect(getSwitchInput('reminders-enabled').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'oneDay').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'oneDay').disabled).toBe(false);
     expect(themeService.applyTheme).toHaveBeenCalledOnce();
     expect(themeService.applyTheme).toHaveBeenLastCalledWith(
       createAccessibilityTheme(loadedPreferences),
@@ -189,12 +195,43 @@ describe('Personalization', () => {
     expect(accessibilityPreferencesService.updatePreferences).not.toHaveBeenCalled();
   });
 
-  it('submits all six preferences once and exposes the saving state', () => {
+  it('updates reminder controls and preserves the selected advance when toggled off and on', () => {
+    createComponent();
+
+    selectPreference('reminder-advance', 'thirtyMinutes');
+    expect(getPreferenceInput('reminder-advance', 'thirtyMinutes').checked).toBe(true);
+
+    toggleSwitch('reminders-enabled', false);
+    expect(getSwitchInput('reminders-enabled').checked).toBe(false);
+    expect(getPreferenceInput('reminder-advance', 'thirtyMinutes').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'thirtyMinutes').disabled).toBe(true);
+
+    toggleSwitch('reminders-enabled', true);
+    expect(getSwitchInput('reminders-enabled').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'thirtyMinutes').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'thirtyMinutes').disabled).toBe(false);
+  });
+
+  it('initializes the reminder advance disabled when saved reminders are off', () => {
+    accessibilityPreferencesService.getPreferences.mockReturnValue(
+      of({ ...loadedPreferences, remindersEnabled: false }),
+    );
+
+    createComponent();
+
+    expect(getSwitchInput('reminders-enabled').checked).toBe(false);
+    expect(getPreferenceInput('reminder-advance', 'oneDay').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'oneDay').disabled).toBe(true);
+  });
+
+  it('submits all eight preferences once and exposes the saving state', () => {
     const saveSubject = new Subject<AccessibilityPreferences>();
     accessibilityPreferencesService.updatePreferences.mockReturnValue(saveSubject.asObservable());
     createComponent();
     selectPreference('font-size', 'normal');
     toggleSwitch('enhanced-feedback', true);
+    selectPreference('reminder-advance', 'oneHour');
+    toggleSwitch('reminders-enabled', false);
 
     submitForm();
     submitForm();
@@ -205,6 +242,8 @@ describe('Personalization', () => {
       ...loadedPreferences,
       fontSize: 'normal',
       enhancedFeedback: true,
+      remindersEnabled: false,
+      reminderAdvance: 'oneHour',
     });
     expect(getButtons()[0].getAttribute('aria-busy')).toBe('true');
     expect(getContentRegion().getAttribute('aria-busy')).toBe('true');
@@ -292,6 +331,9 @@ describe('Personalization', () => {
     expect(getPreferenceInput('interface-mode', 'basic').checked).toBe(true);
     expect(getSwitchInput('enhanced-feedback').checked).toBe(true);
     expect(getSwitchInput('confirm-critical-actions').checked).toBe(true);
+    expect(getSwitchInput('reminders-enabled').checked).toBe(false);
+    expect(getPreferenceInput('reminder-advance', 'atTime').checked).toBe(true);
+    expect(getPreferenceInput('reminder-advance', 'atTime').disabled).toBe(true);
     expect(themeService.applyTheme).toHaveBeenLastCalledWith(
       createAccessibilityTheme(defaultAccessibilityPreferences),
     );

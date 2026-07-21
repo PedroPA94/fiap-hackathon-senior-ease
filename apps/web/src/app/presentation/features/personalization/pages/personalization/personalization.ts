@@ -15,6 +15,7 @@ import {
   type ContrastPreference,
   type FontSizePreference,
   type InterfaceMode,
+  type ReminderAdvance,
   type SpacingPreference,
 } from '@senior-ease/core';
 import { createAccessibilityTheme } from '@senior-ease/tokens';
@@ -26,6 +27,10 @@ import { InlineAlert } from '../../../../shared/feedback/inline-alert/inline-ale
 import { ToastService } from '../../../../shared/feedback/toast/toast.service';
 import { Button } from '../../../../shared/ui/button/button';
 import { Card } from '../../../../shared/ui/card/card';
+import {
+  SegmentedControl,
+  type SegmentedControlOption,
+} from '../../../../shared/ui/segmented-control/segmented-control';
 import { Switch } from '../../../../shared/ui/switch/switch';
 import { AccessibilityPreferencesForm } from '../../components/accessibility-preferences-form/accessibility-preferences-form';
 import type { AccessibilityPreferencesFormGroup } from '../../models/accessibility-preferences-form';
@@ -38,6 +43,7 @@ import type { AccessibilityPreferencesFormGroup } from '../../models/accessibili
     Card,
     InlineAlert,
     ReactiveFormsModule,
+    SegmentedControl,
     Switch,
   ],
   templateUrl: './personalization.html',
@@ -83,9 +89,30 @@ export class Personalization implements OnInit, OnDestroy {
     { nonNullable: true },
   );
 
+  protected readonly remindersEnabledControl = new FormControl(
+    defaultAccessibilityPreferences.remindersEnabled,
+    { nonNullable: true },
+  );
+
+  protected readonly reminderAdvanceControl = new FormControl<ReminderAdvance>(
+    {
+      value: defaultAccessibilityPreferences.reminderAdvance,
+      disabled: !defaultAccessibilityPreferences.remindersEnabled,
+    },
+    { nonNullable: true },
+  );
+
+  protected readonly reminderAdvanceOptions: readonly SegmentedControlOption[] = [
+    { value: 'atTime' satisfies ReminderAdvance, label: 'No horário' },
+    { value: 'thirtyMinutes' satisfies ReminderAdvance, label: '30 minutos antes' },
+    { value: 'oneHour' satisfies ReminderAdvance, label: '1 hora antes' },
+    { value: 'oneDay' satisfies ReminderAdvance, label: '1 dia antes' },
+  ];
+
   protected persistedPreferences: AccessibilityPreferences | null = null;
 
   ngOnInit(): void {
+    this.initializeReminderAdvanceState();
     this.initializePreview();
     this.loadPreferences();
   }
@@ -190,6 +217,8 @@ export class Personalization implements OnInit, OnDestroy {
       this.visualPreferencesForm.valueChanges,
       this.enhancedFeedbackControl.valueChanges,
       this.confirmCriticalActionsControl.valueChanges,
+      this.remindersEnabledControl.valueChanges,
+      this.reminderAdvanceControl.valueChanges,
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
@@ -210,6 +239,8 @@ export class Personalization implements OnInit, OnDestroy {
       ...this.visualPreferencesForm.getRawValue(),
       enhancedFeedback: this.enhancedFeedbackControl.getRawValue(),
       confirmCriticalActions: this.confirmCriticalActionsControl.getRawValue(),
+      remindersEnabled: this.remindersEnabledControl.getRawValue(),
+      reminderAdvance: this.reminderAdvanceControl.getRawValue(),
     };
   }
 
@@ -234,6 +265,24 @@ export class Personalization implements OnInit, OnDestroy {
     this.confirmCriticalActionsControl.setValue(preferences.confirmCriticalActions, {
       emitEvent: false,
     });
+    this.remindersEnabledControl.setValue(preferences.remindersEnabled, { emitEvent: false });
+    this.reminderAdvanceControl.setValue(preferences.reminderAdvance, { emitEvent: false });
+    this.updateReminderAdvanceState(preferences.remindersEnabled);
+  }
+
+  private initializeReminderAdvanceState(): void {
+    this.remindersEnabledControl.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((enabled) => this.updateReminderAdvanceState(enabled));
+  }
+
+  private updateReminderAdvanceState(enabled: boolean): void {
+    if (enabled) {
+      this.reminderAdvanceControl.enable({ emitEvent: false });
+      return;
+    }
+
+    this.reminderAdvanceControl.disable({ emitEvent: false });
   }
 
   private applyPreferencesTheme(preferences: AccessibilityPreferences): void {

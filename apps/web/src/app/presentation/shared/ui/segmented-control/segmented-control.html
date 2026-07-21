@@ -13,6 +13,7 @@
           [name]="controlId()"
           [value]="option.value"
           [checked]="value() === option.value"
+          [disabled]="disabled()"
           (change)="selectOption(option.value)"
           (blur)="markAsTouched()"
         />

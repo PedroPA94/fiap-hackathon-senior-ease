@@ -51,6 +51,19 @@
   align-content: start;
 }
 
+.personalization__reminders {
+  display: grid;
+  gap: var(--se-spacing-medium);
+}
+
+.personalization__reminders h2 {
+  margin: 0;
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-body-large);
+  line-height: var(--se-line-height-body-large);
+}
+
 .personalization__actions {
   padding-top: var(--se-spacing-medium);
 }

@@ -20,11 +20,7 @@ export class LocalStorageAccessibilityPreferencesRepository implements Accessibi
     }
 
     try {
-      const parsedValue = JSON.parse(rawValue) as AccessibilityPreferences;
-
-      validateAccessibilityPreferences(parsedValue);
-
-      return parsedValue;
+      return validateAccessibilityPreferences(JSON.parse(rawValue));
     } catch {
       localStorage.removeItem(storageKey);
 

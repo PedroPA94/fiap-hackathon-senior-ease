@@ -17,6 +17,8 @@ describe('ThemeService', () => {
     interfaceMode: 'advanced',
     enhancedFeedback: false,
     confirmCriticalActions: false,
+    remindersEnabled: true,
+    reminderAdvance: 'thirtyMinutes',
   };
 
   let service: ThemeService;

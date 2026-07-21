@@ -15,6 +15,7 @@ import { UserSessionService } from './user-session.service';
 describe('AccessibilityPreferencesService', () => {
   const userId = 'user-1';
   const preferences: AccessibilityPreferences = {
+    ...defaultAccessibilityPreferences,
     fontSize: 'large',
     contrast: 'high',
     spacing: 'wide',

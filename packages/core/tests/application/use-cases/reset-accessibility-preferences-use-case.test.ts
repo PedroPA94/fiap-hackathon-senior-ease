@@ -43,6 +43,8 @@ describe("ResetAccessibilityPreferencesUseCase", () => {
       interfaceMode: "advanced",
       enhancedFeedback: false,
       confirmCriticalActions: false,
+      remindersEnabled: true,
+      reminderAdvance: "oneHour",
     };
     await repository.save("user-1", previousPreferences);
 

@@ -53,6 +53,8 @@ describe("GetUserExperienceProfileUseCase", () => {
       interfaceMode: "advanced",
       enhancedFeedback: false,
       confirmCriticalActions: false,
+      remindersEnabled: true,
+      reminderAdvance: "oneDay",
     };
     await userProfileRepository.create(profile);
     await accessibilityPreferencesRepository.save("user-1", preferences);

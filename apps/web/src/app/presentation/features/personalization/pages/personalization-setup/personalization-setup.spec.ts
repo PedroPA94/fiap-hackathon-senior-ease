@@ -19,6 +19,8 @@ describe('PersonalizationSetup', () => {
     interfaceMode: 'advanced',
     enhancedFeedback: false,
     confirmCriticalActions: false,
+    remindersEnabled: true,
+    reminderAdvance: 'oneHour',
   };
 
   let accessibilityPreferencesService: AccessibilityPreferencesServiceMock;
@@ -166,6 +168,8 @@ describe('PersonalizationSetup', () => {
       expect.objectContaining({
         enhancedFeedback: false,
         confirmCriticalActions: false,
+        remindersEnabled: true,
+        reminderAdvance: 'oneHour',
       }),
     );
   });

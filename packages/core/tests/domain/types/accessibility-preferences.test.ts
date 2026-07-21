@@ -22,6 +22,8 @@ describe("AccessibilityPreferences value object", () => {
         interfaceMode: "advanced",
         enhancedFeedback: true,
         confirmCriticalActions: false,
+        remindersEnabled: true,
+        reminderAdvance: "oneHour",
       }),
     ).not.toThrow();
   });
@@ -98,6 +100,28 @@ describe("AccessibilityPreferences value object", () => {
     );
   });
 
+  it("rejects non boolean remindersEnabled", () => {
+    expectDomainError(
+      () =>
+        validateAccessibilityPreferences({
+          ...defaultAccessibilityPreferences,
+          remindersEnabled: "yes" as never,
+        }),
+      "ACCESSIBILITY_REMINDERS_ENABLED_INVALID",
+    );
+  });
+
+  it("rejects invalid reminderAdvance", () => {
+    expectDomainError(
+      () =>
+        validateAccessibilityPreferences({
+          ...defaultAccessibilityPreferences,
+          reminderAdvance: "later" as never,
+        }),
+      "ACCESSIBILITY_REMINDER_ADVANCE_INVALID",
+    );
+  });
+
   it("keeps defaultAccessibilityPreferences as a valid value object shape", () => {
     const preferences: AccessibilityPreferences =
       defaultAccessibilityPreferences;
@@ -109,6 +133,8 @@ describe("AccessibilityPreferences value object", () => {
       interfaceMode: "basic",
       enhancedFeedback: true,
       confirmCriticalActions: true,
+      remindersEnabled: false,
+      reminderAdvance: "atTime",
     });
   });
 });

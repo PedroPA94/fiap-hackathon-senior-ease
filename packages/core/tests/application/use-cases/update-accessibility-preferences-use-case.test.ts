@@ -25,6 +25,8 @@ describe("UpdateAccessibilityPreferencesUseCase", () => {
       interfaceMode: "advanced",
       enhancedFeedback: false,
       confirmCriticalActions: false,
+      remindersEnabled: true,
+      reminderAdvance: "thirtyMinutes",
     };
 
     await expect(

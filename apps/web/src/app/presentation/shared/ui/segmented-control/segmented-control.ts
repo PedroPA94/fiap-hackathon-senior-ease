@@ -25,6 +25,7 @@ export class SegmentedControl implements ControlValueAccessor {
   readonly options = input.required<readonly SegmentedControlOption[]>();
 
   protected readonly value = signal('');
+  protected readonly disabled = signal(false);
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -52,5 +53,9 @@ export class SegmentedControl implements ControlValueAccessor {
 
   registerOnTouched(callback: () => void): void {
     this.onTouched = callback;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled.set(isDisabled);
   }
 }

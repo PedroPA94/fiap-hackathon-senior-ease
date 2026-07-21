@@ -21,6 +21,8 @@ describe("GetAccessibilityPreferencesUseCase", () => {
       interfaceMode: "advanced",
       enhancedFeedback: false,
       confirmCriticalActions: false,
+      remindersEnabled: true,
+      reminderAdvance: "oneHour",
     } as const;
     await repository.save("user-1", preferences);
 

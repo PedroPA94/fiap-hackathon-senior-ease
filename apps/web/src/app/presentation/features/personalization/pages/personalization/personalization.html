@@ -45,6 +45,25 @@
             [formControl]="confirmCriticalActionsControl"
           />
 
+          <se-card class="personalization__reminders-card">
+            <section class="personalization__reminders" aria-labelledby="reminders-title">
+              <h2 id="reminders-title">Lembretes</h2>
+
+              <se-switch
+                inputId="reminders-enabled"
+                label="Ativar lembretes"
+                [formControl]="remindersEnabledControl"
+              />
+
+              <se-segmented-control
+                controlId="reminder-advance"
+                label="Antecedência"
+                [options]="reminderAdvanceOptions"
+                [formControl]="reminderAdvanceControl"
+              />
+            </section>
+          </se-card>
+
           @if (saveErrorMessage()) {
             <se-inline-alert variant="error">
               {{ saveErrorMessage() }}

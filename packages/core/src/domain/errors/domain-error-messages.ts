@@ -44,6 +44,11 @@ export const domainErrorMessagesPtBr: Record<DomainErrorCode, string> = {
     "Escolha se deseja receber feedback visual reforçado.",
   ACCESSIBILITY_CONFIRM_CRITICAL_ACTIONS_INVALID:
     "Escolha se deseja confirmação adicional em ações críticas.",
+  ACCESSIBILITY_PREFERENCES_INVALID: "As preferências informadas são inválidas.",
+  ACCESSIBILITY_REMINDERS_ENABLED_INVALID:
+    "Escolha se deseja ativar os lembretes.",
+  ACCESSIBILITY_REMINDER_ADVANCE_INVALID:
+    "Escolha uma antecedência válida para os lembretes.",
   ACCESSIBILITY_USER_ID_REQUIRED: "Não foi possível identificar o usuário.",
 };
 

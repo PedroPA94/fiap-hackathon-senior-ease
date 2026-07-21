@@ -26,6 +26,18 @@ describe('SegmentedControl', () => {
     expect(fixture.nativeElement.textContent).toContain('Grande');
   });
 
+  it('should disable all options through ControlValueAccessor', () => {
+    createComponent();
+
+    component.setDisabledState(true);
+    fixture.detectChanges();
+
+    const inputs: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('input'),
+    );
+    expect(inputs.every((input) => input.disabled)).toBe(true);
+  });
+
   function createComponent(): void {
     fixture = TestBed.createComponent(SegmentedControl);
     component = fixture.componentInstance;

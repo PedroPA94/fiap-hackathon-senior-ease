@@ -18,6 +18,8 @@ describe('LocalStorageAccessibilityPreferencesRepository', () => {
     interfaceMode: 'advanced',
     enhancedFeedback: false,
     confirmCriticalActions: false,
+    remindersEnabled: true,
+    reminderAdvance: 'oneHour',
   };
 
   let repository: LocalStorageAccessibilityPreferencesRepository;
