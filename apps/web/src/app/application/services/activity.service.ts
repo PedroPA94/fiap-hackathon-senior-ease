@@ -10,6 +10,7 @@ import {
   GetHomeActivityOverviewUseCase,
   ListActivitiesByUserUseCase,
   type Activity,
+  type AccessibilityPreferencesRepository,
   type ActivityListFilter,
   type ActivityRepository,
   type CreateActivityUseCaseInput,
@@ -21,7 +22,10 @@ import {
 
 import { UserSessionError } from '../errors/user-session.error';
 import { UserSessionService } from './user-session.service';
-import { ACTIVITY_REPOSITORY } from '../../core/tokens/repository.tokens';
+import {
+  ACCESSIBILITY_PREFERENCES_REPOSITORY,
+  ACTIVITY_REPOSITORY,
+} from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 
 export type CreateCurrentUserActivityInput = Omit<CreateActivityUseCaseInput, 'userId'>;
@@ -31,6 +35,9 @@ export class ActivityService {
   constructor(
     @Inject(ACTIVITY_REPOSITORY)
     private readonly activityRepository: ActivityRepository,
+
+    @Inject(ACCESSIBILITY_PREFERENCES_REPOSITORY)
+    private readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepository,
 
     @Inject(CLOCK)
     private readonly clock: Clock,
@@ -56,7 +63,11 @@ export class ActivityService {
 
   getHomeOverview(recentActivitiesLimit?: number): Observable<HomeActivityOverview> {
     return defer(() => {
-      const useCase = new GetHomeActivityOverviewUseCase(this.activityRepository, this.clock);
+      const useCase = new GetHomeActivityOverviewUseCase(
+        this.activityRepository,
+        this.accessibilityPreferencesRepository,
+        this.clock,
+      );
 
       return from(
         useCase.execute({

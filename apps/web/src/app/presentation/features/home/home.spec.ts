@@ -211,6 +211,7 @@ function makeOverview(overrides: Partial<HomeActivityOverview> = {}): HomeActivi
       makeCompletedActivity('completed-1', 'Caminhada matinal', '2026-07-19T15:00:00.000Z'),
       makeCompletedActivity('completed-2', 'Tomar vitamina', '2026-07-18T12:00:00.000Z'),
     ],
+    reminders: [],
     todaySummary: {
       pending: 2,
       inProgress: 3,

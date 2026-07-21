@@ -1,14 +1,21 @@
 import {
   assertNonEmpty,
+  defaultAccessibilityPreferences,
+  resolveActivityReminder,
   resolveActivityStatus,
   sortActivitySteps,
   type Activity,
+  type ActivityReminder,
   type ActivityStatus,
   type DateOnlyString,
   type EntityId,
+  type ReminderAdvance,
 } from "../../domain";
 import { ApplicationError } from "../errors";
-import type { ActivityRepository } from "../repositories";
+import type {
+  AccessibilityPreferencesRepository,
+  ActivityRepository,
+} from "../repositories";
 import type { Clock } from "../services";
 
 const DEFAULT_RECENT_ACTIVITIES_LIMIT = 2;
@@ -22,6 +29,7 @@ export type TodayActivitySummary = {
 export type HomeActivityOverview = {
   nextActivity: Activity | null;
   recentCompletedActivities: Activity[];
+  reminders: readonly ActivityReminder[];
   todaySummary: TodayActivitySummary;
 };
 
@@ -33,6 +41,7 @@ export type GetHomeActivityOverviewUseCaseInput = {
 export class GetHomeActivityOverviewUseCase {
   constructor(
     private readonly activityRepository: ActivityRepository,
+    private readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepository,
     private readonly clock: Clock,
   ) {}
 
@@ -52,9 +61,12 @@ export class GetHomeActivityOverviewUseCase {
     }
 
     const today = this.clock.today();
-    const activities = await this.activityRepository.list({
-      userId: input.userId,
-    });
+    const now = new Date(this.clock.now());
+    const [activities, savedPreferences] = await Promise.all([
+      this.activityRepository.list({ userId: input.userId }),
+      this.accessibilityPreferencesRepository.findByUserId(input.userId),
+    ]);
+    const preferences = savedPreferences ?? defaultAccessibilityPreferences;
 
     return {
       nextActivity: selectNextActivity(activities, today),
@@ -62,9 +74,69 @@ export class GetHomeActivityOverviewUseCase {
         activities,
         recentActivitiesLimit,
       ),
+      reminders: selectAvailableReminders(
+        activities,
+        preferences.remindersEnabled,
+        preferences.reminderAdvance,
+        now,
+      ),
       todaySummary: summarizeTodayActivities(activities, today),
     };
   }
+}
+
+function selectAvailableReminders(
+  activities: Activity[],
+  remindersEnabled: boolean,
+  reminderAdvance: ReminderAdvance,
+  now: Date,
+): ActivityReminder[] {
+  if (!remindersEnabled) {
+    return [];
+  }
+
+  return activities
+    .flatMap((activity) => {
+      const reminder = resolveActivityReminder({
+        activity,
+        remindersEnabled,
+        reminderAdvance,
+        now,
+      });
+
+      return reminder ? [reminder] : [];
+    })
+    .sort(compareActivityReminders);
+}
+
+function compareActivityReminders(
+  first: ActivityReminder,
+  second: ActivityReminder,
+): number {
+  if (first.hasTime !== second.hasTime) {
+    return first.hasTime ? -1 : 1;
+  }
+
+  if (first.hasTime && second.hasTime) {
+    const scheduleComparison =
+      first.scheduledAt.getTime() - second.scheduledAt.getTime();
+
+    if (scheduleComparison !== 0) {
+      return scheduleComparison;
+    }
+  } else if (!first.hasTime && !second.hasTime) {
+    const dateComparison = first.date.localeCompare(second.date);
+
+    if (dateComparison !== 0) {
+      return dateComparison;
+    }
+  }
+
+  const titleComparison = first.title.localeCompare(second.title);
+
+  return titleComparison !== 0
+    ? titleComparison
+    : first.activityId.localeCompare(second.activityId);
 }
 
 function selectNextActivity(

@@ -8,11 +8,13 @@ import {
   completeActivity,
   completeActivityStep,
   createActivity,
+  defaultAccessibilityPreferences,
   DomainError,
   type Activity,
   type CreateActivityInput,
 } from "../../../src/domain";
 import { FakeClock } from "../../helpers/fake-clock";
+import { InMemoryAccessibilityPreferencesRepository } from "../../helpers/in-memory-accessibility-preferences-repository";
 import { InMemoryActivityRepository } from "../../helpers/in-memory-activity-repository";
 
 const today = "2026-07-09";
@@ -21,42 +23,56 @@ const completedAt = "2026-07-09T12:00:00.000Z";
 
 describe("GetHomeActivityOverviewUseCase", () => {
   it("rejects an empty user id before reading the clock or repository", async () => {
-    const { clock, repository, useCase } = makeUseCase();
+    const { clock, preferencesRepository, repository, useCase } = makeUseCase();
     const listSpy = vi.spyOn(repository, "list");
+    const preferencesSpy = vi.spyOn(preferencesRepository, "findByUserId");
     const todaySpy = vi.spyOn(clock, "today");
+    const nowSpy = vi.spyOn(clock, "now");
 
     await expect(useCase.execute({ userId: " " })).rejects.toEqual(
       new DomainError("ACTIVITY_USER_ID_REQUIRED"),
     );
     expect(listSpy).not.toHaveBeenCalled();
+    expect(preferencesSpy).not.toHaveBeenCalled();
     expect(todaySpy).not.toHaveBeenCalled();
+    expect(nowSpy).not.toHaveBeenCalled();
   });
 
   it.each([0, -1, 1.5])(
     "rejects invalid recent activity limit %s before dependencies are accessed",
     async (recentActivitiesLimit) => {
-      const { clock, repository, useCase } = makeUseCase();
+      const { clock, preferencesRepository, repository, useCase } =
+        makeUseCase();
       const listSpy = vi.spyOn(repository, "list");
+      const preferencesSpy = vi.spyOn(preferencesRepository, "findByUserId");
       const todaySpy = vi.spyOn(clock, "today");
+      const nowSpy = vi.spyOn(clock, "now");
 
       await expect(
         useCase.execute({ userId: "user-1", recentActivitiesLimit }),
       ).rejects.toEqual(new ApplicationError("ACTIVITY_RECENT_LIMIT_INVALID"));
       expect(listSpy).not.toHaveBeenCalled();
+      expect(preferencesSpy).not.toHaveBeenCalled();
       expect(todaySpy).not.toHaveBeenCalled();
+      expect(nowSpy).not.toHaveBeenCalled();
     },
   );
 
-  it("uses today once and lists the user activities exactly once", async () => {
-    const { clock, repository, useCase } = makeUseCase();
+  it("reads the clock, activities and preferences exactly once", async () => {
+    const { clock, preferencesRepository, repository, useCase } = makeUseCase();
     const listSpy = vi.spyOn(repository, "list");
+    const preferencesSpy = vi.spyOn(preferencesRepository, "findByUserId");
     const todaySpy = vi.spyOn(clock, "today");
+    const nowSpy = vi.spyOn(clock, "now");
 
     await useCase.execute({ userId: "user-1" });
 
     expect(todaySpy).toHaveBeenCalledOnce();
+    expect(nowSpy).toHaveBeenCalledOnce();
     expect(listSpy).toHaveBeenCalledOnce();
     expect(listSpy).toHaveBeenCalledWith({ userId: "user-1" });
+    expect(preferencesSpy).toHaveBeenCalledOnce();
+    expect(preferencesSpy).toHaveBeenCalledWith("user-1");
   });
 
   it("produces all projections from the same repository result", async () => {
@@ -79,7 +95,151 @@ describe("GetHomeActivityOverviewUseCase", () => {
       inProgress: 1,
       completed: 1,
     });
+    expect(overview.reminders).toEqual([]);
     expect(listSpy).toHaveBeenCalledOnce();
+  });
+
+  describe("reminders", () => {
+    it("returns an empty list when reminders are disabled", async () => {
+      const { repository, useCase } = makeUseCase();
+      await repository.create(makeActivity({ date: today, time: "12:30" }));
+
+      const overview = await useCase.execute({ userId: "user-1" });
+
+      expect(overview.reminders).toEqual([]);
+    });
+
+    it("coordinates preferences, current time and the domain rule", async () => {
+      const { preferencesRepository, repository, useCase } = makeUseCase();
+      await preferencesRepository.save("user-1", {
+        ...defaultAccessibilityPreferences,
+        remindersEnabled: true,
+        reminderAdvance: "oneHour",
+      });
+      await addActivities(repository, [
+        makeActivity({ id: "available", date: today, time: "12:30" }),
+        makeActivity({ id: "outside-window", date: today, time: "14:00" }),
+        makeCompletedActivity("completed", today, completedAt),
+        makeActivity({ id: "untimed", date: today, time: undefined }),
+      ]);
+
+      const overview = await useCase.execute({ userId: "user-1" });
+
+      expect(overview.reminders.map(({ activityId }) => activityId)).toEqual([
+        "available",
+        "untimed",
+      ]);
+      expect(overview.reminders.every((reminder) => reminder !== null)).toBe(
+        true,
+      );
+    });
+
+    it("sorts timed reminders first and uses stable tie breakers", async () => {
+      const { preferencesRepository, repository, useCase } = makeUseCase();
+      await preferencesRepository.save("user-1", {
+        ...defaultAccessibilityPreferences,
+        remindersEnabled: true,
+        reminderAdvance: "oneHour",
+      });
+      await addActivities(repository, [
+        makeActivity({
+          id: "untimed-z",
+          title: "Zerar agenda",
+          date: today,
+          time: undefined,
+        }),
+        makeActivity({ id: "later", date: today, time: "12:45" }),
+        makeActivity({
+          id: "same-b",
+          title: "B atividade",
+          date: today,
+          time: "12:15",
+        }),
+        makeActivity({
+          id: "same-a",
+          title: "A atividade",
+          date: today,
+          time: "12:15",
+        }),
+        makeActivity({
+          id: "untimed-a",
+          title: "Abrir agenda",
+          date: today,
+          time: undefined,
+        }),
+      ]);
+
+      const overview = await useCase.execute({ userId: "user-1" });
+
+      expect(overview.reminders.map(({ activityId }) => activityId)).toEqual([
+        "same-a",
+        "same-b",
+        "later",
+        "untimed-a",
+        "untimed-z",
+      ]);
+    });
+
+    it("uses the repository user filter and does not mutate its result", async () => {
+      const { preferencesRepository, repository, useCase } = makeUseCase();
+      await preferencesRepository.save("user-1", {
+        ...defaultAccessibilityPreferences,
+        remindersEnabled: true,
+        reminderAdvance: "oneHour",
+      });
+      const activities = [
+        makeActivity({ id: "second", date: today, time: "12:30" }),
+        makeActivity({ id: "first", date: today, time: "12:15" }),
+        makeActivity({ id: "other-user", userId: "user-2", time: undefined }),
+      ];
+      const listSpy = vi
+        .spyOn(repository, "list")
+        .mockImplementation((query) =>
+          Promise.resolve(
+            activities.filter((activity) => activity.userId === query.userId),
+          ),
+        );
+
+      const overview = await useCase.execute({ userId: "user-1" });
+
+      expect(listSpy).toHaveBeenCalledWith({ userId: "user-1" });
+      expect(overview.reminders.map(({ activityId }) => activityId)).toEqual([
+        "first",
+        "second",
+      ]);
+      expect(activities.map(({ id }) => id)).toEqual([
+        "second",
+        "first",
+        "other-user",
+      ]);
+      expect(
+        overview.reminders.some(
+          ({ activityId }) => activityId === "other-user",
+        ),
+      ).toBe(false);
+    });
+
+    it("propagates activity and preference repository failures", async () => {
+      const activityFailure = new Error("Activity repository failed");
+      const preferencesFailure = new Error("Preferences repository failed");
+
+      const activityContext = makeUseCase();
+      vi.spyOn(activityContext.repository, "list").mockRejectedValue(
+        activityFailure,
+      );
+      await expect(
+        activityContext.useCase.execute({ userId: "user-1" }),
+      ).rejects.toBe(activityFailure);
+
+      const preferencesContext = makeUseCase();
+      vi.spyOn(
+        preferencesContext.preferencesRepository,
+        "findByUserId",
+      ).mockRejectedValue(preferencesFailure);
+      await expect(
+        preferencesContext.useCase.execute({ userId: "user-1" }),
+      ).rejects.toBe(preferencesFailure);
+    });
   });
 
   describe("next activity", () => {
@@ -161,8 +321,11 @@ describe("GetHomeActivityOverviewUseCase", () => {
       ];
       const repository = new InMemoryActivityRepository();
       vi.spyOn(repository, "list").mockResolvedValue(activities);
+      const preferencesRepository =
+        new InMemoryAccessibilityPreferencesRepository();
       const useCase = new GetHomeActivityOverviewUseCase(
         repository,
+        preferencesRepository,
         new FakeClock(),
       );
 
@@ -266,10 +429,16 @@ describe("GetHomeActivityOverviewUseCase", () => {
 
 function makeUseCase() {
   const repository = new InMemoryActivityRepository();
-  const clock = new FakeClock("2026-07-09T12:00:00.000Z", today);
-  const useCase = new GetHomeActivityOverviewUseCase(repository, clock);
+  const preferencesRepository =
+    new InMemoryAccessibilityPreferencesRepository();
+  const clock = new FakeClock(new Date(2026, 6, 9, 12).toISOString(), today);
+  const useCase = new GetHomeActivityOverviewUseCase(
+    repository,
+    preferencesRepository,
+    clock,
+  );
 
-  return { clock, repository, useCase };
+  return { clock, preferencesRepository, repository, useCase };
 }
 
 function makeActivity(overrides: Partial<CreateActivityInput> = {}): Activity {

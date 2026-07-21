@@ -2,13 +2,18 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, type Observable } from 'rxjs';
 
 import {
+  defaultAccessibilityPreferences,
+  type AccessibilityPreferencesRepository,
   type Activity,
   type ActivityRepository,
   type Clock,
   type IdGenerator,
 } from '@senior-ease/core';
 
-import { ACTIVITY_REPOSITORY } from '../../core/tokens/repository.tokens';
+import {
+  ACCESSIBILITY_PREFERENCES_REPOSITORY,
+  ACTIVITY_REPOSITORY,
+} from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { UserSessionError } from '../errors/user-session.error';
 import { ActivityService } from './activity.service';
@@ -20,6 +25,7 @@ describe('ActivityService', () => {
   const today = '2026-07-09';
 
   let activityRepository: ActivityRepositoryMock;
+  let accessibilityPreferencesRepository: AccessibilityPreferencesRepositoryMock;
   let clock: ClockMock;
   let idGenerator: IdGeneratorMock;
   let service: ActivityService;
@@ -27,6 +33,7 @@ describe('ActivityService', () => {
 
   beforeEach(() => {
     activityRepository = createActivityRepositoryMock();
+    accessibilityPreferencesRepository = createAccessibilityPreferencesRepositoryMock();
     clock = createClockMock();
     idGenerator = createIdGeneratorMock();
     userSessionService = createUserSessionServiceMock();
@@ -35,6 +42,10 @@ describe('ActivityService', () => {
       providers: [
         ActivityService,
         { provide: ACTIVITY_REPOSITORY, useValue: activityRepository },
+        {
+          provide: ACCESSIBILITY_PREFERENCES_REPOSITORY,
+          useValue: accessibilityPreferencesRepository,
+        },
         { provide: CLOCK, useValue: clock },
         { provide: ID_GENERATOR, useValue: idGenerator },
         { provide: UserSessionService, useValue: userSessionService },
@@ -125,6 +136,24 @@ describe('ActivityService', () => {
       'middle-activity',
     ]);
     expect(overview.todaySummary.completed).toBe(3);
+    expect(overview.reminders).toEqual([]);
+  });
+
+  it('should include available reminders in the home overview', async () => {
+    clock.now.mockReturnValue(new Date(2026, 6, 9, 12).toISOString());
+    accessibilityPreferencesRepository.findByUserId.mockResolvedValue({
+      ...defaultAccessibilityPreferences,
+      remindersEnabled: true,
+      reminderAdvance: 'oneHour',
+    });
+    activityRepository.list.mockResolvedValue([
+      makeActivity({ id: 'reminder-activity', date: today, time: '12:30' }),
+    ]);
+
+    const overview = await firstValueFrom(service.getHomeOverview());
+
+    expect(accessibilityPreferencesRepository.findByUserId).toHaveBeenCalledWith(userId);
+    expect(overview.reminders.map(({ activityId }) => activityId)).toEqual(['reminder-activity']);
   });
 
   it('should forward a custom recent activity limit to the home overview', async () => {
@@ -382,6 +411,17 @@ describe('ActivityService', () => {
     };
   }
 
+  function createAccessibilityPreferencesRepositoryMock(): AccessibilityPreferencesRepositoryMock {
+    return {
+      findByUserId: vi
+        .fn<AccessibilityPreferencesRepository['findByUserId']>()
+        .mockResolvedValue(defaultAccessibilityPreferences),
+      save: vi
+        .fn<AccessibilityPreferencesRepository['save']>()
+        .mockImplementation((_userId, preferences) => Promise.resolve(preferences)),
+    };
+  }
+
   function createClockMock(): ClockMock {
     return {
       now: vi.fn<Clock['now']>().mockReturnValue(now),
@@ -408,6 +448,11 @@ type ActivityRepositoryMock = {
   create: ReturnType<typeof vi.fn<ActivityRepository['create']>>;
   update: ReturnType<typeof vi.fn<ActivityRepository['update']>>;
   delete: ReturnType<typeof vi.fn<ActivityRepository['delete']>>;
+};
+
+type AccessibilityPreferencesRepositoryMock = {
+  findByUserId: ReturnType<typeof vi.fn<AccessibilityPreferencesRepository['findByUserId']>>;
+  save: ReturnType<typeof vi.fn<AccessibilityPreferencesRepository['save']>>;
 };
 
 type ClockMock = {
