@@ -12,6 +12,7 @@ import {
   viewChild,
   viewChildren,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon, provideIcons } from '@ng-icons/core';
@@ -66,7 +67,16 @@ type ConfirmationAction = 'complete' | 'delete';
 
 @Component({
   selector: 'se-activity-details',
-  imports: [RouterLink, NgIcon, ActivityStepItem, Button, Card, ConfirmationDialog, InlineAlert],
+  imports: [
+    RouterLink,
+    NgIcon,
+    ActivityStepItem,
+    Button,
+    Card,
+    ConfirmationDialog,
+    InlineAlert,
+    NgTemplateOutlet,
+  ],
   providers: [provideIcons({ matArrowBackRound })],
   templateUrl: './activity-details.html',
   styleUrl: './activity-details.scss',
@@ -112,6 +122,45 @@ export class ActivityDetails implements OnInit {
       steps: getActivityStepsView(state.activity),
     };
   });
+
+  protected readonly currentStepEntry = computed(() => {
+    const view = this.activityView();
+
+    if (!view) {
+      return null;
+    }
+
+    const position = view.steps.findIndex((step) => step.viewStatus === 'current');
+
+    if (position < 0) {
+      return null;
+    }
+
+    return {
+      step: view.steps[position],
+      position: position + 1,
+    };
+  });
+
+  protected readonly basicProgressLabel = computed(() => {
+    const view = this.activityView();
+    const currentStep = this.currentStepEntry();
+
+    if (!view) {
+      return '';
+    }
+
+    if (view.status === 'completed') {
+      return 'Todas as etapas foram concluídas.';
+    }
+
+    if (!currentStep) {
+      return view.progressLabel;
+    }
+
+    return `Etapa ${currentStep.position} de ${view.progress.totalSteps}`;
+  });
+
   protected readonly isProcessing = computed(() => this.processingAction() !== null);
   protected readonly dialogConfig = computed(() => {
     const action = this.confirmationAction();
@@ -134,6 +183,9 @@ export class ActivityDetails implements OnInit {
           variant: 'default' as const,
         };
   });
+
+  protected readonly interfaceMode = this.themeService.interfaceMode;
+  protected readonly isAdvancedMode = computed(() => this.interfaceMode() === 'advanced');
 
   ngOnInit(): void {
     this.route.paramMap

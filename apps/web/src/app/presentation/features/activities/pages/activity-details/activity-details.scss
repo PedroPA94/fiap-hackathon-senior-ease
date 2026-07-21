@@ -51,6 +51,10 @@
   min-width: 0;
 }
 
+.activity-details__steps {
+  margin-top: var(--se-spacing-medium);
+}
+
 .activity-details__state {
   justify-items: start;
 }
@@ -63,10 +67,15 @@
 .activity-details__progress p,
 .activity-details__steps h2,
 .activity-details__actions h2,
-.activity-details__completed-message {
+.activity-details__completed-message,
+.activity-details__actions-title {
   margin: 0;
   font-family: var(--se-font-family);
   overflow-wrap: anywhere;
+}
+
+.activity-details__actions-title {
+  margin-bottom: var(--se-spacing-large) !important;
 }
 
 .activity-details__state h1,
@@ -144,7 +153,8 @@
 
 .activity-details__progress h2,
 .activity-details__steps h2,
-.activity-details__actions h2 {
+.activity-details__actions h2,
+.activity-details__actions-title {
   color: var(--se-color-text-default);
   font-size: var(--se-font-size-title);
   font-weight: var(--se-font-weight-bold);
@@ -192,8 +202,62 @@
   min-width: 0;
 }
 
+.activity-details__actions-title {
+  margin-bottom: var(--se-spacing-medium);
+}
+
 .activity-details__actions-content {
+  display: grid;
   gap: var(--se-spacing-medium);
+  min-width: 0;
+}
+
+.activity-details__secondary-actions {
+  width: 100%;
+  color: var(--se-color-text-default);
+  background: var(--se-color-background-surface);
+  border: var(--se-border-width-regular) var(--se-border-style-solid) var(--se-color-border-default);
+  border-radius: var(--se-radius-medium);
+  font-family: var(--se-font-family);
+}
+
+.activity-details__secondary-actions summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--se-spacing-medium);
+  min-height: 52px;
+  padding: var(--se-spacing-medium);
+  font-size: var(--se-font-size-body);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body);
+  cursor: pointer;
+}
+
+.activity-details__secondary-actions summary::after {
+  content: '+';
+  flex: 0 0 auto;
+  font-size: var(--se-font-size-title);
+  line-height: 1;
+}
+
+.activity-details__secondary-actions[open] summary::after {
+  content: '−';
+}
+
+.activity-details__secondary-actions summary:focus-visible {
+  outline: var(--se-border-width-strong) solid var(--se-color-focus);
+  outline-offset: var(--se-spacing-xsmall);
+}
+
+.activity-details__secondary-actions-content {
+  padding: 0 var(--se-spacing-medium) var(--se-spacing-medium);
+  border-top: var(--se-border-width-regular) var(--se-border-style-solid)
+    var(--se-color-border-default);
+}
+
+.activity-details__secondary-actions-content .activity-details__actions-content {
+  padding-top: var(--se-spacing-medium);
 }
 
 @media (min-width: 576px) {
@@ -213,6 +277,10 @@
     margin: 0;
   }
 
+  .activity-details--basic {
+    max-width: 52rem;
+  }
+
   .activity-details__header {
     display: flex;
     align-items: start;
@@ -228,7 +296,7 @@
     margin-left: var(--se-spacing-regular);
   }
 
-  .activity-details__layout {
+  .activity-details--advanced .activity-details__layout {
     grid-template-columns: minmax(0, 2fr) minmax(18rem, 1fr);
     align-items: start;
   }

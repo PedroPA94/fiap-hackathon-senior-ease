@@ -1,4 +1,9 @@
-<section class="activity-details" [attr.aria-busy]="loadState().kind === 'loading'">
+<section
+  class="activity-details"
+  [class.activity-details--basic]="!isAdvancedMode()"
+  [class.activity-details--advanced]="isAdvancedMode()"
+  [attr.aria-busy]="loadState().kind === 'loading'"
+>
   <a class="activity-details__back" routerLink="/activities">
     <ng-icon name="matArrowBackRound" size="24" aria-hidden="true" />
     Voltar para atividades
@@ -68,74 +73,120 @@
       </se-inline-alert>
     }
 
+    <ng-template #activityActions>
+      <div class="activity-details__actions-content">
+        @if (actionErrorMessage(); as actionError) {
+          <se-inline-alert variant="error">
+            {{ actionError }}
+          </se-inline-alert>
+        }
+
+        @if (view.status !== 'completed') {
+          <se-button
+            [loading]="isProcessingAction('complete')"
+            [disabled]="isProcessing()"
+            [fullWidth]="true"
+            (click)="requestCompleteActivity()"
+          >
+            Concluir atividade
+          </se-button>
+
+          <se-button
+            variant="danger-outline"
+            [loading]="isProcessingAction('delete')"
+            [disabled]="isProcessing()"
+            [fullWidth]="true"
+            (click)="requestDelete()"
+          >
+            Excluir atividade
+          </se-button>
+        } @else {
+          <p class="activity-details__completed-message">Todas as etapas foram concluídas.</p>
+        }
+      </div>
+    </ng-template>
+
     <div class="activity-details__layout">
       <se-card>
         <div class="activity-details__progress">
           <div>
             <h2 id="activity-progress-heading">Progresso</h2>
-            <p>{{ view.progressLabel }}</p>
+
+            @if (isAdvancedMode()) {
+              <p>{{ view.progressLabel }}</p>
+            } @else {
+              <p>{{ basicProgressLabel() }}</p>
+            }
           </div>
 
-          <progress
-            [max]="view.progress.totalSteps"
-            [value]="view.progress.completedSteps"
-            [attr.aria-valuetext]="view.progressLabel"
-            aria-labelledby="activity-progress-heading"
-          ></progress>
+          @if (isAdvancedMode()) {
+            <progress
+              [max]="view.progress.totalSteps"
+              [value]="view.progress.completedSteps"
+              [attr.aria-valuetext]="view.progressLabel"
+              aria-labelledby="activity-progress-heading"
+            ></progress>
+          }
         </div>
 
         <section class="activity-details__steps">
-          <h2>Etapas</h2>
-          <ol>
-            @for (step of view.steps; track step.id; let position = $index) {
+          @if (isAdvancedMode()) {
+            <h2>Etapas</h2>
+
+            <ol>
+              @for (step of view.steps; track step.id; let position = $index) {
+                <li>
+                  <se-activity-step-item
+                    [step]="step"
+                    [position]="position + 1"
+                    [loading]="isStepProcessing(step.id)"
+                    [actionsDisabled]="isProcessing()"
+                    (completionRequested)="completeStep($event)"
+                  />
+                </li>
+              }
+            </ol>
+          } @else if (currentStepEntry(); as currentStep) {
+            <h2>Etapa atual</h2>
+
+            <ol>
               <li>
                 <se-activity-step-item
-                  [step]="step"
-                  [position]="position + 1"
-                  [loading]="isStepProcessing(step.id)"
+                  [step]="currentStep.step"
+                  [position]="currentStep.position"
+                  [loading]="isStepProcessing(currentStep.step.id)"
                   [actionsDisabled]="isProcessing()"
                   (completionRequested)="completeStep($event)"
                 />
               </li>
-            }
-          </ol>
+            </ol>
+          } @else {
+            <h2>Atividade concluída</h2>
+
+            <p class="activity-details__completed-message">
+              Você concluiu todas as etapas desta atividade.
+            </p>
+          }
         </section>
       </se-card>
 
-      <aside class="activity-details__actions">
-        <se-card>
-          <div class="activity-details__actions-content">
-            <h2>Ações</h2>
+      @if (isAdvancedMode()) {
+        <aside class="activity-details__actions" aria-labelledby="activity-actions-title">
+          <se-card>
+            <h2 id="activity-actions-title" class="activity-details__actions-title">Ações</h2>
 
-            @if (actionErrorMessage(); as actionError) {
-              <se-inline-alert variant="error">{{ actionError }}</se-inline-alert>
-            }
+            <ng-container [ngTemplateOutlet]="activityActions" />
+          </se-card>
+        </aside>
+      } @else {
+        <details class="activity-details__secondary-actions">
+          <summary>Outras ações</summary>
 
-            @if (view.status !== 'completed') {
-              <se-button
-                [loading]="isProcessingAction('complete')"
-                [disabled]="isProcessing()"
-                [fullWidth]="true"
-                (click)="requestCompleteActivity()"
-              >
-                Concluir atividade
-              </se-button>
-
-              <se-button
-                variant="danger-outline"
-                [loading]="isProcessingAction('delete')"
-                [disabled]="isProcessing()"
-                [fullWidth]="true"
-                (click)="requestDelete()"
-              >
-                Excluir atividade
-              </se-button>
-            } @else {
-              <p class="activity-details__completed-message">Todas as etapas foram concluídas.</p>
-            }
+          <div class="activity-details__secondary-actions-content">
+            <ng-container [ngTemplateOutlet]="activityActions" />
           </div>
-        </se-card>
-      </aside>
+        </details>
+      }
     </div>
   }
 </section>
