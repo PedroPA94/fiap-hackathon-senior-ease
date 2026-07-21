@@ -75,6 +75,60 @@
       </se-card>
     </div>
 
+    @if (reminders().length > 0) {
+      <se-card class="home__reminders-card">
+        <section class="home-reminders" aria-labelledby="home-reminders-title">
+          <h2 id="home-reminders-title" class="home-reminders__title">Lembretes</h2>
+
+          @if (isAdvancedMode()) {
+            <ul class="home-reminders__list">
+              @for (reminder of reminders(); track reminder.activityId) {
+                <li class="home-reminders__item">
+                  <div class="home-reminders__content">
+                    <h3 class="home-reminders__activity-title">{{ reminder.title }}</h3>
+                    <p class="home-reminders__schedule">
+                      {{ formatReminderSchedule(reminder) }}
+                    </p>
+                  </div>
+
+                  <se-button
+                    class="home-reminders__action"
+                    [routerLink]="['/activities', reminder.activityId]"
+                    [ariaLabel]="'Ver etapas de ' + reminder.title"
+                  >
+                    Ver etapas
+                  </se-button>
+                </li>
+              }
+            </ul>
+          } @else if (primaryReminder(); as reminder) {
+            <article class="home-reminders__item">
+              <div class="home-reminders__content">
+                <h3 class="home-reminders__activity-title">{{ reminder.title }}</h3>
+                <p class="home-reminders__schedule">
+                  {{ formatReminderSchedule(reminder) }}
+                </p>
+              </div>
+
+              <se-button
+                class="home-reminders__action"
+                [routerLink]="['/activities', reminder.activityId]"
+                [ariaLabel]="'Ver etapas de ' + reminder.title"
+              >
+                Ver etapas
+              </se-button>
+            </article>
+
+            @if (additionalReminderCount() > 0) {
+              <p class="home-reminders__additional-count">
+                {{ additionalRemindersLabel(additionalReminderCount()) }}
+              </p>
+            }
+          }
+        </section>
+      </se-card>
+    }
+
     <nav
       class="home__quick-actions"
       [class.home__quick-actions--single]="!isAdvancedMode()"

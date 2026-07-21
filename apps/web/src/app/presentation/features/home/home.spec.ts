@@ -1,8 +1,8 @@
-import { signal } from '@angular/core';
+import { signal, type WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
-import type { Activity, HomeActivityOverview } from '@senior-ease/core';
+import type { Activity, ActivityReminder, HomeActivityOverview } from '@senior-ease/core';
 import { Observable, of, Subject, throwError } from 'rxjs';
 import type { Mock } from 'vitest';
 
@@ -14,8 +14,10 @@ describe('Home', () => {
   let activityService: ActivityServiceMock;
   let component: Home;
   let fixture: ComponentFixture<Home>;
+  let interfaceMode: WritableSignal<'basic' | 'advanced'>;
 
   beforeEach(async () => {
+    interfaceMode = signal('advanced');
     activityService = {
       getHomeOverview: vi.fn(() => of(makeOverview())),
     };
@@ -27,7 +29,7 @@ describe('Home', () => {
         { provide: ActivityService, useValue: activityService },
         {
           provide: ThemeService,
-          useValue: { interfaceMode: signal<'basic' | 'advanced'>('advanced') },
+          useValue: { interfaceMode },
         },
       ],
     }).compileComponents();
@@ -48,6 +50,7 @@ describe('Home', () => {
 
     expect(getText()).toContain('Carregando dados da página inicial...');
     expect(getContentRegion().getAttribute('aria-busy')).toBe('true');
+    expect(getReminderSection()).toBeNull();
     expect(activityService.getHomeOverview).toHaveBeenCalledOnce();
   });
 
@@ -93,6 +96,157 @@ describe('Home', () => {
 
     expect(getText()).toContain('Você não possui atividades pendentes.');
     expect(getText()).not.toContain('Ver etapas');
+  });
+
+  it('does not render the reminders section when the overview has none', () => {
+    createComponent();
+
+    expect(getReminderSection()).toBeNull();
+    expect(getText()).not.toContain('Lembretes');
+  });
+
+  it('renders only the first reminder and the additional count in basic mode', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeTimedReminder('first-reminder', 'Tomar remédio', '14:00'),
+            makeUntimedReminder('second-reminder', 'Fazer caminhada'),
+            makeUntimedReminder('third-reminder', 'Ligar para família'),
+          ],
+        }),
+      ),
+    );
+
+    createComponent();
+
+    expect(getReminderItems()).toHaveLength(1);
+    expect(getReminderSection()?.textContent).toContain('Tomar remédio');
+    expect(getReminderSection()?.textContent).not.toContain('Fazer caminhada');
+    expect(getReminderSection()?.textContent).not.toContain('Ligar para família');
+    expect(getReminderSection()?.textContent).toContain('25 de julho de 2026 às 14:00');
+    expect(getReminderSection()?.textContent).toContain('Você tem mais 2 lembretes.');
+    expect(getReminderRoutes()).toEqual(['/activities/first-reminder']);
+  });
+
+  it('does not render an additional count for a single basic reminder', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [makeTimedReminder('only-reminder', 'Consulta médica', '14:00')],
+        }),
+      ),
+    );
+
+    createComponent();
+
+    expect(getReminderSection()?.textContent).toContain('Ver etapas');
+    expect(fixture.nativeElement.querySelector('.home-reminders__additional-count')).toBeNull();
+  });
+
+  it('does not invent a time for an untimed basic reminder', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [makeUntimedReminder('untimed-reminder', 'Fazer caminhada')],
+        }),
+      ),
+    );
+
+    createComponent();
+
+    const schedule = fixture.nativeElement.querySelector('.home-reminders__schedule');
+    expect(schedule.textContent.trim()).toBe('25 de julho de 2026');
+    expect(schedule.textContent).not.toContain('00:00');
+  });
+
+  it('renders every reminder in received order with its route in advanced mode', () => {
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeTimedReminder('timed-reminder', 'Tomar remédio', '14:00'),
+            makeUntimedReminder('untimed-reminder', 'Fazer caminhada'),
+          ],
+        }),
+      ),
+    );
+
+    createComponent();
+
+    const items = getReminderItems();
+    expect(fixture.nativeElement.querySelector('.home-reminders__list')).toBeTruthy();
+    expect(items).toHaveLength(2);
+    expect(items[0]?.textContent).toContain('Tomar remédio');
+    expect(items[0]?.textContent).toContain('25 de julho de 2026 às 14:00');
+    expect(items[1]?.textContent).toContain('Fazer caminhada');
+    expect(items[1]?.textContent).toContain('25 de julho de 2026');
+    expect(items[1]?.textContent).not.toContain('00:00');
+    expect(getReminderRoutes()).toEqual([
+      '/activities/timed-reminder',
+      '/activities/untimed-reminder',
+    ]);
+  });
+
+  it('reacts to interface mode changes without loading the overview again', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeTimedReminder('first-reminder', 'Tomar remédio', '14:00'),
+            makeUntimedReminder('second-reminder', 'Fazer caminhada'),
+          ],
+        }),
+      ),
+    );
+    createComponent();
+
+    expect(getReminderItems()).toHaveLength(1);
+    expect(fixture.nativeElement.querySelector('.recent-history')).toBeNull();
+
+    interfaceMode.set('advanced');
+    fixture.detectChanges();
+    expect(getReminderItems()).toHaveLength(2);
+    expect(fixture.nativeElement.querySelector('.recent-history')).toBeTruthy();
+
+    interfaceMode.set('basic');
+    fixture.detectChanges();
+    expect(getReminderItems()).toHaveLength(1);
+    expect(activityService.getHomeOverview).toHaveBeenCalledOnce();
+  });
+
+  it('updates the reminders when a new overview is received', () => {
+    const overviewSubject = new Subject<HomeActivityOverview>();
+    activityService.getHomeOverview.mockReturnValue(overviewSubject.asObservable());
+    createComponent();
+
+    overviewSubject.next(
+      makeOverview({ reminders: [makeUntimedReminder('first', 'Primeiro lembrete')] }),
+    );
+    fixture.detectChanges();
+    expect(getReminderSection()?.textContent).toContain('Primeiro lembrete');
+
+    overviewSubject.next(
+      makeOverview({ reminders: [makeUntimedReminder('second', 'Novo lembrete')] }),
+    );
+    fixture.detectChanges();
+    expect(getReminderSection()?.textContent).toContain('Novo lembrete');
+    expect(getReminderSection()?.textContent).not.toContain('Primeiro lembrete');
+  });
+
+  it('keeps the existing quick actions', () => {
+    createComponent();
+
+    const quickActionRoutes = fixture.debugElement
+      .query(By.css('.home__quick-actions'))
+      .queryAll(By.directive(RouterLink))
+      .map((element) => element.injector.get(RouterLink).urlTree?.toString());
+
+    expect(quickActionRoutes).toEqual(['/activities/new', '/personalization']);
   });
 
   it('renders the recent completed activities as a semantic list', () => {
@@ -149,6 +303,7 @@ describe('Home', () => {
     expect(getText()).toContain('Próxima atividade');
     expect(getText()).toContain('Resumo do dia');
     expect(getText()).toContain('Histórico recente');
+    expect(getReminderSection()).toBeNull();
     expect(getAlertAction()?.textContent).toContain('Tentar novamente');
   });
 
@@ -192,6 +347,22 @@ describe('Home', () => {
 
   function getContentRegion(): HTMLElement {
     return fixture.nativeElement.querySelector('.home__content')!;
+  }
+
+  function getReminderSection(): HTMLElement | null {
+    return fixture.nativeElement.querySelector('.home-reminders');
+  }
+
+  function getReminderItems(): HTMLElement[] {
+    return Array.from(fixture.nativeElement.querySelectorAll('.home-reminders__item'));
+  }
+
+  function getReminderRoutes(): string[] {
+    const section = fixture.debugElement.query(By.css('.home-reminders'));
+
+    return section
+      .queryAll(By.directive(RouterLink))
+      .map((element) => element.injector.get(RouterLink).urlTree?.toString() ?? '');
   }
 
   function getAlertAction(): HTMLButtonElement | null {
@@ -248,6 +419,30 @@ function makeCompletedActivity(id: string, title: string, updatedAt: string): Ac
       },
     ],
   });
+}
+
+function makeTimedReminder(activityId: string, title: string, time: string): ActivityReminder {
+  return {
+    activityId,
+    title,
+    date: '2026-07-25',
+    time,
+    scheduledAt: new Date(2026, 6, 25, Number(time.slice(0, 2)), Number(time.slice(3))),
+    reminderAt: new Date(2026, 6, 25, Number(time.slice(0, 2)), Number(time.slice(3))),
+    hasTime: true,
+  };
+}
+
+function makeUntimedReminder(activityId: string, title: string): ActivityReminder {
+  return {
+    activityId,
+    title,
+    date: '2026-07-25',
+    time: null,
+    scheduledAt: null,
+    reminderAt: null,
+    hasTime: false,
+  };
 }
 
 type ActivityServiceMock = {

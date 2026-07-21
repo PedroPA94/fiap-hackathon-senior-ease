@@ -83,6 +83,74 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.home-reminders {
+  display: grid;
+  gap: var(--se-spacing-large);
+}
+
+.home-reminders__title {
+  margin: 0;
+  color: var(--se-color-text-default);
+  font-family: var(--se-font-family);
+  font-size: var(--se-font-size-title);
+  font-weight: var(--se-font-weight-bold);
+  line-height: 1.2;
+}
+
+.home-reminders__list {
+  display: grid;
+  gap: var(--se-spacing-large);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-reminders__item {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--se-spacing-large);
+  min-width: 0;
+}
+
+.home-reminders__list .home-reminders__item + .home-reminders__item {
+  padding-top: var(--se-spacing-large);
+  border-top: var(--se-border-width-regular) var(--se-border-style-solid)
+    var(--se-color-border-default);
+}
+
+.home-reminders__content {
+  display: grid;
+  gap: var(--se-spacing-small);
+  min-width: 0;
+}
+
+.home-reminders__activity-title,
+.home-reminders__schedule,
+.home-reminders__additional-count {
+  margin: 0;
+  font-family: var(--se-font-family);
+  overflow-wrap: anywhere;
+}
+
+.home-reminders__activity-title {
+  color: var(--se-color-text-default);
+  font-size: var(--se-font-size-body-large);
+  font-weight: var(--se-font-weight-bold);
+  line-height: var(--se-line-height-body-large);
+}
+
+.home-reminders__schedule,
+.home-reminders__additional-count {
+  color: var(--se-color-text-muted);
+  font-size: var(--se-font-size-body);
+  line-height: 1.4;
+}
+
+.home-reminders__action {
+  width: 100%;
+}
+
 .recent-history {
   display: grid;
   gap: var(--se-spacing-medium);
@@ -137,6 +205,17 @@
   .home-card__action {
     max-width: 26rem;
   }
+
+  .home-reminders__item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .home-reminders__action {
+    flex: 0 0 auto;
+    width: min(100%, 15rem);
+  }
 }
 
 @media (min-width: 992px) {
@@ -157,5 +236,9 @@
 
   .home__recent-history {
     width: min(100%, 36rem);
+  }
+
+  .home__reminders-card {
+    width: min(100%, 48rem);
   }
 }

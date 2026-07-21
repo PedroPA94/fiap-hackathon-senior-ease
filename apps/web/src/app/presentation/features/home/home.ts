@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type {
   Activity,
+  ActivityReminder,
   HomeActivityOverview,
   ISODateTimeString,
   TodayActivitySummary,
@@ -21,6 +22,7 @@ import { Card } from '../../shared/ui/card/card';
 import { InlineAlert } from '../../shared/feedback/inline-alert/inline-alert';
 import { ActivityService } from '../../../application/services/activity.service';
 import { formatRelativeDate } from '../../shared/utils/format-relative-date';
+import { formatDateOnlyLongPtBr } from '../../shared/utils/format-date-only';
 import { ThemeService } from '../../../application/services/theme.service';
 
 @Component({
@@ -49,6 +51,13 @@ export class Home implements OnInit {
   );
   protected readonly todayOpenActivities = computed(
     () => this.todaySummary().pending + this.todaySummary().inProgress,
+  );
+  protected readonly reminders = computed<readonly ActivityReminder[]>(
+    () => this.overview()?.reminders ?? [],
+  );
+  protected readonly primaryReminder = computed(() => this.reminders()[0] ?? null);
+  protected readonly additionalReminderCount = computed(() =>
+    Math.max(this.reminders().length - 1, 0),
   );
 
   protected readonly interfaceMode = this.themeService.interfaceMode;
@@ -98,6 +107,16 @@ export class Home implements OnInit {
     }).format(date);
 
     return activity.time ? `${formattedDate}, ${activity.time}` : formattedDate;
+  }
+
+  protected formatReminderSchedule(reminder: ActivityReminder): string {
+    const date = formatDateOnlyLongPtBr(reminder.date);
+
+    return reminder.time ? `${date} às ${reminder.time}` : date;
+  }
+
+  protected additionalRemindersLabel(count: number): string {
+    return `Você tem mais ${count} ${count === 1 ? 'lembrete' : 'lembretes'}.`;
   }
 
   protected pendingLabel(count: number): string {
