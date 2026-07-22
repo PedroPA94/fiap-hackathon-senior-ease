@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type {
   Activity,
   ActivityReminder,
+  EntityId,
   HomeActivityOverview,
   ISODateTimeString,
   TodayActivitySummary,
@@ -24,6 +25,7 @@ import { ActivityService } from '../../../application/services/activity.service'
 import { formatRelativeDate } from '../../shared/utils/format-relative-date';
 import { formatDateOnlyLongPtBr } from '../../shared/utils/format-date-only';
 import { ThemeService } from '../../../application/services/theme.service';
+import { DismissedRemindersService } from '../../../application/services/dismissed-reminders.service';
 
 @Component({
   selector: 'se-home',
@@ -36,6 +38,7 @@ import { ThemeService } from '../../../application/services/theme.service';
 export class Home implements OnInit {
   private readonly activityService = inject(ActivityService);
   private readonly themeService = inject(ThemeService);
+  private readonly dismissedRemindersService = inject(DismissedRemindersService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly overview = signal<HomeActivityOverview | null>(null);
@@ -55,9 +58,14 @@ export class Home implements OnInit {
   protected readonly reminders = computed<readonly ActivityReminder[]>(
     () => this.overview()?.reminders ?? [],
   );
-  protected readonly primaryReminder = computed(() => this.reminders()[0] ?? null);
+  protected readonly visibleReminders = computed<readonly ActivityReminder[]>(() => {
+    const dismissedIds = this.dismissedRemindersService.ids();
+
+    return this.reminders().filter((reminder) => !dismissedIds.has(reminder.activityId));
+  });
+  protected readonly primaryReminder = computed(() => this.visibleReminders()[0] ?? null);
   protected readonly additionalReminderCount = computed(() =>
-    Math.max(this.reminders().length - 1, 0),
+    Math.max(this.visibleReminders().length - 1, 0),
   );
 
   protected readonly interfaceMode = this.themeService.interfaceMode;
@@ -117,6 +125,10 @@ export class Home implements OnInit {
 
   protected additionalRemindersLabel(count: number): string {
     return `Você tem mais ${count} ${count === 1 ? 'lembrete' : 'lembretes'}.`;
+  }
+
+  protected dismissReminder(activityId: EntityId): void {
+    this.dismissedRemindersService.dismiss(activityId);
   }
 
   protected pendingLabel(count: number): string {

@@ -13,6 +13,7 @@ import { USER_PROFILE_REPOSITORY } from '../../core/tokens/repository.tokens';
 import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { LocalStorageUserSessionStore } from '../../infrastructure/stores/local-storage-user-session.store';
 import { UserSessionError } from '../errors/user-session.error';
+import { DismissedRemindersService } from './dismissed-reminders.service';
 import { UserSessionService } from './user-session.service';
 
 describe('UserSessionService', () => {
@@ -34,6 +35,9 @@ describe('UserSessionService', () => {
   };
   let idGeneratorMock: {
     generate: ReturnType<typeof vi.fn<IdGenerator['generate']>>;
+  };
+  let dismissedRemindersServiceMock: {
+    clear: ReturnType<typeof vi.fn<DismissedRemindersService['clear']>>;
   };
   let userSessionStoreMock: {
     getCurrentUserId: ReturnType<typeof vi.fn<LocalStorageUserSessionStore['getCurrentUserId']>>;
@@ -62,6 +66,9 @@ describe('UserSessionService', () => {
     idGeneratorMock = {
       generate: vi.fn<IdGenerator['generate']>().mockReturnValue(profile.id),
     };
+    dismissedRemindersServiceMock = {
+      clear: vi.fn<DismissedRemindersService['clear']>(),
+    };
     userSessionStoreMock = {
       getCurrentUserId: vi.fn<LocalStorageUserSessionStore['getCurrentUserId']>(),
       setCurrentUserId: vi.fn<LocalStorageUserSessionStore['setCurrentUserId']>(),
@@ -81,6 +88,7 @@ describe('UserSessionService', () => {
         { provide: CLOCK, useValue: clockMock },
         { provide: ID_GENERATOR, useValue: idGeneratorMock },
         { provide: LocalStorageUserSessionStore, useValue: userSessionStoreMock },
+        { provide: DismissedRemindersService, useValue: dismissedRemindersServiceMock },
       ],
     });
 
@@ -169,6 +177,7 @@ describe('UserSessionService', () => {
     await expect(firstValueFrom(service.getCurrentUserProfile())).resolves.toBeNull();
 
     expect(userSessionStoreMock.clearCurrentUserId).toHaveBeenCalledOnce();
+    expect(dismissedRemindersServiceMock.clear).toHaveBeenCalledOnce();
   });
 
   it('should rethrow unexpected errors while loading the current profile', async () => {
@@ -201,6 +210,7 @@ describe('UserSessionService', () => {
   });
 
   it('should select an existing local user and refresh its last access date', async () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue(profile.id);
     userProfileRepositoryMock.findById.mockResolvedValue(profile);
 
     await expect(firstValueFrom(service.selectLocalUser(profile.id))).resolves.toEqual(profile);
@@ -212,11 +222,23 @@ describe('UserSessionService', () => {
       name: profile.name,
       lastAccessedAt: now,
     });
+    expect(dismissedRemindersServiceMock.clear).not.toHaveBeenCalled();
+  });
+
+  it('should clear dismissed reminders when another user becomes current', async () => {
+    userSessionStoreMock.getCurrentUserId.mockReturnValue('user-2');
+    userProfileRepositoryMock.findById.mockResolvedValue(profile);
+
+    await firstValueFrom(service.selectLocalUser(profile.id));
+
+    expect(dismissedRemindersServiceMock.clear).toHaveBeenCalledOnce();
+    expect(userSessionStoreMock.setCurrentUserId).toHaveBeenCalledWith(profile.id);
   });
 
   it('should clear the current user session', () => {
     service.clearCurrentUser();
 
     expect(userSessionStoreMock.clearCurrentUserId).toHaveBeenCalledOnce();
+    expect(dismissedRemindersServiceMock.clear).toHaveBeenCalledOnce();
   });
 });

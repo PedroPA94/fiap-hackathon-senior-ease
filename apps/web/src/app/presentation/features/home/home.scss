@@ -151,6 +151,11 @@
   width: 100%;
 }
 
+.home-reminders__actions {
+  display: grid;
+  gap: var(--se-spacing-medium);
+}
+
 .recent-history {
   display: grid;
   gap: var(--se-spacing-medium);
@@ -213,8 +218,15 @@
   }
 
   .home-reminders__action {
-    flex: 0 0 auto;
-    width: min(100%, 15rem);
+    flex: 1 1 10rem;
+    width: auto;
+  }
+
+  .home-reminders__actions {
+    display: flex;
+    flex: 0 1 30rem;
+    flex-wrap: wrap;
+    width: min(100%, 30rem);
   }
 }
 

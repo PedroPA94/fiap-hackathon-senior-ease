@@ -8,6 +8,7 @@ import type { Mock } from 'vitest';
 
 import { ActivityService } from '../../../application/services/activity.service';
 import { ThemeService } from '../../../application/services/theme.service';
+import { DismissedRemindersService } from '../../../application/services/dismissed-reminders.service';
 import { Home } from './home';
 
 describe('Home', () => {
@@ -15,6 +16,7 @@ describe('Home', () => {
   let component: Home;
   let fixture: ComponentFixture<Home>;
   let interfaceMode: WritableSignal<'basic' | 'advanced'>;
+  let dismissedRemindersService: DismissedRemindersService;
 
   beforeEach(async () => {
     interfaceMode = signal('advanced');
@@ -33,6 +35,8 @@ describe('Home', () => {
         },
       ],
     }).compileComponents();
+
+    dismissedRemindersService = TestBed.inject(DismissedRemindersService);
   });
 
   it('creates and loads the overview once on initialization', () => {
@@ -146,6 +150,35 @@ describe('Home', () => {
     expect(fixture.nativeElement.querySelector('.home-reminders__additional-count')).toBeNull();
   });
 
+  it('dismisses basic reminders in sequence and updates count, route and section visibility', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeTimedReminder('first-reminder', 'Tomar remédio', '14:00'),
+            makeUntimedReminder('second-reminder', 'Fazer caminhada'),
+            makeUntimedReminder('third-reminder', 'Ligar para família'),
+          ],
+        }),
+      ),
+    );
+    createComponent();
+
+    clickFirstDismissButton();
+    expect(getReminderSection()?.textContent).toContain('Fazer caminhada');
+    expect(getReminderSection()?.textContent).toContain('Você tem mais 1 lembrete.');
+    expect(getReminderRoutes()).toEqual(['/activities/second-reminder']);
+
+    clickFirstDismissButton();
+    expect(getReminderSection()?.textContent).toContain('Ligar para família');
+    expect(fixture.nativeElement.querySelector('.home-reminders__additional-count')).toBeNull();
+    expect(getReminderRoutes()).toEqual(['/activities/third-reminder']);
+
+    clickFirstDismissButton();
+    expect(getReminderSection()).toBeNull();
+  });
+
   it('does not invent a time for an untimed basic reminder', () => {
     interfaceMode.set('basic');
     activityService.getHomeOverview.mockReturnValue(
@@ -189,6 +222,38 @@ describe('Home', () => {
       '/activities/timed-reminder',
       '/activities/untimed-reminder',
     ]);
+    expect(getDismissButtons()).toHaveLength(2);
+  });
+
+  it('dismisses only the selected advanced reminder and preserves the remaining order', () => {
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeUntimedReminder('first-reminder', 'Primeiro lembrete'),
+            makeUntimedReminder('second-reminder', 'Segundo lembrete'),
+            makeUntimedReminder('third-reminder', 'Terceiro lembrete'),
+          ],
+        }),
+      ),
+    );
+    createComponent();
+
+    getDismissButtons()[1]?.click();
+    fixture.detectChanges();
+
+    const remainingItems = getReminderItems();
+    expect(remainingItems).toHaveLength(2);
+    expect(remainingItems[0]?.textContent).toContain('Primeiro lembrete');
+    expect(remainingItems[1]?.textContent).toContain('Terceiro lembrete');
+    expect(getReminderRoutes()).toEqual([
+      '/activities/first-reminder',
+      '/activities/third-reminder',
+    ]);
+
+    clickFirstDismissButton();
+    clickFirstDismissButton();
+    expect(getReminderSection()).toBeNull();
   });
 
   it('reacts to interface mode changes without loading the overview again', () => {
@@ -217,6 +282,74 @@ describe('Home', () => {
     fixture.detectChanges();
     expect(getReminderItems()).toHaveLength(1);
     expect(activityService.getHomeOverview).toHaveBeenCalledOnce();
+  });
+
+  it('keeps a basic dismissal when switching to advanced mode', () => {
+    interfaceMode.set('basic');
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeUntimedReminder('first-reminder', 'Primeiro lembrete'),
+            makeUntimedReminder('second-reminder', 'Segundo lembrete'),
+            makeUntimedReminder('third-reminder', 'Terceiro lembrete'),
+          ],
+        }),
+      ),
+    );
+    createComponent();
+
+    clickFirstDismissButton();
+    interfaceMode.set('advanced');
+    fixture.detectChanges();
+
+    expect(getReminderItems()).toHaveLength(2);
+    expect(getReminderSection()?.textContent).not.toContain('Primeiro lembrete');
+    expect(getReminderSection()?.textContent).toContain('Segundo lembrete');
+    expect(getReminderSection()?.textContent).toContain('Terceiro lembrete');
+  });
+
+  it('keeps an advanced dismissal when switching to basic mode and counts visible reminders', () => {
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [
+            makeUntimedReminder('first-reminder', 'Primeiro lembrete'),
+            makeUntimedReminder('second-reminder', 'Segundo lembrete'),
+            makeUntimedReminder('third-reminder', 'Terceiro lembrete'),
+          ],
+        }),
+      ),
+    );
+    createComponent();
+
+    getDismissButtons()[1]?.click();
+    interfaceMode.set('basic');
+    fixture.detectChanges();
+
+    expect(getReminderItems()).toHaveLength(1);
+    expect(getReminderSection()?.textContent).toContain('Primeiro lembrete');
+    expect(getReminderSection()?.textContent).not.toContain('Segundo lembrete');
+    expect(getReminderSection()?.textContent).toContain('Você tem mais 1 lembrete.');
+  });
+
+  it('shows dismissed reminders again after session state is cleared', () => {
+    activityService.getHomeOverview.mockReturnValue(
+      of(
+        makeOverview({
+          reminders: [makeUntimedReminder('reminder', 'Lembrete da sessão')],
+        }),
+      ),
+    );
+    createComponent();
+
+    clickFirstDismissButton();
+    expect(getReminderSection()).toBeNull();
+
+    dismissedRemindersService.clear();
+    fixture.detectChanges();
+
+    expect(getReminderSection()?.textContent).toContain('Lembrete da sessão');
   });
 
   it('updates the reminders when a new overview is received', () => {
@@ -363,6 +496,17 @@ describe('Home', () => {
     return section
       .queryAll(By.directive(RouterLink))
       .map((element) => element.injector.get(RouterLink).urlTree?.toString() ?? '');
+  }
+
+  function getDismissButtons(): HTMLButtonElement[] {
+    return Array.from(
+      fixture.nativeElement.querySelectorAll('button[aria-label^="Dispensar lembrete de"]'),
+    );
+  }
+
+  function clickFirstDismissButton(): void {
+    getDismissButtons()[0]?.click();
+    fixture.detectChanges();
   }
 
   function getAlertAction(): HTMLButtonElement | null {

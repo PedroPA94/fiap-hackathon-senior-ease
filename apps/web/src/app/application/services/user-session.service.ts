@@ -17,6 +17,7 @@ import { CLOCK, ID_GENERATOR } from '../../core/tokens/service.tokens';
 import { LocalStorageUserSessionStore } from '../../infrastructure/stores/local-storage-user-session.store';
 import { UserSessionError } from '../errors/user-session.error';
 import type { LocalUser } from '../models/local-user';
+import { DismissedRemindersService } from './dismissed-reminders.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserSessionService {
@@ -31,6 +32,8 @@ export class UserSessionService {
     private readonly idGenerator: IdGenerator,
 
     private readonly userSessionStore: LocalStorageUserSessionStore,
+
+    private readonly dismissedRemindersService: DismissedRemindersService,
   ) {}
 
   getCurrentUserId(): EntityId | null {
@@ -99,7 +102,7 @@ export class UserSessionService {
         }),
       ).pipe(
         tap((profile) => {
-          this.userSessionStore.setCurrentUserId(profile.id);
+          this.setCurrentUser(profile.id);
 
           this.userSessionStore.saveLocalUser({
             id: profile.id,
@@ -117,7 +120,7 @@ export class UserSessionService {
 
       return from(useCase.execute({ id: userId })).pipe(
         tap((profile) => {
-          this.userSessionStore.setCurrentUserId(profile.id);
+          this.setCurrentUser(profile.id);
 
           this.userSessionStore.saveLocalUser({
             id: profile.id,
@@ -130,6 +133,15 @@ export class UserSessionService {
   }
 
   clearCurrentUser(): void {
+    this.dismissedRemindersService.clear();
     this.userSessionStore.clearCurrentUserId();
+  }
+
+  private setCurrentUser(userId: EntityId): void {
+    if (this.getCurrentUserId() !== userId) {
+      this.dismissedRemindersService.clear();
+    }
+
+    this.userSessionStore.setCurrentUserId(userId);
   }
 }
