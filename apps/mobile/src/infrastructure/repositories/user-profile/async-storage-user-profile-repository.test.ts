@@ -41,6 +41,18 @@ describe("AsyncStorageUserProfileRepository", () => {
     await expect(storage.getItem(key)).resolves.toBe(JSON.stringify(profile));
   });
 
+  it("does not overwrite an existing profile", async () => {
+    await repository.create(profile);
+    const storedValue = await storage.getItem(key);
+
+    await expect(
+      repository.create({ ...profile, name: "Outro nome" }),
+    ).rejects.toThrow(/already exists/i);
+
+    await expect(storage.getItem(key)).resolves.toBe(storedValue);
+    await expect(repository.findById(userId)).resolves.toEqual(profile);
+  });
+
   it.each([
     ["malformed JSON", "{invalid-json"],
     ["a non-object value", JSON.stringify("profile")],

@@ -37,11 +37,14 @@ export class AsyncStorageUserProfileRepository
 
   async create(profile: UserProfile): Promise<UserProfile> {
     const parsedProfile = parseUserProfile(profile);
+    const key = storageKeys.userProfile(parsedProfile.id);
+    const storedProfile = await this.storage.getItem(key);
 
-    await this.storage.setItem(
-      storageKeys.userProfile(parsedProfile.id),
-      JSON.stringify(parsedProfile),
-    );
+    if (storedProfile !== null) {
+      throw new Error(`User profile "${parsedProfile.id}" already exists.`);
+    }
+
+    await this.storage.setItem(key, JSON.stringify(parsedProfile));
 
     return parsedProfile;
   }
