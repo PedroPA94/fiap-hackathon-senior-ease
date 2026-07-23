@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "SeniorEase",
+    "slug": "senior-ease",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "senior-ease",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

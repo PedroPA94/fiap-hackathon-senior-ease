@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "test": "pnpm test:package-exports",
     "test:package-exports": "pnpm --filter @senior-ease/core build && pnpm --filter @senior-ease/tokens build && tsc -p tsconfig.json && node runtime-smoke.mjs"
   },
   "dependencies": {
