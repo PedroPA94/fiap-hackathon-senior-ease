@@ -1,3 +1,3 @@
-export * from "./activity-repository";
-export * from "./accessibility-preferences-repository";
-export * from "./user-profile-repository";
+export * from "./activity-repository.js";
+export * from "./accessibility-preferences-repository.js";
+export * from "./user-profile-repository.js";

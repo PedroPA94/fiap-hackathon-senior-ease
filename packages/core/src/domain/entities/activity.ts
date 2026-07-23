@@ -1,4 +1,4 @@
-import { DomainError, type DomainErrorCode } from "../errors";
+import { DomainError, type DomainErrorCode } from "../errors/index.js";
 
 import {
   assertNonEmpty,
@@ -8,14 +8,14 @@ import {
   normalizeOptionalText,
   normalizeOptionalTime,
   normalizeRequiredText,
-} from "../validation";
+} from "../validation/index.js";
 
 import type {
   EntityId,
   DateOnlyString,
   ISODateTimeString,
   TimeString,
-} from "../types";
+} from "../types/index.js";
 
 export type ActivityStatus = "pending" | "inProgress" | "completed";
 

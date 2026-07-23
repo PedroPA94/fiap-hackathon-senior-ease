@@ -1,2 +1,2 @@
-export * from "./clock";
-export * from "./id-generator";
+export * from "./clock.js";
+export * from "./id-generator.js";

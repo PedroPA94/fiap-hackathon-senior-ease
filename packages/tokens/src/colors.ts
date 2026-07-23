@@ -51,6 +51,8 @@ export const defaultColors = {
   },
 } as const;
 
+export const colors = defaultColors;
+
 export const highContrastColors = {
   background: {
     page: "#FFFFFF",

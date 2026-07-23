@@ -2,9 +2,9 @@ import {
   createUserProfile,
   type EntityId,
   type UserProfile,
-} from "../../domain";
-import type { UserProfileRepository } from "../repositories";
-import type { Clock } from "../services";
+} from "../../domain/index.js";
+import type { UserProfileRepository } from "../repositories/index.js";
+import type { Clock } from "../services/index.js";
 
 export type CreateUserProfileUseCaseInput = {
   id: EntityId;

@@ -4,12 +4,12 @@ import {
   type InterfaceMode,
 } from "@senior-ease/core";
 
-import { borderStyle, borderWidth } from "./border";
-import { getColorScheme, type ColorScheme } from "./colors";
-import { radius } from "./radius";
-import { createSpacingScale, type SpacingScale } from "./spacing";
-import { createTypographyScale, type TypographyScale } from "./typography";
-import { breakpoints } from "./breakpoints";
+import { borderStyle, borderWidth } from "./border.js";
+import { getColorScheme, type ColorScheme } from "./colors.js";
+import { radius } from "./radius.js";
+import { createSpacingScale, type SpacingScale } from "./spacing.js";
+import { createTypographyScale, type TypographyScale } from "./typography.js";
+import { breakpoints } from "./breakpoints.js";
 
 export type AccessibilityTheme = {
   typography: TypographyScale;

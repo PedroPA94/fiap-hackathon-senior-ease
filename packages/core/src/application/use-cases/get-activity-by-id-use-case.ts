@@ -1,6 +1,6 @@
-import { assertNonEmpty, type Activity, type EntityId } from "../../domain";
-import { ApplicationError } from "../errors";
-import type { ActivityRepository } from "../repositories";
+import { assertNonEmpty, type Activity, type EntityId } from "../../domain/index.js";
+import { ApplicationError } from "../errors/index.js";
+import type { ActivityRepository } from "../repositories/index.js";
 
 export type GetActivityByIdUseCaseInput = {
   userId: EntityId;

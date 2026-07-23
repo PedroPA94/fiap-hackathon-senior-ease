@@ -1,4 +1,4 @@
-import { DomainError, type DomainErrorCode } from "../errors";
+import { DomainError, type DomainErrorCode } from "../errors/index.js";
 
 export function normalizeRequiredText(
   value: string,

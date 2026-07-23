@@ -10,13 +10,13 @@ import {
   type DateOnlyString,
   type EntityId,
   type ReminderAdvance,
-} from "../../domain";
-import { ApplicationError } from "../errors";
+} from "../../domain/index.js";
+import { ApplicationError } from "../errors/index.js";
 import type {
   AccessibilityPreferencesRepository,
   ActivityRepository,
-} from "../repositories";
-import type { Clock } from "../services";
+} from "../repositories/index.js";
+import type { Clock } from "../services/index.js";
 
 const DEFAULT_RECENT_ACTIVITIES_LIMIT = 2;
 

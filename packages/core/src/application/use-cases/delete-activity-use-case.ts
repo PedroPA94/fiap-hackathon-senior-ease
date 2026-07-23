@@ -1,5 +1,5 @@
-import { assertNonEmpty, type EntityId } from "../../domain";
-import type { ActivityRepository } from "../repositories";
+import { assertNonEmpty, type EntityId } from "../../domain/index.js";
+import type { ActivityRepository } from "../repositories/index.js";
 
 export type DeleteActivityUseCaseInput = {
   userId: EntityId;

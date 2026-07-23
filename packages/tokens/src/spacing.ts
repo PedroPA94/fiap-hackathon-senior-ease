@@ -14,6 +14,8 @@ export type SpacingToken = keyof typeof baseSpacing;
 
 export type SpacingScale = Record<SpacingToken, number>;
 
+export const spacing: SpacingScale = baseSpacing;
+
 const spacingMultiplier: Record<SpacingPreference, number> = {
   comfortable: 1,
   wide: 1.25,

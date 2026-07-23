@@ -1,3 +1,3 @@
-export * from "./activity";
-export * from "./activity-reminder";
-export * from "./user-profile";
+export * from "./activity.js";
+export * from "./activity-reminder.js";
+export * from "./user-profile.js";

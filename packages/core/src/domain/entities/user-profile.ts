@@ -1,5 +1,5 @@
-import type { EntityId, ISODateTimeString } from "../types";
-import { assertNonEmpty, normalizeRequiredText } from "../validation";
+import type { EntityId, ISODateTimeString } from "../types/index.js";
+import { assertNonEmpty, normalizeRequiredText } from "../validation/index.js";
 
 export type UserProfile = {
   id: EntityId;

@@ -1,5 +1,5 @@
-import { DomainError, type DomainErrorCode } from "../errors";
-import type { DateOnlyString, TimeString } from "../types";
+import { DomainError, type DomainErrorCode } from "../errors/index.js";
+import type { DateOnlyString, TimeString } from "../types/index.js";
 
 const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 const timePattern = /^\d{2}:\d{2}$/;

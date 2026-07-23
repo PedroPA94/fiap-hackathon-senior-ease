@@ -1,4 +1,4 @@
-import { DomainError, DomainErrorCode } from "../errors/domain-error";
+import { DomainError, DomainErrorCode } from "../errors/domain-error.js";
 
 export function assertNonEmpty(value: string, message: DomainErrorCode): void {
   if (!value.trim()) {

@@ -1,6 +1,6 @@
-import { assertNonEmpty, type EntityId, type UserProfile } from "../../domain";
-import { ApplicationError } from "../errors";
-import type { UserProfileRepository } from "../repositories";
+import { assertNonEmpty, type EntityId, type UserProfile } from "../../domain/index.js";
+import { ApplicationError } from "../errors/index.js";
+import type { UserProfileRepository } from "../repositories/index.js";
 
 export type GetUserProfileUseCaseInput = {
   id: EntityId;

@@ -3,8 +3,8 @@ import type {
   EntityId,
   ReminderAdvance,
   TimeString,
-} from "../types";
-import { resolveActivityStatus, type Activity } from "./activity";
+} from "../types/index.js";
+import { resolveActivityStatus, type Activity } from "./activity.js";
 
 export type ActivityReminder =
   | {

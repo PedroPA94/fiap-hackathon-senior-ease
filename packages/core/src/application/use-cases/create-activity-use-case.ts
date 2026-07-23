@@ -4,9 +4,9 @@ import {
   type EntityId,
   type DateOnlyString,
   type TimeString,
-} from "../../domain";
-import type { ActivityRepository } from "../repositories";
-import type { Clock, IdGenerator } from "../services";
+} from "../../domain/index.js";
+import type { ActivityRepository } from "../repositories/index.js";
+import type { Clock, IdGenerator } from "../services/index.js";
 
 export type CreateActivityUseCaseInput = {
   userId: EntityId;

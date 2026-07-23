@@ -3,8 +3,8 @@ import {
   defaultAccessibilityPreferences,
   type AccessibilityPreferences,
   type EntityId,
-} from "../../domain";
-import type { AccessibilityPreferencesRepository } from "../repositories";
+} from "../../domain/index.js";
+import type { AccessibilityPreferencesRepository } from "../repositories/index.js";
 
 export type ResetAccessibilityPreferencesUseCaseInput = {
   userId: EntityId;

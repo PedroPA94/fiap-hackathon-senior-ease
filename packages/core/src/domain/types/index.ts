@@ -1,2 +1,2 @@
-export * from "./accessibility-preferences";
-export * from "./common";
+export * from "./accessibility-preferences.js";
+export * from "./common.js";

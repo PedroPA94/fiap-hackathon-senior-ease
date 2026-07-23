@@ -2,9 +2,9 @@ import {
   assertNonEmpty,
   type AccessibilityPreferences,
   type EntityId,
-} from "../../domain";
-import { validateAccessibilityPreferences } from "../../domain/";
-import type { AccessibilityPreferencesRepository } from "../repositories";
+} from "../../domain/index.js";
+import { validateAccessibilityPreferences } from "../../domain/index.js";
+import type { AccessibilityPreferencesRepository } from "../repositories/index.js";
 
 export type UpdateAccessibilityPreferencesUseCaseInput = {
   userId: EntityId;

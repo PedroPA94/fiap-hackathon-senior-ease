@@ -3,10 +3,10 @@ import {
   completeActivityStep,
   type Activity,
   type EntityId,
-} from "../../domain";
-import { ApplicationError } from "../errors";
-import type { ActivityRepository } from "../repositories";
-import type { Clock } from "../services";
+} from "../../domain/index.js";
+import { ApplicationError } from "../errors/index.js";
+import type { ActivityRepository } from "../repositories/index.js";
+import type { Clock } from "../services/index.js";
 
 export type CompleteActivityStepUseCaseInput = {
   activityId: EntityId;

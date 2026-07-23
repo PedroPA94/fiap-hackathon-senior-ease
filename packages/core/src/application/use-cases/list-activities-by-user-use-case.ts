@@ -4,9 +4,9 @@ import {
   type Activity,
   type ActivityStatus,
   type EntityId,
-} from "../../domain";
-import type { ActivityRepository } from "../repositories";
-import type { Clock } from "../services";
+} from "../../domain/index.js";
+import type { ActivityRepository } from "../repositories/index.js";
+import type { Clock } from "../services/index.js";
 
 export type ActivityListFilter = "all" | "today" | ActivityStatus;
 

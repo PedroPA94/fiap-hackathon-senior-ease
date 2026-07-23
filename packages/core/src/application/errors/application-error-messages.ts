@@ -1,4 +1,4 @@
-import type { ApplicationErrorCode } from "./application-error";
+import type { ApplicationErrorCode } from "./application-error.js";
 
 export const applicationErrorMessagesPtBr: Record<
   ApplicationErrorCode,

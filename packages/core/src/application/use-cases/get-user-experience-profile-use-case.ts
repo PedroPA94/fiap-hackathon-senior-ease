@@ -2,13 +2,13 @@ import type {
   AccessibilityPreferences,
   EntityId,
   UserProfile,
-} from "../../domain";
-import { ApplicationError } from "../errors";
+} from "../../domain/index.js";
+import { ApplicationError } from "../errors/index.js";
 import type {
   AccessibilityPreferencesRepository,
   UserProfileRepository,
-} from "../repositories";
-import { defaultAccessibilityPreferences, assertNonEmpty } from "../../domain";
+} from "../repositories/index.js";
+import { defaultAccessibilityPreferences, assertNonEmpty } from "../../domain/index.js";
 
 export type UserExperienceProfile = {
   profile: UserProfile;

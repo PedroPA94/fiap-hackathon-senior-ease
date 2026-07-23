@@ -1,4 +1,4 @@
-import type { DomainErrorCode } from "./domain-error";
+import type { DomainErrorCode } from "./domain-error.js";
 
 export const domainErrorMessagesPtBr: Record<DomainErrorCode, string> = {
   ACTIVITY_INVALID: "Os dados da atividade estão inválidos.",

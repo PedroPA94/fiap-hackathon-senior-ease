@@ -112,3 +112,5 @@ export function createTypographyScale(
     displayLargeBold: createTextStyle(displayLarge, fontWeight.bold),
   };
 }
+
+export const typography = createTypographyScale("normal");

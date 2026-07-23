@@ -1,4 +1,4 @@
-import type { Activity, DateOnlyString, EntityId } from "../../domain";
+import type { Activity, DateOnlyString, EntityId } from "../../domain/index.js";
 
 export type ActivityQuery = {
   userId: EntityId;

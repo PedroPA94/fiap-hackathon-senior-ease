@@ -1,4 +1,4 @@
-import { DomainError } from "../errors";
+import { DomainError } from "../errors/index.js";
 import {
   type AccessibilityPreferences,
   type ContrastPreference,
@@ -6,7 +6,7 @@ import {
   type InterfaceMode,
   type ReminderAdvance,
   type SpacingPreference,
-} from "../types";
+} from "../types/index.js";
 
 const fontSizePreferences: readonly FontSizePreference[] = ["normal", "large", "extra"];
 
