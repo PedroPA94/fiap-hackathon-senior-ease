@@ -1,1 +1,5 @@
-// Add shared Jest setup only when the Expo preset does not cover a real need.
+jest.mock(
+  "@react-native-async-storage/async-storage",
+  () =>
+    require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
+);

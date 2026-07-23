@@ -17,6 +17,7 @@
     "build": "pnpm clean && expo export --platform android --output-dir dist"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@senior-ease/core": "workspace:*",
     "@senior-ease/tokens": "workspace:*",
     "expo": "~54.0.35",
