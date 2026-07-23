@@ -24,6 +24,11 @@ web-build/
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
+
+# tests
+coverage/
+jest-cache/
 
 # macOS
 .DS_Store

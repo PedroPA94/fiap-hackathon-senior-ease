@@ -46,7 +46,9 @@ export function TechnicalValidationScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>SeniorEase Mobile</Text>
+        <Text accessibilityRole="header" style={styles.title}>
+          SeniorEase Mobile
+        </Text>
 
         <View style={styles.statusList}>
           <Text style={styles.status}>✓ Expo Router funcionando</Text>
