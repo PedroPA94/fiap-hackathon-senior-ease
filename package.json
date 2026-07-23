@@ -6,6 +6,7 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
+    "test:package-exports": "pnpm --filter @senior-ease/package-exports-smoke test:package-exports",
     "start:web": "pnpm --filter @senior-ease/web start"
   },
   "devDependencies": {

@@ -1,0 +1,13 @@
+{
+  "name": "@senior-ease/package-exports-smoke",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:package-exports": "pnpm --filter @senior-ease/core build && pnpm --filter @senior-ease/tokens build && tsc -p tsconfig.json && node runtime-smoke.mjs"
+  },
+  "dependencies": {
+    "@senior-ease/core": "workspace:*",
+    "@senior-ease/tokens": "workspace:*"
+  }
+}

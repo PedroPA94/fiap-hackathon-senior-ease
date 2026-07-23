@@ -78,6 +78,15 @@ importers:
 
   packages/core: {}
 
+  packages/package-exports-smoke:
+    dependencies:
+      '@senior-ease/core':
+        specifier: workspace:*
+        version: link:../core
+      '@senior-ease/tokens':
+        specifier: workspace:*
+        version: link:../tokens
+
   packages/tokens:
     dependencies:
       '@senior-ease/core':
