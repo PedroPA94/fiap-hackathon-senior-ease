@@ -4,25 +4,10 @@ import type {
   TodayActivitySummary,
 } from "@senior-ease/core";
 import { useRouter } from "expo-router";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 
-import {
-  AppText,
-  Button,
-  Card,
-  ErrorState,
-} from "../../../../components";
+import { AppText, Button, Card, ErrorState } from "../../../../components";
 import { MobileHeader } from "../../../../layout";
 import {
   useAccessibilityTheme,
@@ -36,8 +21,7 @@ import {
   formatReminderSchedule,
 } from "../../utils/home-date-format";
 
-const homeErrorMessage =
-  "Não foi possível carregar o início. Tente novamente.";
+const homeErrorMessage = "Não foi possível carregar o início. Tente novamente.";
 
 export function HomeScreen() {
   const router = useRouter();
@@ -77,10 +61,9 @@ export function HomeScreen() {
       }
 
       try {
-        const nextOverview =
-          await useCases.activities.getHomeOverview.execute({
-            userId: currentUserId,
-          });
+        const nextOverview = await useCases.activities.getHomeOverview.execute({
+          userId: currentUserId,
+        });
 
         if (mountedRef.current && requestId === requestIdRef.current) {
           setOverview(nextOverview);
@@ -134,24 +117,17 @@ export function HomeScreen() {
     );
   }
 
-  const navigateToActivities = () =>
-    router.push("/(tabs)/activities");
+  const navigateToActivities = () => router.push("/(tabs)/activities");
   const navigateToPersonalization = () =>
     router.push("/(tabs)/personalization");
 
   return (
     <View
-      style={[
-        styles.screen,
-        { backgroundColor: theme.colors.background.page },
-      ]}
+      style={[styles.screen, { backgroundColor: theme.colors.background.page }]}
     >
       <MobileHeader />
       <ScrollView
-        contentContainerStyle={[
-          styles.content,
-          { gap: theme.spacing.large },
-        ]}
+        contentContainerStyle={[styles.content, { gap: theme.spacing.large }]}
         refreshControl={
           <RefreshControl
             colors={[theme.colors.primary.default]}
@@ -193,10 +169,7 @@ export function HomeScreen() {
         <View
           accessibilityLabel="Ações rápidas"
           accessibilityRole="toolbar"
-          style={[
-            styles.quickActions,
-            { gap: theme.spacing.regular },
-          ]}
+          style={[styles.quickActions, { gap: theme.spacing.regular }]}
         >
           <Button
             fullWidth={false}
@@ -218,9 +191,7 @@ export function HomeScreen() {
         </View>
 
         {isAdvanced ? (
-          <RecentHistoryCard
-            activities={overview.recentCompletedActivities}
-          />
+          <RecentHistoryCard activities={overview.recentCompletedActivities} />
         ) : null}
       </ScrollView>
     </View>
@@ -256,9 +227,7 @@ function NextActivityCard({
           </Button>
         </>
       ) : (
-        <AppText color="muted">
-          Você não possui atividades pendentes.
-        </AppText>
+        <AppText>Você não possui atividades pendentes.</AppText>
       )}
     </Card>
   );
@@ -280,12 +249,7 @@ function TodaySummaryCard({
         Resumo do dia
       </AppText>
       {isAdvanced ? (
-        <View
-          style={[
-            styles.summary,
-            { gap: theme.spacing.small },
-          ]}
-        >
+        <View style={[styles.summary, { gap: theme.spacing.small }]}>
           <SummaryItem label="Pendentes" value={summary.pending} />
           <SummaryItem
             color="warning"

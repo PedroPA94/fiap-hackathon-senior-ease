@@ -65,7 +65,9 @@ export function SegmentedControl<T extends string>({
                     ? theme.colors.primary.default
                     : theme.colors.border.default,
                   borderRadius: theme.radius.large,
-                  borderWidth: theme.borderWidth.regular,
+                  borderWidth: selected
+                    ? theme.borderWidth.strong
+                    : theme.borderWidth.regular,
                   opacity: disabled ? 0.6 : 1,
                 },
                 pressed && !disabled && styles.pressed,

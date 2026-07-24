@@ -312,12 +312,12 @@ describe("CreateProfileScreen", () => {
     renderScreen();
 
     const title = screen.getByText("Vamos começar?");
-    const footer = screen.getByText(
-      "Você poderá trocar de usuário depois.",
+    const supportingCopy = screen.getByText(
+      "Digite seu nome para personalizar sua experiência.",
     );
 
     expect(title.props.numberOfLines).toBeUndefined();
-    expect(footer.props.numberOfLines).toBeUndefined();
+    expect(supportingCopy.props.numberOfLines).toBeUndefined();
   });
 });
 
