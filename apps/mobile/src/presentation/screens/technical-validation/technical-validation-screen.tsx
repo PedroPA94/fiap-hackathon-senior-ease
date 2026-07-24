@@ -1,10 +1,9 @@
 import { parseActivity } from "@senior-ease/core";
-import type { AccessibilityTheme } from "@senior-ease/tokens";
-import { StatusBar } from "expo-status-bar";
-import { useMemo } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
+import { StyleSheet, View } from "react-native";
 
+import { AppText, Button, InlineFeedback, TextField } from "../../components";
+import { ScrollableScreen } from "../../layout";
 import { useAccessibilityTheme } from "../../providers";
 
 const technicalActivity = parseActivity({
@@ -25,109 +24,114 @@ const technicalActivity = parseActivity({
   updatedAt: "2026-07-23T12:00:00.000Z",
 });
 
-function toReactNativeFontWeight(fontWeight: number): 400 | 600 {
-  return fontWeight >= 600 ? 600 : 400;
-}
-
 export function TechnicalValidationScreen() {
-  const { theme } = useAccessibilityTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { preferences, resetPreferences, setPreferences, theme } =
+    useAccessibilityTheme();
+  const [fieldValue, setFieldValue] = useState("");
+
+  function toggleTechnicalTheme() {
+    const usesExpandedTheme = preferences.fontSize === "extra";
+
+    setPreferences({
+      ...preferences,
+      fontSize: usesExpandedTheme ? "normal" : "extra",
+      spacing: usesExpandedTheme ? "comfortable" : "extraWide",
+      contrast: usesExpandedTheme ? "default" : "high",
+    });
+  }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar style="dark" />
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
+    <ScrollableScreen
+      contentContainerStyle={{
+        gap: theme.spacing.large,
+      }}
+      testID="technical-validation-screen"
+    >
+      <AppText accessibilityRole="header" variant="headingBold">
+        SeniorEase Mobile
+      </AppText>
+
+      <InlineFeedback variant="success">
+        Runtime visual acessível carregado.
+      </InlineFeedback>
+
+      <View style={{ gap: theme.spacing.small }}>
+        <AppText color="success" variant="bodyLarge">
+          ✓ Expo Router funcionando
+        </AppText>
+        <AppText color="success" variant="bodyLarge">
+          ✓ Core carregado
+        </AppText>
+        <AppText color="success" variant="bodyLarge">
+          ✓ Tokens carregados
+        </AppText>
+        <AppText color="success" variant="bodyLarge">
+          ✓ Primitives carregados
+        </AppText>
+      </View>
+
+      <View
+        style={[
+          styles.card,
+          {
+            gap: theme.spacing.small,
+            padding: theme.spacing.medium,
+            backgroundColor: theme.colors.background.surface,
+            borderColor: theme.colors.border.default,
+            borderRadius: theme.radius.medium,
+            borderWidth: theme.borderWidth.regular,
+          },
+        ]}
       >
-        <Text accessibilityRole="header" style={styles.title}>
-          SeniorEase Mobile
-        </Text>
+        <AppText color="muted" variant="helper">
+          Atividade validada
+        </AppText>
+        <AppText variant="titleBold">{technicalActivity.title}</AppText>
+        <AppText color="muted">{technicalActivity.description}</AppText>
+      </View>
 
-        <View style={styles.statusList}>
-          <Text style={styles.status}>✓ Expo Router funcionando</Text>
-          <Text style={styles.status}>✓ Core carregado</Text>
-          <Text style={styles.status}>✓ Tokens carregados</Text>
-        </View>
+      <TextField
+        autoCapitalize="words"
+        hint="Este campo demonstra label, hint e teclado nativo."
+        label="Campo técnico"
+        onChangeText={setFieldValue}
+        placeholder="Digite um texto"
+        returnKeyType="done"
+        value={fieldValue}
+      />
 
-        <View style={styles.card}>
-          <Text style={styles.eyebrow}>Atividade validada</Text>
-          <Text style={styles.activityTitle}>{technicalActivity.title}</Text>
-          <Text style={styles.description}>
-            {technicalActivity.description}
-          </Text>
-        </View>
+      <View style={{ gap: theme.spacing.small }}>
+        <Button onPress={toggleTechnicalTheme}>Alternar tema ampliado</Button>
+        <Button onPress={resetPreferences} variant="ghost">
+          Restaurar tema padrão
+        </Button>
+      </View>
 
-        <View style={styles.metrics}>
-          <Text style={styles.metric}>
-            Fonte do tema: {theme.typography.bodyLarge.fontSize}
-          </Text>
-          <Text style={styles.metric}>Espaçamento: {theme.spacing.medium}</Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      <View
+        style={[
+          styles.metrics,
+          {
+            gap: theme.spacing.xsmall,
+            padding: theme.spacing.medium,
+            backgroundColor: theme.colors.background.surfaceSoft,
+            borderRadius: theme.radius.medium,
+          },
+        ]}
+      >
+        <AppText variant="helper">
+          Fonte do tema: {theme.typography.bodyLarge.fontSize}
+        </AppText>
+        <AppText variant="helper">Espaçamento: {theme.spacing.medium}</AppText>
+      </View>
+    </ScrollableScreen>
   );
 }
 
-function createStyles(theme: AccessibilityTheme) {
-  return StyleSheet.create({
-    safeArea: {
-      flex: 1,
-      backgroundColor: theme.colors.background.page,
-    },
-    content: {
-      flexGrow: 1,
-      gap: theme.spacing.large,
-      padding: theme.spacing.large,
-    },
-    title: {
-      color: theme.colors.primary.strong,
-      fontSize: theme.typography.heading.fontSize,
-      fontWeight: toReactNativeFontWeight(theme.typography.heading.fontWeight),
-      lineHeight: theme.typography.heading.lineHeight,
-    },
-    statusList: {
-      gap: theme.spacing.small,
-    },
-    status: {
-      color: theme.colors.success.default,
-      fontSize: theme.typography.bodyLarge.fontSize,
-      lineHeight: theme.typography.bodyLarge.lineHeight,
-    },
-    card: {
-      gap: theme.spacing.small,
-      padding: theme.spacing.medium,
-      backgroundColor: theme.colors.background.surface,
-      borderColor: theme.colors.border.default,
-      borderRadius: theme.radius.medium,
-      borderWidth: theme.borderWidth.regular,
-    },
-    eyebrow: {
-      color: theme.colors.text.muted,
-      fontSize: theme.typography.helper.fontSize,
-      lineHeight: theme.typography.helper.lineHeight,
-    },
-    activityTitle: {
-      color: theme.colors.text.default,
-      fontSize: theme.typography.title.fontSize,
-      fontWeight: toReactNativeFontWeight(theme.typography.title.fontWeight),
-      lineHeight: theme.typography.title.lineHeight,
-    },
-    description: {
-      color: theme.colors.text.muted,
-      fontSize: theme.typography.body.fontSize,
-      lineHeight: theme.typography.body.lineHeight,
-    },
-    metrics: {
-      gap: theme.spacing.xsmall,
-      padding: theme.spacing.medium,
-      backgroundColor: theme.colors.background.surfaceSoft,
-      borderRadius: theme.radius.medium,
-    },
-    metric: {
-      color: theme.colors.text.default,
-      fontSize: theme.typography.body.fontSize,
-      lineHeight: theme.typography.body.lineHeight,
-    },
-  });
-}
+const styles = StyleSheet.create({
+  card: {
+    width: "100%",
+  },
+  metrics: {
+    width: "100%",
+  },
+});

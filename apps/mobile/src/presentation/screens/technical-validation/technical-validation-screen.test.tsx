@@ -1,10 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
-import { Pressable, Text } from "react-native";
 
-import {
-  AccessibilityThemeProvider,
-  useAccessibilityTheme,
-} from "../../providers";
+import { AccessibilityThemeProvider } from "../../providers";
 import { TechnicalValidationScreen } from "./technical-validation-screen";
 
 function renderScreen() {
@@ -30,7 +26,23 @@ describe("TechnicalValidationScreen", () => {
 
     expect(screen.getByText(/Core carregado/)).toBeOnTheScreen();
     expect(screen.getByText(/Tokens carregados/)).toBeOnTheScreen();
+    expect(screen.getByText(/Primitives carregados/)).toBeOnTheScreen();
     expect(screen.getByText("Validação Mobile")).toBeOnTheScreen();
+  });
+
+  it("demonstrates the visual primitives without becoming a catalog", () => {
+    renderScreen();
+
+    expect(
+      screen.getByLabelText("Sucesso: Runtime visual acessível carregado."),
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText("Campo técnico")).toBeOnTheScreen();
+    expect(
+      screen.getByRole("button", { name: "Alternar tema ampliado" }),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByRole("button", { name: "Restaurar tema padrão" }),
+    ).toBeOnTheScreen();
   });
 
   it("renders the accessibility theme metrics", () => {
@@ -46,38 +58,21 @@ describe("TechnicalValidationScreen", () => {
     expect(screen.getAllByText("SeniorEase Mobile")).toHaveLength(1);
   });
 
-  it("renders metrics from the current provider theme", () => {
-    function ThemeUpdater() {
-      const { preferences, setPreferences } = useAccessibilityTheme();
-
-      return (
-        <Pressable
-          accessibilityRole="button"
-          onPress={() =>
-            setPreferences({
-              ...preferences,
-              fontSize: "large",
-              spacing: "wide",
-            })
-          }
-        >
-          <Text>Alterar tema técnico</Text>
-        </Pressable>
-      );
-    }
-
-    render(
-      <AccessibilityThemeProvider>
-        <ThemeUpdater />
-        <TechnicalValidationScreen />
-      </AccessibilityThemeProvider>,
-    );
+  it("updates and restores the in-memory theme", () => {
+    renderScreen();
 
     fireEvent.press(
-      screen.getByRole("button", { name: "Alterar tema técnico" }),
+      screen.getByRole("button", { name: "Alternar tema ampliado" }),
     );
 
-    expect(screen.getByText("Fonte do tema: 22")).toBeOnTheScreen();
-    expect(screen.getByText("Espaçamento: 20")).toBeOnTheScreen();
+    expect(screen.getByText("Fonte do tema: 26")).toBeOnTheScreen();
+    expect(screen.getByText("Espaçamento: 24")).toBeOnTheScreen();
+
+    fireEvent.press(
+      screen.getByRole("button", { name: "Restaurar tema padrão" }),
+    );
+
+    expect(screen.getByText("Fonte do tema: 18")).toBeOnTheScreen();
+    expect(screen.getByText("Espaçamento: 16")).toBeOnTheScreen();
   });
 });

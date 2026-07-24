@@ -2,6 +2,7 @@ import {
   render,
   screen as testingLibraryScreen,
 } from "@testing-library/react-native";
+import { useFonts } from "expo-font";
 import { Text } from "react-native";
 import {
   renderRouter,
@@ -30,6 +31,12 @@ function ProviderProbe() {
 }
 
 describe("index route", () => {
+  const mockedUseFonts = jest.mocked(useFonts);
+
+  beforeEach(() => {
+    mockedUseFonts.mockReturnValue([true, null]);
+  });
+
   it("renders the technical screen from the real index route", () => {
     render(
       <AccessibilityThemeProvider>
@@ -71,5 +78,28 @@ describe("index route", () => {
     );
 
     expect(routerScreen.getByText("Providers disponíveis")).toBeOnTheScreen();
+  });
+
+  it("renders the loading screen before the Inter font is ready", () => {
+    mockedUseFonts.mockReturnValue([false, null]);
+
+    renderRouter(
+      {
+        _layout: RootLayout,
+        index: IndexRoute,
+      },
+      {
+        initialUrl: "/",
+      },
+    );
+
+    expect(
+      routerScreen.getByRole("progressbar", {
+        name: "Preparando tudo para você...",
+      }),
+    ).toBeOnTheScreen();
+    expect(
+      routerScreen.queryByRole("header", { name: "SeniorEase Mobile" }),
+    ).not.toBeOnTheScreen();
   });
 });
