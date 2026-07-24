@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      
+
   workflow_dispatch:
 
 permissions:
@@ -38,15 +38,15 @@ jobs:
           node-version: 22
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-    
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
+
       - name: Build shared packages
         run: |
           pnpm --filter @senior-ease/core build
           pnpm --filter @senior-ease/tokens build
-      
+
       - name: Lint Web and shared packages
         run: >
           pnpm exec eslint
@@ -54,22 +54,22 @@ jobs:
           packages/core
           packages/tokens
           --max-warnings=0
-      
+
       - name: Typecheck Web and shared packages
         run: |
           pnpm --filter @senior-ease/core typecheck
           pnpm --filter @senior-ease/tokens typecheck
           pnpm --dir apps/web typecheck
-      
+
       - name: Test Web and shared packages
         run: |
           pnpm --filter @senior-ease/core test
           pnpm --filter @senior-ease/tokens test
-          pnpm --dir apps/web test -- --watch=false
-      
+          pnpm --dir apps/web test
+
       - name: Validate package exports
         run: pnpm test:package-exports
-      
+
       - name: Build Angular for GitHub Pages
         run: >
           pnpm --dir apps/web exec ng build
