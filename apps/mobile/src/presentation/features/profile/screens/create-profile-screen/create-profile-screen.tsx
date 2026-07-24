@@ -1,6 +1,6 @@
 import { DomainError } from "@senior-ease/core";
 import { useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import {
   AppText,
@@ -19,7 +19,13 @@ const requiredNameMessage = "Digite seu nome para continuar.";
 const createProfileErrorMessage =
   "Não foi possível criar o perfil. Tente novamente.";
 
-export function CreateProfileScreen() {
+export type CreateProfileScreenProps = {
+  onSelectProfile?: () => void;
+};
+
+export function CreateProfileScreen({
+  onSelectProfile,
+}: CreateProfileScreenProps) {
   const { theme } = useAccessibilityTheme();
   const session = useApplicationSession();
   const [name, setName] = useState("");
@@ -109,9 +115,18 @@ export function CreateProfileScreen() {
         Continuar
       </Button>
 
-      <AppText color="muted" variant="caption" style={styles.centeredText}>
-        Você poderá trocar de usuário depois.
-      </AppText>
+      {session.users.length > 0 && onSelectProfile ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isSubmitting}
+          onPress={onSelectProfile}
+          style={styles.selectAction}
+        >
+          <AppText color="primary" variant="body" style={styles.selectLabel}>
+            Selecionar perfil existente
+          </AppText>
+        </Pressable>
+      ) : null}
     </ScrollableScreen>
   );
 }
@@ -136,7 +151,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   spacer: {
-    flex: 1,
-    minHeight: 24,
+    minHeight: 12,
+  },
+  selectAction: {
+    minHeight: 48,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectLabel: {
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
 });

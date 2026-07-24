@@ -2,11 +2,7 @@ import type { EntityId } from "@senior-ease/core";
 import { useRef, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import {
-  AppText,
-  Button,
-  InlineFeedback,
-} from "../../../../components";
+import { AppText, Button, InlineFeedback } from "../../../../components";
 import { ScrollableScreen } from "../../../../layout";
 import {
   useAccessibilityTheme,
@@ -27,9 +23,7 @@ export function SelectProfileScreen({
 }: SelectProfileScreenProps) {
   const { theme } = useAccessibilityTheme();
   const session = useApplicationSession();
-  const [selectedUserId, setSelectedUserId] = useState<EntityId | null>(
-    null,
-  );
+  const [selectedUserId, setSelectedUserId] = useState<EntityId | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const submittingRef = useRef(false);
@@ -68,10 +62,7 @@ export function SelectProfileScreen({
 
   return (
     <ScrollableScreen
-      contentContainerStyle={[
-        styles.content,
-        { gap: theme.spacing.large },
-      ]}
+      contentContainerStyle={[styles.content, { gap: theme.spacing.large }]}
     >
       <ProfileBrand />
 
@@ -83,19 +74,12 @@ export function SelectProfileScreen({
         >
           Quem está usando?
         </AppText>
-        <AppText
-          color="muted"
-          variant="body"
-          style={styles.centeredText}
-        >
+        <AppText color="muted" variant="body" style={styles.centeredText}>
           Selecione seu perfil para continuar.
         </AppText>
       </View>
 
-      <View
-        accessibilityRole="radiogroup"
-        style={{ gap: theme.spacing.small }}
-      >
+      <View accessibilityRole="radiogroup" style={{ gap: theme.spacing.small }}>
         {session.users.map((user) => (
           <ProfileSelectorItem
             disabled={isSubmitting}
@@ -144,8 +128,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   spacer: {
-    flex: 1,
-    minHeight: 32,
+    minHeight: 12,
   },
   createAction: {
     minHeight: 48,
