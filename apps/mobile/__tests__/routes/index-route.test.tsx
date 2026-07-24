@@ -17,6 +17,10 @@ import OnboardingLayout from "../../app/(onboarding)/_layout";
 import CreateProfileRoute from "../../app/(onboarding)/create-profile";
 import PersonalizationSetupRoute from "../../app/(onboarding)/personalization-setup";
 import SelectProfileRoute from "../../app/(onboarding)/select-profile";
+import TabsLayout from "../../app/(tabs)/_layout";
+import ActivitiesRoute from "../../app/(tabs)/activities";
+import HomeRoute from "../../app/(tabs)/home";
+import PersonalizationRoute from "../../app/(tabs)/personalization";
 import IndexRoute from "../../app/index";
 import type { ApplicationSessionSnapshot } from "../../src/application/session";
 import {
@@ -116,6 +120,10 @@ function renderSessionRouter(
       "(onboarding)/create-profile": CreateProfileRoute,
       "(onboarding)/personalization-setup": PersonalizationSetupRoute,
       "(onboarding)/select-profile": SelectProfileRoute,
+      "(tabs)/_layout": TabsLayout,
+      "(tabs)/activities": ActivitiesRoute,
+      "(tabs)/home": HomeRoute,
+      "(tabs)/personalization": PersonalizationRoute,
     },
     { initialUrl },
   );
@@ -167,15 +175,20 @@ describe("profile bootstrap routes", () => {
     ).toBeOnTheScreen();
   });
 
-  it("keeps the technical ready destination", async () => {
+  it("redirects ready to the Home tab without the technical screen", async () => {
     renderSessionRouter(snapshots.ready);
 
     expect(
       await routerScreen.findByRole("header", {
-        name: "SeniorEase Mobile",
+        name: "Olá, Maria!",
       }),
     ).toBeOnTheScreen();
-    expect(routerScreen).toHavePathname("/");
+    expect(routerScreen).toHavePathname("/home");
+    expect(
+      routerScreen.queryByRole("header", {
+        name: "SeniorEase Mobile",
+      }),
+    ).not.toBeOnTheScreen();
   });
 
   it("uses LoadingScreen while bootstrap is pending", () => {
@@ -330,7 +343,7 @@ describe("profile bootstrap routes", () => {
     });
   });
 
-  it("navigates from selection to creation on explicit request", async () => {
+  it("alternates explicitly between profile selection and creation", async () => {
     renderSessionRouter(snapshots.profileSelectionRequired);
     await waitFor(() => {
       expect(routerScreen).toHavePathname("/select-profile");
@@ -345,6 +358,16 @@ describe("profile bootstrap routes", () => {
     await waitFor(() => {
       expect(routerScreen).toHavePathname("/create-profile");
     });
+
+    fireEvent.press(
+      routerScreen.getByRole("button", {
+        name: "Selecionar perfil existente",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/select-profile");
+    });
   });
 
   it("protects setup when the session requires profile creation", async () => {
@@ -355,7 +378,7 @@ describe("profile bootstrap routes", () => {
     });
   });
 
-  it("returns a ready session from setup to the technical destination", async () => {
+  it("returns a ready session from setup to Home", async () => {
     const { container } = renderSessionRouter(
       snapshots.onboardingRequired,
       "/personalization-setup",
@@ -370,11 +393,63 @@ describe("profile bootstrap routes", () => {
     );
 
     await waitFor(() => {
-      expect(routerScreen).toHavePathname("/");
+      expect(routerScreen).toHavePathname("/home");
       expect(
         routerScreen.getByRole("header", {
-          name: "SeniorEase Mobile",
+          name: "Olá, Maria!",
         }),
+      ).toBeOnTheScreen();
+    });
+  });
+
+  it("navigates predictably between the three main tabs", async () => {
+    renderSessionRouter(snapshots.ready);
+    await routerScreen.findByRole("header", { name: "Olá, Maria!" });
+
+    fireEvent.press(
+      routerScreen.getByLabelText("Aba Personalização"),
+    );
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/personalization");
+      expect(
+        routerScreen.getByRole("header", { name: "Personalização" }),
+      ).toBeOnTheScreen();
+    });
+
+    fireEvent.press(routerScreen.getByLabelText("Aba Atividades"));
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/activities");
+      expect(
+        routerScreen.getByRole("header", { name: "Atividades" }),
+      ).toBeOnTheScreen();
+    });
+
+    fireEvent.press(routerScreen.getByLabelText("Aba Início"));
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/home");
+      expect(
+        routerScreen.getByRole("header", { name: "Olá, Maria!" }),
+      ).toBeOnTheScreen();
+    });
+  });
+
+  it("returns profile switching from tabs to the selection flow", async () => {
+    const { container } = renderSessionRouter(snapshots.ready);
+    jest
+      .spyOn(container.services.session, "clearCurrentProfile")
+      .mockResolvedValue(snapshots.profileSelectionRequired);
+    await routerScreen.findByRole("header", { name: "Olá, Maria!" });
+
+    fireEvent.press(
+      routerScreen.getByRole("button", {
+        name: "Trocar perfil. Perfil atual: Maria",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/select-profile");
+      expect(
+        routerScreen.getByRole("header", { name: "Quem está usando?" }),
       ).toBeOnTheScreen();
     });
   });

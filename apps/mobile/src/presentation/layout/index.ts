@@ -5,3 +5,4 @@ export {
   type ScreenProps,
   type ScrollableScreenProps,
 } from "./screen/screen";
+export { MobileHeader } from "./mobile-header/mobile-header";

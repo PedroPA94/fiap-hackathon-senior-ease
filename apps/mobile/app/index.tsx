@@ -8,7 +8,6 @@ import {
   useApplicationSession,
 } from "../src/presentation/providers";
 import { LoadingScreen } from "../src/presentation/screens/loading/loading-screen";
-import { TechnicalValidationScreen } from "../src/presentation/screens/technical-validation/technical-validation-screen";
 
 export default function IndexRoute() {
   const session = useApplicationSession();
@@ -34,7 +33,7 @@ export default function IndexRoute() {
     case "onboardingRequired":
       return <Redirect href="/(onboarding)/personalization-setup" />;
     default:
-      return <TechnicalValidationScreen />;
+      return <Redirect href="/(tabs)/home" />;
   }
 }
 

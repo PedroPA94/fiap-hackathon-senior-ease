@@ -1,9 +1,10 @@
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 
 import { CreateProfileScreen } from "../../src/presentation/features/profile";
 import { useApplicationSession } from "../../src/presentation/providers";
 
 export default function CreateProfileRoute() {
+  const router = useRouter();
   const session = useApplicationSession();
 
   if (
@@ -13,5 +14,11 @@ export default function CreateProfileRoute() {
     return <Redirect href="/" />;
   }
 
-  return <CreateProfileScreen />;
+  return (
+    <CreateProfileScreen
+      onSelectProfile={() =>
+        router.replace("/(onboarding)/select-profile")
+      }
+    />
+  );
 }
