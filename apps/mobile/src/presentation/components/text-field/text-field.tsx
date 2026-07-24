@@ -23,6 +23,7 @@ export type TextFieldProps = Omit<
   hint?: string;
   required?: boolean;
   disabled?: boolean;
+  showLabel?: boolean;
 };
 
 export function TextField({
@@ -33,6 +34,7 @@ export function TextField({
   hint,
   required = false,
   disabled = false,
+  showLabel = true,
   accessibilityHint,
   accessibilityLabel,
   accessibilityState,
@@ -59,9 +61,14 @@ export function TextField({
 
   return (
     <View style={{ gap: theme.spacing.small }}>
-      <AppText color={disabled ? "disabled" : "default"} variant="helperBold">
-        {required ? `${label} *` : label}
-      </AppText>
+      {showLabel ? (
+        <AppText
+          color={disabled ? "disabled" : "default"}
+          variant="helperBold"
+        >
+          {required ? `${label} *` : label}
+        </AppText>
+      ) : null}
 
       <TextInput
         {...inputProps}
