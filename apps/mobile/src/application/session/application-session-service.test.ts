@@ -1,8 +1,10 @@
 import type {
   Clock,
+  IdGenerator,
   UserProfile,
   UserProfileRepository,
 } from "@senior-ease/core";
+import { CreateUserProfileUseCase } from "@senior-ease/core";
 
 import { AsyncStorageUserProfileRepository } from "../../infrastructure/repositories/user-profile";
 import { LocalSessionStore } from "../../infrastructure/session";
@@ -31,7 +33,9 @@ const jose: UserProfile = {
 
 describe("ApplicationSessionService", () => {
   let clock: jest.Mocked<Clock>;
+  let idGenerator: jest.Mocked<IdGenerator>;
   let repository: AsyncStorageUserProfileRepository;
+  let createUserProfileUseCase: CreateUserProfileUseCase;
   let sessionStore: LocalSessionStore;
   let service: ApplicationSessionService;
 
@@ -42,12 +46,21 @@ describe("ApplicationSessionService", () => {
       now: jest.fn(() => selectedAccess),
       today: jest.fn(() => "2026-07-24"),
     };
+    idGenerator = {
+      generate: jest.fn(() => "created-user"),
+    };
     repository = new AsyncStorageUserProfileRepository(storage);
+    createUserProfileUseCase = new CreateUserProfileUseCase(
+      repository,
+      clock,
+    );
     sessionStore = new LocalSessionStore(storage);
     service = new ApplicationSessionService(
       sessionStore,
       repository,
       clock,
+      createUserProfileUseCase,
+      idGenerator,
     );
   });
 
@@ -204,6 +217,33 @@ describe("ApplicationSessionService", () => {
     await expect(sessionStore.getCurrentUserId()).resolves.toBe(maria.id);
   });
 
+  it("creates, persists, registers, and activates a profile atomically for the UI", async () => {
+    const execute = jest.spyOn(createUserProfileUseCase, "execute");
+
+    await expect(
+      service.createAndActivateProfile("  Ana Maria  "),
+    ).resolves.toMatchObject({
+      status: "onboardingRequired",
+      currentUser: {
+        id: "created-user",
+        name: "Ana Maria",
+      },
+    });
+
+    expect(idGenerator.generate).toHaveBeenCalledTimes(1);
+    expect(execute).toHaveBeenCalledWith({
+      id: "created-user",
+      name: "  Ana Maria  ",
+    });
+    await expect(repository.findById("created-user")).resolves.toMatchObject({
+      id: "created-user",
+      name: "Ana Maria",
+    });
+    await expect(sessionStore.getCurrentUserId()).resolves.toBe(
+      "created-user",
+    );
+  });
+
   it("preserves profiles with equal names and distinct identifiers", async () => {
     const secondMaria = { ...jose, name: maria.name };
 
@@ -255,6 +295,8 @@ describe("ApplicationSessionService", () => {
       sessionStore,
       failingRepository,
       clock,
+      createUserProfileUseCase,
+      idGenerator,
     );
 
     await sessionStore.upsertUser({

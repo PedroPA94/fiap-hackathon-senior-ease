@@ -1,6 +1,8 @@
 import type {
   Clock,
+  CreateUserProfileUseCase,
   EntityId,
+  IdGenerator,
   UserProfile,
   UserProfileRepository,
 } from "@senior-ease/core";
@@ -28,6 +30,8 @@ export class ApplicationSessionService {
     private readonly sessionStore: ApplicationSessionStore,
     private readonly userProfileRepository: UserProfileRepository,
     private readonly clock: Clock,
+    private readonly createUserProfileUseCase: CreateUserProfileUseCase,
+    private readonly idGenerator: IdGenerator,
   ) {}
 
   async bootstrap(): Promise<ApplicationSessionSnapshot> {
@@ -69,6 +73,17 @@ export class ApplicationSessionService {
 
   async refresh(): Promise<ApplicationSessionSnapshot> {
     return this.bootstrap();
+  }
+
+  async createAndActivateProfile(
+    name: string,
+  ): Promise<ApplicationSessionSnapshot> {
+    const profile = await this.createUserProfileUseCase.execute({
+      id: this.idGenerator.generate(),
+      name,
+    });
+
+    return this.registerProfile(profile);
   }
 
   async registerProfile(

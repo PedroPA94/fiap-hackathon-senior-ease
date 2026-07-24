@@ -1,7 +1,4 @@
-import type {
-  EntityId,
-  UserProfile,
-} from "@senior-ease/core";
+import type { UserProfile } from "@senior-ease/core";
 import {
   act,
   fireEvent,
@@ -95,9 +92,9 @@ function SessionProbe({
       </Pressable>
       <Pressable
         accessibilityRole="button"
-        onPress={() => void session.registerProfile(maria)}
+        onPress={() => void session.createProfile("Ana Maria")}
       >
-        <Text>Register</Text>
+        <Text>Create</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"
@@ -218,7 +215,7 @@ describe("ApplicationSessionProvider", () => {
   it.each([
     ["Select", "selectProfile", snapshots.onboardingRequired],
     ["Clear", "clearCurrentProfile", snapshots.profileSelectionRequired],
-    ["Register", "registerProfile", snapshots.onboardingRequired],
+    ["Create", "createAndActivateProfile", snapshots.onboardingRequired],
     ["Complete", "completeOnboarding", snapshots.ready],
   ] as const)(
     "%s updates the context with the service result",
@@ -254,11 +251,39 @@ describe("ApplicationSessionProvider", () => {
         expect(action).toHaveBeenCalledWith(maria.id);
       }
 
-      if (method === "registerProfile") {
-        expect(action).toHaveBeenCalledWith(maria);
+      if (method === "createAndActivateProfile") {
+        expect(action).toHaveBeenCalledWith("Ana Maria");
       }
     },
   );
+
+  it("propagates action errors while preserving the current snapshot", async () => {
+    const container = createTestContainer();
+    const actionError = new Error("create failed");
+    let currentValue: ApplicationSessionContextValue | undefined;
+
+    jest
+      .spyOn(container.services.session, "bootstrap")
+      .mockResolvedValue(snapshots.noProfiles);
+    jest
+      .spyOn(container.services.session, "createAndActivateProfile")
+      .mockRejectedValue(actionError);
+
+    renderProvider(container, (value) => {
+      currentValue = value;
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("status")).toHaveTextContent("noProfiles");
+    });
+
+    if (!currentValue) {
+      throw new Error("Session context was not captured.");
+    }
+
+    await expect(currentValue.createProfile("Ana")).rejects.toBe(actionError);
+    expect(screen.getByTestId("status")).toHaveTextContent("noProfiles");
+    expect(screen.getByTestId("error")).toHaveTextContent("none");
+  });
 
   it("ignores an older async result after a newer retry", async () => {
     const container = createTestContainer();

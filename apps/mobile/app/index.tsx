@@ -1,3 +1,4 @@
+import { Redirect } from "expo-router";
 import { View } from "react-native";
 
 import { AppText, Button, InlineFeedback } from "../src/presentation/components";
@@ -27,21 +28,9 @@ export default function IndexRoute() {
         </SessionStateScreen>
       );
     case "noProfiles":
-      return (
-        <SessionStateScreen title="Nenhum perfil local">
-          <AppText color="muted">
-            O fluxo de criação de perfil será apresentado aqui.
-          </AppText>
-        </SessionStateScreen>
-      );
+      return <Redirect href="/(onboarding)/create-profile" />;
     case "profileSelectionRequired":
-      return (
-        <SessionStateScreen title="Seleção de perfil necessária">
-          <AppText color="muted">
-            {formatProfileCount(session.users.length)}
-          </AppText>
-        </SessionStateScreen>
-      );
+      return <Redirect href="/(onboarding)/select-profile" />;
     case "onboardingRequired":
       return (
         <SessionStateScreen title="Configuração inicial pendente">
@@ -82,10 +71,4 @@ function SessionStateScreen({
       </View>
     </Screen>
   );
-}
-
-function formatProfileCount(count: number): string {
-  return count === 1
-    ? "1 perfil local aguardando seleção."
-    : `${count} perfis locais aguardando seleção.`;
 }

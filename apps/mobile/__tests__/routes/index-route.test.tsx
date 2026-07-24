@@ -2,21 +2,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { UserProfile } from "@senior-ease/core";
 import {
   fireEvent,
-  render,
-  screen as testingLibraryScreen,
   waitFor,
 } from "@testing-library/react-native";
 import { useFonts } from "expo-font";
-import { Text } from "react-native";
+import { Slot } from "expo-router";
 import {
   renderRouter,
   screen as routerScreen,
 } from "expo-router/testing-library";
+import { Text } from "react-native";
 
 import RootLayout from "../../app/_layout";
+import OnboardingLayout from "../../app/(onboarding)/_layout";
+import CreateProfileRoute from "../../app/(onboarding)/create-profile";
+import SelectProfileRoute from "../../app/(onboarding)/select-profile";
 import IndexRoute from "../../app/index";
 import type { ApplicationSessionSnapshot } from "../../src/application/session";
-import { createApplicationContainer } from "../../src/composition";
+import {
+  createApplicationContainer,
+  type ApplicationContainer,
+} from "../../src/composition";
 import { InMemoryStorage } from "../../src/infrastructure/storage";
 import {
   AccessibilityThemeProvider,
@@ -40,6 +45,29 @@ const localMaria = {
   lastAccessedAt: "2026-07-24T12:00:00.000Z",
 };
 
+const snapshots = {
+  noProfiles: {
+    status: "noProfiles",
+    users: [],
+    currentUser: null,
+  },
+  profileSelectionRequired: {
+    status: "profileSelectionRequired",
+    users: [localMaria],
+    currentUser: null,
+  },
+  onboardingRequired: {
+    status: "onboardingRequired",
+    users: [localMaria],
+    currentUser: maria,
+  },
+  ready: {
+    status: "ready",
+    users: [localMaria],
+    currentUser: maria,
+  },
+} satisfies Record<string, ApplicationSessionSnapshot>;
+
 function ProviderProbe() {
   const container = useApplicationContainer();
   const { theme } = useAccessibilityTheme();
@@ -56,27 +84,44 @@ function ProviderProbe() {
   );
 }
 
-function renderIndex(snapshot: ApplicationSessionSnapshot) {
+function renderSessionRouter(
+  snapshot: ApplicationSessionSnapshot,
+  initialUrl = "/",
+) {
   const container = createApplicationContainer({
     storage: new InMemoryStorage(),
   });
-
-  jest
+  const bootstrap = jest
     .spyOn(container.services.session, "bootstrap")
     .mockResolvedValue(snapshot);
 
-  return render(
-    <ApplicationContainerProvider container={container}>
-      <AccessibilityThemeProvider>
-        <ApplicationSessionProvider>
-          <IndexRoute />
-        </ApplicationSessionProvider>
-      </AccessibilityThemeProvider>
-    </ApplicationContainerProvider>,
+  function TestLayout() {
+    return (
+      <ApplicationContainerProvider container={container}>
+        <AccessibilityThemeProvider>
+          <ApplicationSessionProvider>
+            <Slot />
+          </ApplicationSessionProvider>
+        </AccessibilityThemeProvider>
+      </ApplicationContainerProvider>
+    );
+  }
+
+  renderRouter(
+    {
+      _layout: TestLayout,
+      index: IndexRoute,
+      "(onboarding)/_layout": OnboardingLayout,
+      "(onboarding)/create-profile": CreateProfileRoute,
+      "(onboarding)/select-profile": SelectProfileRoute,
+    },
+    { initialUrl },
   );
+
+  return { bootstrap, container };
 }
 
-describe("index route", () => {
+describe("profile bootstrap routes", () => {
   const mockedUseFonts = jest.mocked(useFonts);
 
   beforeEach(async () => {
@@ -84,7 +129,50 @@ describe("index route", () => {
     await AsyncStorage.clear();
   });
 
-  it("uses LoadingScreen while the session bootstrap is pending", () => {
+  it("redirects noProfiles to the real create-profile route without loops", async () => {
+    const { bootstrap } = renderSessionRouter(snapshots.noProfiles);
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
+    });
+    expect(
+      routerScreen.getByRole("header", { name: "Vamos começar?" }),
+    ).toBeOnTheScreen();
+    expect(bootstrap).toHaveBeenCalledTimes(1);
+  });
+
+  it("redirects profileSelectionRequired to the real selection route", async () => {
+    renderSessionRouter(snapshots.profileSelectionRequired);
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/select-profile");
+    });
+    expect(
+      routerScreen.getByRole("header", { name: "Quem está usando?" }),
+    ).toBeOnTheScreen();
+  });
+
+  it("keeps the provisional onboarding destination", async () => {
+    renderSessionRouter(snapshots.onboardingRequired);
+
+    expect(
+      await routerScreen.findByText("Onboarding pendente para Maria."),
+    ).toBeOnTheScreen();
+    expect(routerScreen).toHavePathname("/");
+  });
+
+  it("keeps the technical ready destination", async () => {
+    renderSessionRouter(snapshots.ready);
+
+    expect(
+      await routerScreen.findByRole("header", {
+        name: "SeniorEase Mobile",
+      }),
+    ).toBeOnTheScreen();
+    expect(routerScreen).toHavePathname("/");
+  });
+
+  it("uses LoadingScreen while bootstrap is pending", () => {
     const container = createApplicationContainer({
       storage: new InMemoryStorage(),
     });
@@ -93,127 +181,160 @@ describe("index route", () => {
       .spyOn(container.services.session, "bootstrap")
       .mockReturnValue(new Promise(() => undefined));
 
-    render(
-      <ApplicationContainerProvider container={container}>
-        <AccessibilityThemeProvider>
-          <ApplicationSessionProvider>
-            <IndexRoute />
-          </ApplicationSessionProvider>
-        </AccessibilityThemeProvider>
-      </ApplicationContainerProvider>,
+    function LoadingLayout() {
+      return (
+        <ApplicationContainerProvider container={container}>
+          <AccessibilityThemeProvider>
+            <ApplicationSessionProvider>
+              <Slot />
+            </ApplicationSessionProvider>
+          </AccessibilityThemeProvider>
+        </ApplicationContainerProvider>
+      );
+    }
+
+    renderRouter(
+      {
+        _layout: LoadingLayout,
+        index: IndexRoute,
+      },
+      { initialUrl: "/" },
     );
 
     expect(
-      testingLibraryScreen.getByRole("progressbar", {
+      routerScreen.getByRole("progressbar", {
         name: "Preparando tudo para você...",
       }),
     ).toBeOnTheScreen();
   });
 
-  it("shows a recoverable error and retries bootstrap", async () => {
+  it("keeps bootstrap errors recoverable and retries into creation", async () => {
     const container = createApplicationContainer({
       storage: new InMemoryStorage(),
     });
     const bootstrap = jest
       .spyOn(container.services.session, "bootstrap")
       .mockRejectedValueOnce(new Error("storage failure"))
-      .mockResolvedValueOnce({
-        status: "noProfiles",
-        users: [],
-        currentUser: null,
-      });
+      .mockResolvedValueOnce(snapshots.noProfiles);
 
-    render(
-      <ApplicationContainerProvider container={container}>
-        <AccessibilityThemeProvider>
-          <ApplicationSessionProvider>
-            <IndexRoute />
-          </ApplicationSessionProvider>
-        </AccessibilityThemeProvider>
-      </ApplicationContainerProvider>,
+    function ErrorLayout() {
+      return (
+        <ApplicationContainerProvider container={container}>
+          <AccessibilityThemeProvider>
+            <ApplicationSessionProvider>
+              <Slot />
+            </ApplicationSessionProvider>
+          </AccessibilityThemeProvider>
+        </ApplicationContainerProvider>
+      );
+    }
+
+    renderRouter(
+      {
+        _layout: ErrorLayout,
+        index: IndexRoute,
+        "(onboarding)/_layout": OnboardingLayout,
+        "(onboarding)/create-profile": CreateProfileRoute,
+      },
+      { initialUrl: "/" },
     );
 
     expect(
-      await testingLibraryScreen.findByRole("alert", {
+      await routerScreen.findByRole("alert", {
         name: /não foi possível ler os dados locais/i,
       }),
     ).toBeOnTheScreen();
 
     fireEvent.press(
-      testingLibraryScreen.getByRole("button", {
+      routerScreen.getByRole("button", {
         name: "Tentar novamente",
       }),
     );
 
-    expect(
-      await testingLibraryScreen.findByRole("header", {
-        name: "Nenhum perfil local",
-      }),
-    ).toBeOnTheScreen();
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
+    });
     expect(bootstrap).toHaveBeenCalledTimes(2);
   });
 
-  it("shows the provisional no-profile destination", async () => {
-    renderIndex({
-      status: "noProfiles",
-      users: [],
-      currentUser: null,
+  it("redirects an unexpectedly empty selection route to creation", async () => {
+    renderSessionRouter(snapshots.noProfiles, "/select-profile");
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
+    });
+  });
+
+  it("follows the session state after profile creation", async () => {
+    const { container } = renderSessionRouter(snapshots.noProfiles);
+
+    jest
+      .spyOn(container.services.session, "createAndActivateProfile")
+      .mockResolvedValue(snapshots.onboardingRequired);
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
     });
 
-    expect(
-      await testingLibraryScreen.findByRole("header", {
-        name: "Nenhum perfil local",
+    fireEvent.changeText(
+      routerScreen.getByLabelText("Seu nome, campo obrigatório"),
+      "Maria",
+    );
+    fireEvent.press(
+      routerScreen.getByRole("button", { name: "Continuar" }),
+    );
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/");
+      expect(
+        routerScreen.getByText("Onboarding pendente para Maria."),
+      ).toBeOnTheScreen();
+    });
+  });
+
+  it("follows the session state only after selection confirmation", async () => {
+    const { container } = renderSessionRouter(
+      snapshots.profileSelectionRequired,
+    );
+
+    jest
+      .spyOn(container.services.session, "selectProfile")
+      .mockResolvedValue(snapshots.onboardingRequired);
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/select-profile");
+    });
+
+    fireEvent.press(
+      routerScreen.getByRole("radio", { name: localMaria.name }),
+    );
+    expect(routerScreen).toHavePathname("/select-profile");
+
+    fireEvent.press(
+      routerScreen.getByRole("button", { name: "Continuar" }),
+    );
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/");
+      expect(
+        routerScreen.getByText("Onboarding pendente para Maria."),
+      ).toBeOnTheScreen();
+    });
+  });
+
+  it("navigates from selection to creation on explicit request", async () => {
+    renderSessionRouter(snapshots.profileSelectionRequired);
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/select-profile");
+    });
+
+    fireEvent.press(
+      routerScreen.getByRole("button", {
+        name: "Criar novo perfil",
       }),
-    ).toBeOnTheScreen();
-  });
+    );
 
-  it("shows how many profiles await selection", async () => {
-    renderIndex({
-      status: "profileSelectionRequired",
-      users: [
-        localMaria,
-        {
-          ...localMaria,
-          id: "user-2",
-          name: "José",
-        },
-      ],
-      currentUser: null,
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
     });
-
-    expect(
-      await testingLibraryScreen.findByText(
-        "2 perfis locais aguardando seleção.",
-      ),
-    ).toBeOnTheScreen();
-  });
-
-  it("shows the current user when onboarding is required", async () => {
-    renderIndex({
-      status: "onboardingRequired",
-      users: [localMaria],
-      currentUser: maria,
-    });
-
-    expect(
-      await testingLibraryScreen.findByText(
-        "Onboarding pendente para Maria.",
-      ),
-    ).toBeOnTheScreen();
-  });
-
-  it("renders the technical screen when the session is ready", async () => {
-    renderIndex({
-      status: "ready",
-      users: [localMaria],
-      currentUser: maria,
-    });
-
-    expect(
-      await testingLibraryScreen.findByRole("header", {
-        name: "SeniorEase Mobile",
-      }),
-    ).toBeOnTheScreen();
   });
 
   it("keeps container, theme, and session providers integrated at the root", async () => {
@@ -228,11 +349,9 @@ describe("index route", () => {
     );
 
     expect(routerScreen).toHavePathname("/");
-    await waitFor(() => {
-      expect(
-        routerScreen.getByText("Providers disponíveis"),
-      ).toBeOnTheScreen();
-    });
+    expect(
+      await routerScreen.findByText("Providers disponíveis"),
+    ).toBeOnTheScreen();
   });
 
   it("renders font loading before mounting the session provider", () => {
@@ -253,10 +372,5 @@ describe("index route", () => {
         name: "Preparando tudo para você...",
       }),
     ).toBeOnTheScreen();
-    expect(
-      routerScreen.queryByRole("header", {
-        name: "Nenhum perfil local",
-      }),
-    ).not.toBeOnTheScreen();
   });
 });

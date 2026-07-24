@@ -37,11 +37,17 @@ export function createApplicationContainer(
   const userProfileRepository = new AsyncStorageUserProfileRepository(storage);
   const accessibilityPreferencesRepository =
     new AsyncStorageAccessibilityPreferencesRepository(storage);
+  const createUserProfileUseCase = new CreateUserProfileUseCase(
+    userProfileRepository,
+    clock,
+  );
   const sessionStore = new LocalSessionStore(storage);
   const sessionService = new ApplicationSessionService(
     sessionStore,
     userProfileRepository,
     clock,
+    createUserProfileUseCase,
+    idGenerator,
   );
 
   return {
@@ -81,7 +87,7 @@ export function createApplicationContainer(
         delete: new DeleteActivityUseCase(activityRepository),
       },
       userProfiles: {
-        create: new CreateUserProfileUseCase(userProfileRepository, clock),
+        create: createUserProfileUseCase,
         get: new GetUserProfileUseCase(userProfileRepository),
         getExperience: new GetUserExperienceProfileUseCase(
           userProfileRepository,

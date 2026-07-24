@@ -27,9 +27,9 @@ export type ApplicationSessionContextValue = {
   currentUser: UserProfile | null;
   error: Error | null;
   retry(): Promise<void>;
+  createProfile(name: string): Promise<void>;
   selectProfile(userId: EntityId): Promise<void>;
   clearCurrentProfile(): Promise<void>;
-  registerProfile(profile: UserProfile): Promise<void>;
   completeOnboarding(): Promise<void>;
 };
 
@@ -63,7 +63,7 @@ export function ApplicationSessionProvider({
   const mountedRef = useRef(true);
   const operationIdRef = useRef(0);
 
-  const execute = useCallback(
+  const executeBootstrap = useCallback(
     async (
       operation: () => Promise<ApplicationSessionSnapshot>,
     ): Promise<void> => {
@@ -109,49 +109,74 @@ export function ApplicationSessionProvider({
   }, []);
 
   useEffect(() => {
-    void execute(() => services.session.bootstrap());
-  }, [execute, services.session]);
+    void executeBootstrap(() => services.session.bootstrap());
+  }, [executeBootstrap, services.session]);
 
   const retry = useCallback(
-    () => execute(() => services.session.bootstrap()),
-    [execute, services.session],
+    () => executeBootstrap(() => services.session.bootstrap()),
+    [executeBootstrap, services.session],
+  );
+
+  const executeAction = useCallback(
+    async (
+      operation: () => Promise<ApplicationSessionSnapshot>,
+    ): Promise<void> => {
+      const operationId = ++operationIdRef.current;
+
+      try {
+        const snapshot = await operation();
+
+        if (mountedRef.current && operationId === operationIdRef.current) {
+          setState({
+            ...snapshot,
+            error: null,
+          });
+        }
+      } catch (error) {
+        throw toError(error);
+      }
+    },
+    [],
+  );
+
+  const createProfile = useCallback(
+    (name: string) =>
+      executeAction(() =>
+        services.session.createAndActivateProfile(name),
+      ),
+    [executeAction, services.session],
   );
 
   const selectProfile = useCallback(
     (userId: EntityId) =>
-      execute(() => services.session.selectProfile(userId)),
-    [execute, services.session],
+      executeAction(() => services.session.selectProfile(userId)),
+    [executeAction, services.session],
   );
 
   const clearCurrentProfile = useCallback(
-    () => execute(() => services.session.clearCurrentProfile()),
-    [execute, services.session],
-  );
-
-  const registerProfile = useCallback(
-    (profile: UserProfile) =>
-      execute(() => services.session.registerProfile(profile)),
-    [execute, services.session],
+    () =>
+      executeAction(() => services.session.clearCurrentProfile()),
+    [executeAction, services.session],
   );
 
   const completeOnboarding = useCallback(
-    () => execute(() => services.session.completeOnboarding()),
-    [execute, services.session],
+    () => executeAction(() => services.session.completeOnboarding()),
+    [executeAction, services.session],
   );
 
   const value = useMemo<ApplicationSessionContextValue>(
     () => ({
       ...state,
       retry,
+      createProfile,
       selectProfile,
       clearCurrentProfile,
-      registerProfile,
       completeOnboarding,
     }),
     [
       clearCurrentProfile,
       completeOnboarding,
-      registerProfile,
+      createProfile,
       retry,
       selectProfile,
       state,
