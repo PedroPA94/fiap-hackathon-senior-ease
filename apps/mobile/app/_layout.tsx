@@ -6,6 +6,7 @@ import { Stack } from "expo-router";
 import {
   AccessibilityThemeProvider,
   ApplicationContainerProvider,
+  ApplicationSessionProvider,
 } from "../src/presentation/providers";
 import { LoadingScreen } from "../src/presentation/screens/loading/loading-screen";
 
@@ -23,7 +24,9 @@ export default function RootLayout() {
         {!fontsLoaded && !fontError ? (
           <LoadingScreen />
         ) : (
-          <Stack screenOptions={{ headerShown: false }} />
+          <ApplicationSessionProvider>
+            <Stack screenOptions={{ headerShown: false }} />
+          </ApplicationSessionProvider>
         )}
       </AccessibilityThemeProvider>
     </ApplicationContainerProvider>

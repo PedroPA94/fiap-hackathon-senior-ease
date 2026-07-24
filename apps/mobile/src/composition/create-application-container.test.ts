@@ -16,6 +16,8 @@ import {
   type IdGenerator,
 } from "@senior-ease/core";
 
+import { ApplicationSessionService } from "../application/session";
+import { LocalSessionStore } from "../infrastructure/session";
 import { InMemoryStorage } from "../infrastructure/storage";
 import { createApplicationContainer } from "./create-application-container";
 
@@ -31,6 +33,10 @@ describe("createApplicationContainer", () => {
     expect(container.repositories.activities).toBeDefined();
     expect(container.repositories.userProfiles).toBeDefined();
     expect(container.repositories.accessibilityPreferences).toBeDefined();
+    expect(container.stores.session).toBeInstanceOf(LocalSessionStore);
+    expect(container.services.session).toBeInstanceOf(
+      ApplicationSessionService,
+    );
 
     expect(container.useCases.activities.create).toBeInstanceOf(
       CreateActivityUseCase,
@@ -133,5 +139,36 @@ describe("createApplicationContainer", () => {
     await expect(
       secondContainer.useCases.userProfiles.get.execute({ id: "user-1" }),
     ).rejects.toMatchObject({ code: "USER_PROFILE_NOT_FOUND" });
+  });
+
+  it("reuses the storage, clock, and user profile repository in session services", async () => {
+    const storage = new InMemoryStorage();
+    const container = createApplicationContainer({
+      storage,
+      clock: fixedClock,
+    });
+    const profile = await container.useCases.userProfiles.create.execute({
+      id: "user-1",
+      name: "Maria",
+    });
+    const findById = jest.spyOn(
+      container.repositories.userProfiles,
+      "findById",
+    );
+
+    await container.services.session.registerProfile(profile);
+    const snapshot = await container.services.session.bootstrap();
+
+    expect(findById).toHaveBeenCalledWith(profile.id);
+    expect(snapshot).toMatchObject({
+      status: "onboardingRequired",
+      currentUser: profile,
+      users: [
+        {
+          id: profile.id,
+          lastAccessedAt: "2026-07-23T12:00:00.000Z",
+        },
+      ],
+    });
   });
 });

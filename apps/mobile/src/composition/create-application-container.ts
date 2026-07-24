@@ -14,9 +14,11 @@ import {
   UpdateAccessibilityPreferencesUseCase,
 } from "@senior-ease/core";
 
+import { ApplicationSessionService } from "../application/session";
 import { AsyncStorageAccessibilityPreferencesRepository } from "../infrastructure/repositories/accessibility-preferences";
 import { AsyncStorageActivityRepository } from "../infrastructure/repositories/activity";
 import { AsyncStorageUserProfileRepository } from "../infrastructure/repositories/user-profile";
+import { LocalSessionStore } from "../infrastructure/session";
 import { RandomIdGenerator, SystemClock } from "../infrastructure/services";
 import { AsyncStorageAdapter } from "../infrastructure/storage";
 import type {
@@ -35,12 +37,24 @@ export function createApplicationContainer(
   const userProfileRepository = new AsyncStorageUserProfileRepository(storage);
   const accessibilityPreferencesRepository =
     new AsyncStorageAccessibilityPreferencesRepository(storage);
+  const sessionStore = new LocalSessionStore(storage);
+  const sessionService = new ApplicationSessionService(
+    sessionStore,
+    userProfileRepository,
+    clock,
+  );
 
   return {
     repositories: {
       activities: activityRepository,
       userProfiles: userProfileRepository,
       accessibilityPreferences: accessibilityPreferencesRepository,
+    },
+    stores: {
+      session: sessionStore,
+    },
+    services: {
+      session: sessionService,
     },
     useCases: {
       activities: {

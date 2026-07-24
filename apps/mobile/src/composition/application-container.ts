@@ -19,6 +19,8 @@ import type {
   UserProfileRepository,
 } from "@senior-ease/core";
 
+import type { ApplicationSessionService } from "../application/session";
+import type { LocalSessionStore } from "../infrastructure/session";
 import type { Storage } from "../infrastructure/storage";
 
 export type ApplicationContainer = {
@@ -26,6 +28,12 @@ export type ApplicationContainer = {
     activities: ActivityRepository;
     userProfiles: UserProfileRepository;
     accessibilityPreferences: AccessibilityPreferencesRepository;
+  };
+  stores: {
+    session: LocalSessionStore;
+  };
+  services: {
+    session: ApplicationSessionService;
   };
   useCases: {
     activities: {
