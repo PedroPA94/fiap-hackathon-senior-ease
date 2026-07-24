@@ -32,13 +32,7 @@ export default function IndexRoute() {
     case "profileSelectionRequired":
       return <Redirect href="/(onboarding)/select-profile" />;
     case "onboardingRequired":
-      return (
-        <SessionStateScreen title="Configuração inicial pendente">
-          <AppText color="muted">
-            Onboarding pendente para {session.currentUser?.name}.
-          </AppText>
-        </SessionStateScreen>
-      );
+      return <Redirect href="/(onboarding)/personalization-setup" />;
     default:
       return <TechnicalValidationScreen />;
   }

@@ -8,6 +8,7 @@ import {
   ApplicationContainerProvider,
   ApplicationSessionProvider,
 } from "../src/presentation/providers";
+import { ApplicationThemeSync } from "../src/presentation/providers/application-theme-sync";
 import { LoadingScreen } from "../src/presentation/screens/loading/loading-screen";
 
 const appFonts = {
@@ -25,7 +26,9 @@ export default function RootLayout() {
           <LoadingScreen />
         ) : (
           <ApplicationSessionProvider>
-            <Stack screenOptions={{ headerShown: false }} />
+            <ApplicationThemeSync>
+              <Stack screenOptions={{ headerShown: false }} />
+            </ApplicationThemeSync>
           </ApplicationSessionProvider>
         )}
       </AccessibilityThemeProvider>

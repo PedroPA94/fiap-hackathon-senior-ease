@@ -15,6 +15,7 @@ import { Text } from "react-native";
 import RootLayout from "../../app/_layout";
 import OnboardingLayout from "../../app/(onboarding)/_layout";
 import CreateProfileRoute from "../../app/(onboarding)/create-profile";
+import PersonalizationSetupRoute from "../../app/(onboarding)/personalization-setup";
 import SelectProfileRoute from "../../app/(onboarding)/select-profile";
 import IndexRoute from "../../app/index";
 import type { ApplicationSessionSnapshot } from "../../src/application/session";
@@ -113,6 +114,7 @@ function renderSessionRouter(
       index: IndexRoute,
       "(onboarding)/_layout": OnboardingLayout,
       "(onboarding)/create-profile": CreateProfileRoute,
+      "(onboarding)/personalization-setup": PersonalizationSetupRoute,
       "(onboarding)/select-profile": SelectProfileRoute,
     },
     { initialUrl },
@@ -152,13 +154,17 @@ describe("profile bootstrap routes", () => {
     ).toBeOnTheScreen();
   });
 
-  it("keeps the provisional onboarding destination", async () => {
+  it("redirects onboardingRequired to the real personalization setup", async () => {
     renderSessionRouter(snapshots.onboardingRequired);
 
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/personalization-setup");
+    });
     expect(
-      await routerScreen.findByText("Onboarding pendente para Maria."),
+      await routerScreen.findByRole("header", {
+        name: "Vamos deixar a tela mais confortável para você",
+      }),
     ).toBeOnTheScreen();
-    expect(routerScreen).toHavePathname("/");
   });
 
   it("keeps the technical ready destination", async () => {
@@ -284,9 +290,11 @@ describe("profile bootstrap routes", () => {
     );
 
     await waitFor(() => {
-      expect(routerScreen).toHavePathname("/");
+      expect(routerScreen).toHavePathname("/personalization-setup");
       expect(
-        routerScreen.getByText("Onboarding pendente para Maria."),
+        routerScreen.getByRole("header", {
+          name: "Vamos deixar a tela mais confortável para você",
+        }),
       ).toBeOnTheScreen();
     });
   });
@@ -313,9 +321,11 @@ describe("profile bootstrap routes", () => {
     );
 
     await waitFor(() => {
-      expect(routerScreen).toHavePathname("/");
+      expect(routerScreen).toHavePathname("/personalization-setup");
       expect(
-        routerScreen.getByText("Onboarding pendente para Maria."),
+        routerScreen.getByRole("header", {
+          name: "Vamos deixar a tela mais confortável para você",
+        }),
       ).toBeOnTheScreen();
     });
   });
@@ -334,6 +344,38 @@ describe("profile bootstrap routes", () => {
 
     await waitFor(() => {
       expect(routerScreen).toHavePathname("/create-profile");
+    });
+  });
+
+  it("protects setup when the session requires profile creation", async () => {
+    renderSessionRouter(snapshots.noProfiles, "/personalization-setup");
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/create-profile");
+    });
+  });
+
+  it("returns a ready session from setup to the technical destination", async () => {
+    const { container } = renderSessionRouter(
+      snapshots.onboardingRequired,
+      "/personalization-setup",
+    );
+    jest
+      .spyOn(container.services.session, "completeOnboarding")
+      .mockResolvedValue(snapshots.ready);
+    await routerScreen.findByRole("button", { name: "Começar" });
+
+    fireEvent.press(
+      routerScreen.getByRole("button", { name: "Começar" }),
+    );
+
+    await waitFor(() => {
+      expect(routerScreen).toHavePathname("/");
+      expect(
+        routerScreen.getByRole("header", {
+          name: "SeniorEase Mobile",
+        }),
+      ).toBeOnTheScreen();
     });
   });
 

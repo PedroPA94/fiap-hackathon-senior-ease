@@ -10,4 +10,9 @@ export {
   type InlineFeedbackProps,
   type InlineFeedbackVariant,
 } from "./inline-feedback/inline-feedback";
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+  type SegmentedControlProps,
+} from "./segmented-control/segmented-control";
 export { TextField, type TextFieldProps } from "./text-field/text-field";
