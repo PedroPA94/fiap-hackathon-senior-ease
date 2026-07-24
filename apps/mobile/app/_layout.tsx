@@ -1,5 +1,16 @@
 import { Stack } from "expo-router";
 
+import {
+  AccessibilityThemeProvider,
+  ApplicationContainerProvider,
+} from "../src/presentation/providers";
+
 export default function RootLayout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <ApplicationContainerProvider>
+      <AccessibilityThemeProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </AccessibilityThemeProvider>
+    </ApplicationContainerProvider>
+  );
 }

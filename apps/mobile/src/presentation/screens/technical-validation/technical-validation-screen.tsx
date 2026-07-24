@@ -1,16 +1,11 @@
-import {
-  defaultAccessibilityPreferences,
-  parseActivity,
-} from "@senior-ease/core";
-import {
-  createAccessibilityTheme,
-  radius,
-  spacing,
-  typography,
-} from "@senior-ease/tokens";
+import { parseActivity } from "@senior-ease/core";
+import type { AccessibilityTheme } from "@senior-ease/tokens";
 import { StatusBar } from "expo-status-bar";
+import { useMemo } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useAccessibilityTheme } from "../../providers";
 
 const technicalActivity = parseActivity({
   id: "technical-activity",
@@ -30,15 +25,14 @@ const technicalActivity = parseActivity({
   updatedAt: "2026-07-23T12:00:00.000Z",
 });
 
-const technicalTheme = createAccessibilityTheme(
-  defaultAccessibilityPreferences,
-);
-
 function toReactNativeFontWeight(fontWeight: number): 400 | 600 {
   return fontWeight >= 600 ? 600 : 400;
 }
 
 export function TechnicalValidationScreen() {
+  const { theme } = useAccessibilityTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
@@ -66,76 +60,74 @@ export function TechnicalValidationScreen() {
 
         <View style={styles.metrics}>
           <Text style={styles.metric}>
-            Fonte do tema: {typography.bodyLarge.fontSize}
+            Fonte do tema: {theme.typography.bodyLarge.fontSize}
           </Text>
-          <Text style={styles.metric}>Espaçamento: {spacing.medium}</Text>
+          <Text style={styles.metric}>Espaçamento: {theme.spacing.medium}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: technicalTheme.colors.background.page,
-  },
-  content: {
-    flexGrow: 1,
-    gap: technicalTheme.spacing.large,
-    padding: technicalTheme.spacing.large,
-  },
-  title: {
-    color: technicalTheme.colors.primary.strong,
-    fontSize: technicalTheme.typography.heading.fontSize,
-    fontWeight: toReactNativeFontWeight(
-      technicalTheme.typography.heading.fontWeight,
-    ),
-    lineHeight: technicalTheme.typography.heading.lineHeight,
-  },
-  statusList: {
-    gap: technicalTheme.spacing.small,
-  },
-  status: {
-    color: technicalTheme.colors.success.default,
-    fontSize: technicalTheme.typography.bodyLarge.fontSize,
-    lineHeight: technicalTheme.typography.bodyLarge.lineHeight,
-  },
-  card: {
-    gap: technicalTheme.spacing.small,
-    padding: technicalTheme.spacing.medium,
-    backgroundColor: technicalTheme.colors.background.surface,
-    borderColor: technicalTheme.colors.border.default,
-    borderRadius: radius.medium,
-    borderWidth: technicalTheme.borderWidth.regular,
-  },
-  eyebrow: {
-    color: technicalTheme.colors.text.muted,
-    fontSize: technicalTheme.typography.helper.fontSize,
-    lineHeight: technicalTheme.typography.helper.lineHeight,
-  },
-  activityTitle: {
-    color: technicalTheme.colors.text.default,
-    fontSize: technicalTheme.typography.title.fontSize,
-    fontWeight: toReactNativeFontWeight(
-      technicalTheme.typography.title.fontWeight,
-    ),
-    lineHeight: technicalTheme.typography.title.lineHeight,
-  },
-  description: {
-    color: technicalTheme.colors.text.muted,
-    fontSize: technicalTheme.typography.body.fontSize,
-    lineHeight: technicalTheme.typography.body.lineHeight,
-  },
-  metrics: {
-    gap: technicalTheme.spacing.xsmall,
-    padding: technicalTheme.spacing.medium,
-    backgroundColor: technicalTheme.colors.background.surfaceSoft,
-    borderRadius: radius.medium,
-  },
-  metric: {
-    color: technicalTheme.colors.text.default,
-    fontSize: typography.body.fontSize,
-    lineHeight: typography.body.lineHeight,
-  },
-});
+function createStyles(theme: AccessibilityTheme) {
+  return StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: theme.colors.background.page,
+    },
+    content: {
+      flexGrow: 1,
+      gap: theme.spacing.large,
+      padding: theme.spacing.large,
+    },
+    title: {
+      color: theme.colors.primary.strong,
+      fontSize: theme.typography.heading.fontSize,
+      fontWeight: toReactNativeFontWeight(theme.typography.heading.fontWeight),
+      lineHeight: theme.typography.heading.lineHeight,
+    },
+    statusList: {
+      gap: theme.spacing.small,
+    },
+    status: {
+      color: theme.colors.success.default,
+      fontSize: theme.typography.bodyLarge.fontSize,
+      lineHeight: theme.typography.bodyLarge.lineHeight,
+    },
+    card: {
+      gap: theme.spacing.small,
+      padding: theme.spacing.medium,
+      backgroundColor: theme.colors.background.surface,
+      borderColor: theme.colors.border.default,
+      borderRadius: theme.radius.medium,
+      borderWidth: theme.borderWidth.regular,
+    },
+    eyebrow: {
+      color: theme.colors.text.muted,
+      fontSize: theme.typography.helper.fontSize,
+      lineHeight: theme.typography.helper.lineHeight,
+    },
+    activityTitle: {
+      color: theme.colors.text.default,
+      fontSize: theme.typography.title.fontSize,
+      fontWeight: toReactNativeFontWeight(theme.typography.title.fontWeight),
+      lineHeight: theme.typography.title.lineHeight,
+    },
+    description: {
+      color: theme.colors.text.muted,
+      fontSize: theme.typography.body.fontSize,
+      lineHeight: theme.typography.body.lineHeight,
+    },
+    metrics: {
+      gap: theme.spacing.xsmall,
+      padding: theme.spacing.medium,
+      backgroundColor: theme.colors.background.surfaceSoft,
+      borderRadius: theme.radius.medium,
+    },
+    metric: {
+      color: theme.colors.text.default,
+      fontSize: theme.typography.body.fontSize,
+      lineHeight: theme.typography.body.lineHeight,
+    },
+  });
+}
