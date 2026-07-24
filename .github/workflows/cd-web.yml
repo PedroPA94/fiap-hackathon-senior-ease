@@ -1,0 +1,106 @@
+name: Deploy Web
+
+on:
+  push:
+    branches:
+      - main
+      
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  validate-and-build:
+    name: Validate and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.11.0
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+    
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build shared packages
+        run: |
+          pnpm --filter @senior-ease/core build
+          pnpm --filter @senior-ease/tokens build
+      
+      - name: Lint Web and shared packages
+        run: >
+          pnpm exec eslint
+          apps/web
+          packages/core
+          packages/tokens
+          --max-warnings=0
+      
+      - name: Typecheck Web and shared packages
+        run: |
+          pnpm --filter @senior-ease/core typecheck
+          pnpm --filter @senior-ease/tokens typecheck
+          pnpm --dir apps/web typecheck
+      
+      - name: Test Web and shared packages
+        run: |
+          pnpm --filter @senior-ease/core test
+          pnpm --filter @senior-ease/tokens test
+          pnpm --dir apps/web test -- --watch=false
+      
+      - name: Validate package exports
+        run: pnpm test:package-exports
+      
+      - name: Build Angular for GitHub Pages
+        run: >
+          pnpm --dir apps/web exec ng build
+          --configuration production
+          --base-href /fiap-hackathon-senior-ease/
+
+      - name: Configure Angular route fallback
+        run: cp apps/web/dist/web/browser/index.html apps/web/dist/web/browser/404.html
+
+      - name: Disable Jekyll processing
+        run: touch apps/web/dist/web/browser/.nojekyll
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: apps/web/dist/web/browser
+          include-hidden-files: true
+
+  deploy:
+    name: Deploy to production
+    needs: validate-and-build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
