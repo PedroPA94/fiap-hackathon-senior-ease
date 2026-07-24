@@ -1,15 +1,12 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { catchError, defer, from, of, tap, throwError, type Observable } from 'rxjs';
 
 import {
   ApplicationError,
   CreateUserProfileUseCase,
   GetUserProfileUseCase,
-  type Clock,
   type EntityId,
-  type IdGenerator,
   type UserProfile,
-  type UserProfileRepository,
 } from '@senior-ease/core';
 
 import { USER_PROFILE_REPOSITORY } from '../../core/tokens/repository.tokens';
@@ -21,20 +18,11 @@ import { DismissedRemindersService } from './dismissed-reminders.service';
 
 @Injectable({ providedIn: 'root' })
 export class UserSessionService {
-  constructor(
-    @Inject(USER_PROFILE_REPOSITORY)
-    private readonly userProfileRepository: UserProfileRepository,
-
-    @Inject(CLOCK)
-    private readonly clock: Clock,
-
-    @Inject(ID_GENERATOR)
-    private readonly idGenerator: IdGenerator,
-
-    private readonly userSessionStore: LocalStorageUserSessionStore,
-
-    private readonly dismissedRemindersService: DismissedRemindersService,
-  ) {}
+  private readonly userProfileRepository = inject(USER_PROFILE_REPOSITORY);
+  private readonly clock = inject(CLOCK);
+  private readonly idGenerator = inject(ID_GENERATOR);
+  private readonly userSessionStore = inject(LocalStorageUserSessionStore);
+  private readonly dismissedRemindersService = inject(DismissedRemindersService);
 
   getCurrentUserId(): EntityId | null {
     return this.userSessionStore.getCurrentUserId();

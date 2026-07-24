@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { defer, from, Observable } from 'rxjs';
 
 import {
@@ -6,7 +6,6 @@ import {
   ResetAccessibilityPreferencesUseCase,
   UpdateAccessibilityPreferencesUseCase,
   type AccessibilityPreferences,
-  type AccessibilityPreferencesRepository,
   type EntityId,
 } from '@senior-ease/core';
 
@@ -16,12 +15,8 @@ import { UserSessionError } from '../errors/user-session.error';
 
 @Injectable({ providedIn: 'root' })
 export class AccessibilityPreferencesService {
-  constructor(
-    @Inject(ACCESSIBILITY_PREFERENCES_REPOSITORY)
-    private readonly preferencesRepository: AccessibilityPreferencesRepository,
-
-    private readonly userSessionService: UserSessionService,
-  ) {}
+  private readonly preferencesRepository = inject(ACCESSIBILITY_PREFERENCES_REPOSITORY);
+  private readonly userSessionService = inject(UserSessionService);
 
   getPreferences(): Observable<AccessibilityPreferences> {
     return defer(() => {

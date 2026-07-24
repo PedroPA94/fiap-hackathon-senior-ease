@@ -23,10 +23,7 @@ import HomeRoute from "../../app/(tabs)/home";
 import PersonalizationRoute from "../../app/(tabs)/personalization";
 import IndexRoute from "../../app/index";
 import type { ApplicationSessionSnapshot } from "../../src/application/session";
-import {
-  createApplicationContainer,
-  type ApplicationContainer,
-} from "../../src/composition";
+import { createApplicationContainer } from "../../src/composition";
 import { InMemoryStorage } from "../../src/infrastructure/storage";
 import {
   AccessibilityThemeProvider,

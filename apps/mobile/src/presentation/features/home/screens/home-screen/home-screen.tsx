@@ -86,7 +86,8 @@ export function HomeScreen() {
 
   useEffect(() => {
     mountedRef.current = true;
-    void loadOverview();
+    const loadPromise = Promise.resolve().then(() => loadOverview());
+    void loadPromise;
 
     return () => {
       mountedRef.current = false;

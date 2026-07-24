@@ -1,8 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import { Pressable, StyleSheet, Text } from "react-native";
 
-import { AccessibilityThemeProvider } from "../../providers";
-import { useAccessibilityTheme } from "../../providers";
+import {
+  AccessibilityThemeProvider,
+  useAccessibilityTheme,
+} from "../../providers";
 import { AppText } from "./app-text";
 
 function renderWithTheme(children: React.ReactNode) {

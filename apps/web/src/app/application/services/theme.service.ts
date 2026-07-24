@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { computed, Inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { catchError, map, Observable, of, tap, throwError } from 'rxjs';
 
 import { createAccessibilityTheme, type AccessibilityTheme } from '@senior-ease/tokens';
@@ -9,6 +9,8 @@ import { UserSessionError } from '../errors/user-session.error';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
+  private readonly accessibilityPreferencesService = inject(AccessibilityPreferencesService);
+  private readonly document = inject(DOCUMENT);
   private readonly currentThemeState = signal<AccessibilityTheme | null>(null);
 
   readonly currentTheme = this.currentThemeState.asReadonly();
@@ -17,13 +19,6 @@ export class ThemeService {
   readonly confirmCriticalActions = computed(
     () => this.currentThemeState()?.confirmCriticalActions ?? true,
   );
-
-  constructor(
-    private readonly accessibilityPreferencesService: AccessibilityPreferencesService,
-
-    @Inject(DOCUMENT)
-    private readonly document: Document,
-  ) {}
 
   initializeTheme(): Observable<AccessibilityTheme> {
     return this.applyCurrentUserTheme().pipe(

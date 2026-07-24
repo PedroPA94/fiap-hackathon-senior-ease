@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { defer, from, type Observable } from 'rxjs';
 
 import {
@@ -10,14 +10,10 @@ import {
   GetHomeActivityOverviewUseCase,
   ListActivitiesByUserUseCase,
   type Activity,
-  type AccessibilityPreferencesRepository,
   type ActivityListFilter,
-  type ActivityRepository,
   type CreateActivityUseCaseInput,
   type EntityId,
   type HomeActivityOverview,
-  type Clock,
-  type IdGenerator,
 } from '@senior-ease/core';
 
 import { UserSessionError } from '../errors/user-session.error';
@@ -32,21 +28,13 @@ export type CreateCurrentUserActivityInput = Omit<CreateActivityUseCaseInput, 'u
 
 @Injectable({ providedIn: 'root' })
 export class ActivityService {
-  constructor(
-    @Inject(ACTIVITY_REPOSITORY)
-    private readonly activityRepository: ActivityRepository,
-
-    @Inject(ACCESSIBILITY_PREFERENCES_REPOSITORY)
-    private readonly accessibilityPreferencesRepository: AccessibilityPreferencesRepository,
-
-    @Inject(CLOCK)
-    private readonly clock: Clock,
-
-    @Inject(ID_GENERATOR)
-    private readonly idGenerator: IdGenerator,
-
-    private readonly userSessionService: UserSessionService,
-  ) {}
+  private readonly activityRepository = inject(ACTIVITY_REPOSITORY);
+  private readonly accessibilityPreferencesRepository = inject(
+    ACCESSIBILITY_PREFERENCES_REPOSITORY,
+  );
+  private readonly clock = inject(CLOCK);
+  private readonly idGenerator = inject(ID_GENERATOR);
+  private readonly userSessionService = inject(UserSessionService);
 
   listActivities(filter: ActivityListFilter = 'all'): Observable<Activity[]> {
     return defer(() => {

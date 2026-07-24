@@ -116,7 +116,10 @@ export function ActivitiesScreen() {
 
   useEffect(() => {
     mountedRef.current = true;
-    void loadActivities(filter);
+    const loadPromise = Promise.resolve().then(() =>
+      loadActivities(filter),
+    );
+    void loadPromise;
 
     return () => {
       mountedRef.current = false;
@@ -177,7 +180,7 @@ export function ActivitiesScreen() {
               Nova atividade
             </Button>
 
-            <SegmentedControl
+            <SegmentedControl<ActivityListFilter>
               label="Filtrar atividades"
               onChange={setFilter}
               options={FILTER_OPTIONS}

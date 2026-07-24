@@ -109,8 +109,29 @@ export function ApplicationSessionProvider({
   }, []);
 
   useEffect(() => {
-    void executeBootstrap(() => services.session.bootstrap());
-  }, [executeBootstrap, services.session]);
+    const operationId = ++operationIdRef.current;
+
+    void services.session
+      .bootstrap()
+      .then((snapshot) => {
+        if (mountedRef.current && operationId === operationIdRef.current) {
+          setState({
+            ...snapshot,
+            error: null,
+          });
+        }
+      })
+      .catch((error: unknown) => {
+        if (mountedRef.current && operationId === operationIdRef.current) {
+          setState({
+            status: "error",
+            users: [],
+            currentUser: null,
+            error: toError(error),
+          });
+        }
+      });
+  }, [services.session]);
 
   const retry = useCallback(
     () => executeBootstrap(() => services.session.bootstrap()),

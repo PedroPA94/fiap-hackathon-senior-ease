@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  inject,
+  signal,
+  type OnInit,
+} from '@angular/core';
 import { Header } from '../../../../shared/layout/header/header';
 import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 import type {
@@ -28,7 +35,7 @@ import { Router } from '@angular/router';
   styleUrl: './personalization-setup.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PersonalizationSetup {
+export class PersonalizationSetup implements OnInit {
   private accessibilityPreferencesService = inject(AccessibilityPreferencesService);
   private themeService = inject(ThemeService);
   private toastService = inject(ToastService);
@@ -56,7 +63,7 @@ export class PersonalizationSetup {
 
   protected loadedPreferences: AccessibilityPreferences | null = null;
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadPreferences();
     this.initializaPreviewPreferences();
   }

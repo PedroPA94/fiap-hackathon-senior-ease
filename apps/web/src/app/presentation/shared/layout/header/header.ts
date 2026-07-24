@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  booleanAttribute,
   inject,
   input,
   output,

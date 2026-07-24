@@ -35,9 +35,6 @@ export class TextInput implements ControlValueAccessor {
   readonly required = input(false, {
     transform: booleanAttribute,
   });
-  readonly autofocus = input(false, {
-    transform: booleanAttribute,
-  });
   readonly invalid = input(false, {
     transform: booleanAttribute,
   });

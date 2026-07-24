@@ -15,7 +15,6 @@ import { TextInput, type TextInputType } from './text-input';
       [hint]="hint"
       [errorMessage]="errorMessage"
       [required]="required"
-      [autofocus]="autofocus"
       [invalid]="invalid"
       [name]="name"
       [maxLength]="maxLength"
@@ -30,7 +29,6 @@ class TextInputHost {
   hint: string | null = 'Informe o nome completo';
   errorMessage: string | null = null;
   required = false;
-  autofocus = false;
   invalid = false;
   name: string | null = 'name';
   maxLength: number | null = 80;
@@ -98,15 +96,6 @@ describe('TextInput', () => {
     expect(input.required).toBe(true);
     expect(input.getAttribute('aria-required')).toBe('true');
     expect(fixture.nativeElement.textContent).toContain('Campo obrigatório');
-  });
-
-  it('should forward the initial autofocus preference to the native input', () => {
-    const fixture = TestBed.createComponent(TextInputHost);
-    fixture.componentInstance.autofocus = true;
-
-    fixture.detectChanges();
-
-    expect(getInputElement(fixture).autofocus).toBe(true);
   });
 
   it('should render invalid state with error message', () => {

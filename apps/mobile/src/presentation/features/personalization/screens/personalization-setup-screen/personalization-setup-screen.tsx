@@ -110,7 +110,8 @@ export function PersonalizationSetupScreen() {
 
   useEffect(() => {
     mountedRef.current = true;
-    void loadPreferences();
+    const loadPromise = Promise.resolve().then(() => loadPreferences());
+    void loadPromise;
 
     return () => {
       mountedRef.current = false;

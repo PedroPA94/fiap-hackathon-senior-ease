@@ -1,4 +1,11 @@
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+  type OnInit,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EMPTY, catchError, concatMap, finalize } from 'rxjs';
 import { CreateUserForm } from './components/create-user-form/create-user-form';
@@ -19,7 +26,7 @@ type WelcomeMode = 'select-user' | 'create-user';
   templateUrl: './welcome.html',
   styleUrl: './welcome.scss',
 })
-export class Welcome {
+export class Welcome implements OnInit {
   private userSessionService = inject(UserSessionService);
   private themeService = inject(ThemeService);
   private destroyRef = inject(DestroyRef);

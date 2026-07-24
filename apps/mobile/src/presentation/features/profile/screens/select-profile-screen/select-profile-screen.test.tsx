@@ -12,10 +12,7 @@ import type {
   ApplicationSessionSnapshot,
   LocalUserSummary,
 } from "../../../../../application/session";
-import {
-  createApplicationContainer,
-  type ApplicationContainer,
-} from "../../../../../composition";
+import { createApplicationContainer } from "../../../../../composition";
 import { InMemoryStorage } from "../../../../../infrastructure/storage";
 import {
   AccessibilityThemeProvider,

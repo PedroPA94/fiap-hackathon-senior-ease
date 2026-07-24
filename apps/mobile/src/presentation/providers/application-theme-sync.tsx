@@ -28,30 +28,39 @@ export function ApplicationThemeSync({
   useEffect(() => {
     const requestId = ++requestIdRef.current;
 
-    if (!currentUserId) {
-      resetPreferences();
-      setLoadedUserId(null);
+    const syncPromise = Promise.resolve().then(async () => {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+
+      if (!currentUserId) {
+        resetPreferences();
+        setLoadedUserId(null);
+        setFailedUserId(null);
+        return;
+      }
+
       setFailedUserId(null);
-      return;
-    }
 
-    setFailedUserId(null);
+      try {
+        const preferences =
+          await useCases.accessibilityPreferences.get.execute({
+            userId: currentUserId,
+          });
 
-    void useCases.accessibilityPreferences.get
-      .execute({ userId: currentUserId })
-      .then((preferences) => {
         if (requestId !== requestIdRef.current) {
           return;
         }
 
         setPreferences(preferences);
         setLoadedUserId(currentUserId);
-      })
-      .catch(() => {
+      } catch {
         if (requestId === requestIdRef.current) {
           setFailedUserId(currentUserId);
         }
-      });
+      }
+    });
+    void syncPromise;
 
     return () => {
       requestIdRef.current += 1;
