@@ -2,10 +2,9 @@ import type {
   Activity,
   ActivityListFilter,
 } from "@senior-ease/core";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import {
   useCallback,
-  useEffect,
   useRef,
   useState,
 } from "react";
@@ -114,18 +113,20 @@ export function ActivitiesScreen() {
     [currentUserId, useCases.activities.listByUser],
   );
 
-  useEffect(() => {
-    mountedRef.current = true;
-    const loadPromise = Promise.resolve().then(() =>
-      loadActivities(filter),
-    );
-    void loadPromise;
+  useFocusEffect(
+    useCallback(() => {
+      mountedRef.current = true;
+      const loadPromise = Promise.resolve().then(() =>
+        loadActivities(filter),
+      );
+      void loadPromise;
 
-    return () => {
-      mountedRef.current = false;
-      requestIdRef.current += 1;
-    };
-  }, [filter, loadActivities]);
+      return () => {
+        mountedRef.current = false;
+        requestIdRef.current += 1;
+      };
+    }, [filter, loadActivities]),
+  );
 
   const navigateToNewActivity = () =>
     router.push("/activities/new");

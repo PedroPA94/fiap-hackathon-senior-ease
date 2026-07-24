@@ -1,10 +1,14 @@
-import { ActivityChildPlaceholderScreen } from "../../src/presentation/features/activities";
+import { useLocalSearchParams } from "expo-router";
+
+import { ActivityGuidedScreen } from "../../src/presentation/features/activities";
 
 export default function ActivityDetailsRoute() {
-  return (
-    <ActivityChildPlaceholderScreen
-      description="O acompanhamento das etapas será implementado na próxima etapa."
-      title="Etapas da atividade"
-    />
-  );
+  const params = useLocalSearchParams<{
+    activityId?: string | string[];
+  }>();
+  const activityId = Array.isArray(params.activityId)
+    ? params.activityId[0]
+    : params.activityId;
+
+  return <ActivityGuidedScreen activityId={activityId} />;
 }

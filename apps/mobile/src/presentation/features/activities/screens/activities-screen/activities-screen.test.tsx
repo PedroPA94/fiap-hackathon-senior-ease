@@ -37,6 +37,9 @@ const mockMaria: UserProfile = {
 };
 
 jest.mock("expo-router", () => ({
+  useFocusEffect: (
+    callback: () => void | (() => void),
+  ) => jest.requireActual("react").useEffect(callback, [callback]),
   useRouter: () => ({
     push: mockRouterPush,
   }),
